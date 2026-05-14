@@ -1,0 +1,88 @@
+\section{Proof of \texorpdfstring{\Cref{lem:linear_conv}}{Lemma 3}}\label{sec:proof_linear_conv}
+
+\begin{proof}[Proof of \Cref{lem:linear_conv}]
+The proof is by induction on $s$. The base case $s = 0$ holds trivially: $\norm{\ub(0) - \yb}_2^2 \le (1 - \eta \lambda_0/2)^0 \norm{\ub(0) - \yb}_2^2$ and $\wb_r(0) = \wb_r(0)$.
+
+Fix $0 \le s \le t$ and assume the conclusion holds at every step $s' \le s$. We prove it at step $s + 1$. Throughout, we suppress arguments of $\Hb$ when the iterate $\Wb(s)$ is clear and write $\Hb_s \defeq \Hb(\Wb(s))$.
+
+\paragraph{Step 1: residual update.}
+For each $i \in [n]$, by Eq.~\eqref{eq:gd_update} and a first-order expansion of the piecewise-linear $\sigma$ (where the ``remainder'' $e_i(s)$ captures only sign-flip contributions, not a quadratic Taylor error, since $\sigma$ is affine on each open halfspace),
+\begin{align}\label{eq:residual_update}
+\ub_i(s+1) - y_i
+\;=\; \ub_i(s) - y_i \;-\; \eta \sum_{r = 1}^m \inner{\nabla_{\wb_r} \ub_i(\Wb(s))}{\nabla_{\wb_r} L(\Wb(s))} \;+\; e_i(s),
+\end{align}
+where $e_i(s)$ is the higher-order remainder. Plugging in Eq.~\eqref{eq:gd_per_neuron} and the identity (\Cref{rem:gram_W})
+\begin{align}\label{eq:gram_inner_product}
+\sum_{r=1}^m \inner{\nabla_{\wb_r} \ub_i(\Wb(s))}{\nabla_{\wb_r} \ub_j(\Wb(s))} \;=\; \Hb_s {}_{ij},
+\end{align}
+we obtain $\sum_r \inner{\nabla_{\wb_r} \ub_i(\Wb(s))}{\nabla_{\wb_r} L(\Wb(s))} = \sum_j (\ub_j(s) - y_j) \, (\Hb_s)_{ij}$, hence vectorizing
+\begin{align}\label{eq:residual_vector_update}
+\ub(s+1) - \yb \;=\; \big( \I - \eta \Hb_s \big) (\ub(s) - \yb) \;+\; \mathbf e(s),
+\end{align}
+with $\mathbf e(s) = (e_1(s), \ldots, e_n(s))^\top$.
+
+\paragraph{Step 2: bounding the higher-order remainder.}
+We show $\norm{\mathbf e(s)}_2 \le \tfrac{\eta \lambda_0}{4} \norm{\ub(s) - \yb}_2$ for $C_2$ sufficiently small. By definition,
+\begin{align*}
+e_i(s)
+\;=\; \tfrac{1}{\sqrt m} \sum_{r=1}^m a_r \big( \sigma(\wb_r(s+1)^\top \xb_i) - \sigma(\wb_r(s)^\top \xb_i) - \sigma'(\wb_r(s)^\top \xb_i) \, (\wb_r(s+1) - \wb_r(s))^\top \xb_i \big).
+\end{align*}
+Now $\sigma$ is 1-Lipschitz and the higher-order remainder $\sigma(z + \Delta) - \sigma(z) - \sigma'(z) \Delta$ vanishes whenever the activation pattern does not flip between $z$ and $z + \Delta$, and is otherwise bounded by $|\Delta|$. Let $T_i(s) \subseteq [m]$ denote the set of neurons whose activation pattern flips on input $\xb_i$ at step $s$, i.e., $\one[\wb_r(s+1)^\top \xb_i \ge 0] \ne \one[\wb_r(s)^\top \xb_i \ge 0]$. Then
+\begin{align}\label{eq:remainder_bound}
+|e_i(s)|
+\;\le\; \frac{1}{\sqrt m} \sum_{r \in T_i(s)} |a_r| \cdot |(\wb_r(s+1) - \wb_r(s))^\top \xb_i|
+\;\le\; \frac{1}{\sqrt m} \sum_{r \in T_i(s)} \norm{\wb_r(s+1) - \wb_r(s)}_2.
+\end{align}
+Each per-neuron gradient is bounded by $\sqrt n \norm{\ub(s) - \yb}_2 / \sqrt m$ (the standard ReLU gradient bound; see Eq.~\eqref{eq:gd_per_neuron}, $\norm{\xb_i}=1$, $|a_r|=1$, and Cauchy-Schwarz on $\sum_i (\ub_i(s) - y_i)$):
+\begin{align}\label{eq:per_neuron_grad_norm}
+\norm{\wb_r(s+1) - \wb_r(s)}_2
+\;=\; \eta \, \norm{\nabla_{\wb_r} L(\Wb(s))}_2
+\;\le\; \frac{\eta \sqrt n}{\sqrt m} \, \norm{\ub(s) - \yb}_2.
+\end{align}
+Substituting in Eq.~\eqref{eq:remainder_bound},
+\begin{align}\label{eq:remainder_intermediate}
+|e_i(s)| \;\le\; \frac{|T_i(s)|}{\sqrt m} \cdot \frac{\eta \sqrt n}{\sqrt m} \, \norm{\ub(s) - \yb}_2
+\;=\; \frac{\eta \sqrt n \, |T_i(s)|}{m} \, \norm{\ub(s) - \yb}_2.
+\end{align}
+We claim $T_i(s) \subseteq S_i$. Indeed, by the third hypothesis of the lemma, both $\wb_r(s)$ and $\wb_r(s+1)$ are within $R$ of $\wb_r(0)$; if $r \in T_i(s)$, i.e., $\one[\wb_r(s)^\top \xb_i \ge 0] \ne \one[\wb_r(s+1)^\top \xb_i \ge 0]$, then the existential clause defining $A_{i,r}(R)$ in Eq.~\eqref{eq:flip_event} is witnessed by the pair $(\wb_r(s), \wb_r(s+1))$ (with one of the two playing the role of the reference $\wb_r(0)$): more precisely, both vectors lie in the $R$-ball around $\wb_r(0)$, so the sign-flip between them forces $\wb_r(0)^\top \xb_i$ to lie in the segment connecting $\wb_r(s)^\top \xb_i$ and $\wb_r(s+1)^\top \xb_i$, which straddles 0. This means $A_{i,r}(R)$ occurs (the pair $(\wb_r(0), \wb_r(s))$ already witnesses it if $\wb_r(s)$ has the same sign as $\wb_r(s+1)$, and similarly with $\wb_r(s+1)$ otherwise; in either case the witness is within $R$ of $\wb_r(0)$). Hence $r \in S_i$. Combined with the second hypothesis $|S_i| \le 2mR$,
+\begin{align}\label{eq:flip_count_inherited}
+|T_i(s)| \;\le\; |S_i| \;\le\; 2 m R.
+\end{align}
+Plugging $|T_i(s)| \le 2mR$ into Eq.~\eqref{eq:remainder_intermediate}, then summing,
+\begin{align}\label{eq:residual_remainder_bound}
+\norm{\mathbf e(s)}_2
+\;\le\; \sqrt n \cdot \max_i |e_i(s)|
+\;\le\; \sqrt n \cdot 2 \eta \sqrt n \, R \, \norm{\ub(s) - \yb}_2
+\;=\; 2 \eta n R \, \norm{\ub(s) - \yb}_2.
+\end{align}
+With $R = O(\lambda_0 / n^2)$ from the perturbation hypothesis of \Cref{lem:perturbation}, the prefactor in Eq.~\eqref{eq:residual_remainder_bound} is at most $\tfrac{\eta \lambda_0}{4}$ for $c$ in $R \le c \lambda_0 / n^2$ sufficiently small.
+
+\paragraph{Step 3: contraction of the residual.}
+Combining Eq.~\eqref{eq:residual_vector_update} with the triangle inequality and Eq.~\eqref{eq:residual_remainder_bound}:
+\begin{align}\label{eq:res_squared_step}
+\norm{\ub(s+1) - \yb}_2^2
+\;\le\; \big( \opnorm{\I - \eta \Hb_s} + \tfrac{\eta \lambda_0}{4} \big)^2 \, \norm{\ub(s) - \yb}_2^2.
+\end{align}
+By hypothesis, $\lambda_{\min}(\Hb_s) \ge \lambda_0/2$, and trivially $\opnorm{\Hb_s} \le n$ since each entry of $\Hb_s$ is in $[0, 1]$ by Eq.~\eqref{eq:gram_W} and Cauchy-Schwarz (so $\norm{\Hb_s}_F \le n$ implies $\opnorm{\Hb_s} \le n$). With $\eta = C_2 \lambda_0 / n^2$ and $C_2$ small enough that $\eta n \le 1$, we have $\opnorm{\I - \eta \Hb_s} \le 1 - \eta \lambda_0/2$. Hence
+\begin{align*}
+\norm{\ub(s+1) - \yb}_2^2
+\;\le\; \big( 1 - \tfrac{\eta \lambda_0}{4} \big)^2 \, \norm{\ub(s) - \yb}_2^2
+\;\le\; \big( 1 - \tfrac{\eta \lambda_0}{2} \big) \, \norm{\ub(s) - \yb}_2^2.
+\end{align*}
+Combined with the inductive hypothesis, this gives $\norm{\ub(s+1) - \yb}_2^2 \le (1 - \eta \lambda_0/2)^{s+1} \norm{\ub(0) - \yb}_2^2$.
+
+\paragraph{Step 4: distance from initialization.}
+By Eq.~\eqref{eq:per_neuron_grad_norm} and the inductive contraction just established,
+\begin{align*}
+\norm{\wb_r(s+1) - \wb_r(0)}_2
+\;\le\; \sum_{s' = 0}^{s} \norm{\wb_r(s'+1) - \wb_r(s')}_2
+\;\le\; \sum_{s' = 0}^{s} \frac{\eta \sqrt n}{\sqrt m} \, \norm{\ub(s') - \yb}_2.
+\end{align*}
+Using $\norm{\ub(s') - \yb}_2 \le (1 - \eta \lambda_0/2)^{s'/2} \norm{\ub(0) - \yb}_2$ and summing the geometric series with rate $\sqrt{1 - \eta \lambda_0/2} \le 1 - \eta \lambda_0/4$,
+\begin{align*}
+\norm{\wb_r(s+1) - \wb_r(0)}_2
+\;\le\; \frac{\eta \sqrt n}{\sqrt m} \, \norm{\ub(0) - \yb}_2 \cdot \frac{1}{1 - (1 - \eta \lambda_0/4)}
+\;=\; \frac{4 \sqrt n \, \norm{\ub(0) - \yb}_2}{\sqrt m \, \lambda_0}.
+\end{align*}
+This is the claimed bound. The induction step is complete, and so the lemma holds.
+\end{proof}

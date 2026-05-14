@@ -1,0 +1,56 @@
+\section{Massart's finite-class Rademacher bound}\label{sec:massart}
+
+We bound the expected supremum of a Rademacher average over a finite set of vectors. The bound is the standard Massart lemma; we use it in expectation form and then in conditional (data-dependent) form.
+
+\begin{lemma}[Finite-class Rademacher bound]\label{lem:massart}
+Let $A \subset \R^n$ be a finite set with $N := |A| \ge 2$ and $R := \max_{a \in A} \norm{a}_2$, where $\norm{\cdot}_2$ denotes the Euclidean norm. Let $\eps_1, \ldots, \eps_n$ be i.i.d.\ Rademacher signs. Then
+\begin{align}\label{eq:massart-abs}
+\E_{\eps}\!\left[ \max_{a \in A} \Bigl| \sum_{i=1}^{n} \eps_i\, a_i \Bigr| \right]
+\;\le\;
+R \sqrt{2 \log(2 N)}.
+\end{align}
+\end{lemma}
+
+\begin{proof}
+The proof uses sub-Gaussianity of Rademacher sums followed by a maximal-inequality estimate.
+
+\paragraph{Step 1: sub-Gaussian moment generating function.}
+Fix any $a \in A$ and any $\lambda > 0$. By Hoeffding's lemma applied to the independent, mean-zero summands $\eps_i a_i$ (each bounded in $[-|a_i|, |a_i|]$),
+\begin{align*}
+\E_{\eps}\!\left[ \exp\!\Bigl( \lambda \sum_{i=1}^{n} \eps_i\, a_i \Bigr) \right]
+\;=\; & ~ \prod_{i=1}^{n} \E_{\eps_i}\!\bigl[ \exp(\lambda \eps_i a_i) \bigr] \\
+\;\le\; & ~ \prod_{i=1}^{n} \exp\!\bigl( \lambda^2 a_i^2 / 2 \bigr) \\
+\;=\; & ~ \exp\!\Bigl( \lambda^2 \norm{a}_2^2 / 2 \Bigr) \\
+\;\le\; & ~ \exp\!\bigl( \lambda^2 R^2 / 2 \bigr),
+\end{align*}
+where the first step uses independence of the $\eps_i$, the second step applies Hoeffding's lemma $\E[e^{\lambda \eps_i a_i}] \le e^{\lambda^2 a_i^2 / 2}$ to each Rademacher factor, the third step collects $\sum_i a_i^2 = \norm{a}_2^2$, and the last step uses $\norm{a}_2 \le R$ by definition of $R$.
+
+\paragraph{Step 2: maximal inequality.}
+For each $a \in A$, define $X_a := \sum_i \eps_i a_i$. Augment $A$ to $A' := A \cup (-A) := A \cup \{-a : a \in A\}$, so $|A'| \le 2 N$. Observe that $\max_{a \in A} |X_a| = \max_{a' \in A'} X_{a'}$, since for any $a$, exactly one of $a, -a$ achieves $|X_a|$ as $X_{\pm a}$. Each $X_{a'}$ for $a' \in A'$ is sub-Gaussian with parameter $R$ (by the Step 1 bound applied to $\pm a$, which has the same norm $R$). By Jensen's inequality on $\exp(\lambda \cdot)$ for any $\lambda > 0$,
+\begin{align*}
+\exp\!\Bigl( \lambda \, \E \max_{a' \in A'} X_{a'} \Bigr)
+\;\le\; & ~ \E\!\Bigl[ \exp\!\bigl( \lambda \max_{a' \in A'} X_{a'} \bigr) \Bigr] \\
+\;=\; & ~ \E\!\Bigl[ \max_{a' \in A'} \exp\!\bigl( \lambda X_{a'} \bigr) \Bigr] \\
+\;\le\; & ~ \sum_{a' \in A'} \E\!\bigl[ \exp\!\bigl( \lambda X_{a'} \bigr) \bigr] \\
+\;\le\; & ~ |A'| \cdot \exp\!\bigl( \lambda^2 R^2 / 2 \bigr) \\
+\;\le\; & ~ 2 N \cdot \exp\!\bigl( \lambda^2 R^2 / 2 \bigr),
+\end{align*}
+where the first step is Jensen on the convex function $\exp(\lambda \cdot)$, the second step uses monotonicity of $\exp$ to commute $\max$ and $\exp$, the third step bounds $\max$ by sum (each summand is nonnegative), the fourth step applies the Step 1 sub-Gaussian moment bound to each $X_{a'}$, and the last step uses $|A'| \le 2 N$.
+
+\paragraph{Step 3: optimize $\lambda$.}
+Taking logarithms in the previous display and dividing by $\lambda > 0$,
+\begin{align*}
+\E \max_{a' \in A'} X_{a'}
+\;\le\; \frac{\log(2 N)}{\lambda} + \frac{\lambda R^2}{2}.
+\end{align*}
+Setting $\lambda := \sqrt{2 \log(2 N)} / R$ (positive since $N \ge 2$) gives
+\begin{align*}
+\E \max_{a' \in A'} X_{a'}
+\;\le\; R \sqrt{2 \log(2N)},
+\end{align*}
+which is the right-hand side of Eq.~\eqref{eq:massart-abs} after recognizing $\E \max_{a \in A} | X_a | = \E \max_{a' \in A'} X_{a'}$ from Step 2. This completes the proof.
+\end{proof}
+
+\begin{remark}\label{rem:massart-data-dependent}
+We will apply \Cref{lem:massart} \emph{conditionally on the data} (a $(2n)$-tuple of points), with $A$ being the projection $\GG|_{S \cup S'}$ viewed as a set of vectors in $\{0,1\}^{2n}$. In that setting $R \le \sqrt{2n}$ trivially (every vector has $\{0,1\}$ entries), and $N = |\GG|_{S \cup S'}| \le \growth_{\GG}(2n) = \growth_{\HH}(2n)$, the growth function controlled by \Cref{lem:sauer-shelah}.
+\end{remark}

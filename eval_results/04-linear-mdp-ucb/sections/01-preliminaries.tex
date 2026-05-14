@@ -1,0 +1,81 @@
+\section{Preliminaries}\label{sec:prelim}
+
+\paragraph{Notation.}
+For a vector $v \in \R^d$ and a positive-definite matrix $A \succ 0$, write $\norm{v}_A \coloneqq \sqrt{v^\top A v}$. For a function $f \colon \cS \to \R$ and a kernel $P_h(\cdot \mid s, a)$, write $[P_h f](s, a) \coloneqq \E_{s' \sim P_h(\cdot \mid s, a)}[ f(s') ]$. Throughout, $c, C, C_1, C_2, \ldots$ denote universal positive constants whose values may change from line to line and depend only on quantities specified in each lemma's hypotheses.
+
+\paragraph{MDP setting.}
+We consider a finite-horizon, episodic Markov decision process $\cM = (\cS, \cA, H, \{P_h\}_{h=1}^H, \{r_h\}_{h=1}^H)$, where $\cS$ is a (possibly infinite) state space, $\cA$ is a finite action space, $H \in \N$ is the horizon, $P_h(\cdot \mid s, a)$ is the transition kernel at step $h$, and $r_h \colon \cS \times \cA \to [0, 1]$ is the deterministic reward. A policy is a sequence $\pi = (\pi_h)_{h=1}^H$ with $\pi_h \colon \cS \to \cA$. For each policy $\pi$, define value and action-value functions
+\begin{align*}
+V_h^\pi(s)
+&\coloneqq \E^\pi\!\Bigl[ \textstyle\sum_{h'=h}^H r_{h'}(s_{h'}, a_{h'}) \,\Big|\, s_h = s \Bigr],
+&
+Q_h^\pi(s, a)
+&\coloneqq \E^\pi\!\Bigl[ \textstyle\sum_{h'=h}^H r_{h'}(s_{h'}, a_{h'}) \,\Big|\, s_h = s,\, a_h = a \Bigr].
+\end{align*}
+Let $V_h^*(s) \coloneqq \max_\pi V_h^\pi(s)$ and $Q_h^*(s, a) \coloneqq \max_\pi Q_h^\pi(s, a)$ denote the optimal value functions, with $V_{H+1}^\pi \equiv 0$. The Bellman equation gives $Q_h^*(s, a) = r_h(s, a) + [P_h V_{h+1}^*](s, a)$ and $V_h^*(s) = \max_a Q_h^*(s, a)$.
+
+An algorithm interacts with $\cM$ over $K$ episodes. At the start of episode $k$, it receives a fixed initial state $s_1^k$ and follows a policy $\pi^k$, yielding a trajectory $(s_h^k, a_h^k)_{h=1}^H$ with $s_{h+1}^k \sim P_h(\cdot \mid s_h^k, a_h^k)$. The cumulative regret over $K$ episodes is
+\begin{align*}
+\Reg(K) \;\coloneqq\; \sum_{k=1}^K \bigl[ V_1^*(s_1^k) - V_1^{\pi^k}(s_1^k) \bigr].
+\end{align*}
+Write $T \coloneqq K H$ for the total number of step-level interactions.
+
+\begin{assumption}[Linear MDP]\label{ass:linear_mdp}
+There exists a known feature map $\phi \colon \cS \times \cA \to \R^d$ such that:
+\begin{enumerate}[label=(\roman*), leftmargin=2em, itemsep=0.2em]
+    \item \label{ass:linear_mdp:trans} (Linear transitions.) For each $h \in [H]$ there exists a signed vector measure $\mu_h = (\mu_h^{(1)}, \ldots, \mu_h^{(d)})$ on $\cS$ such that for every $(s, a) \in \cS \times \cA$,
+    \begin{align*}
+    P_h(\cdot \mid s, a) \;=\; \inner{\phi(s, a)}{\mu_h(\cdot)},
+    \quad \text{with}\quad \norm{\mu_h(\cS)}_2 \le \sqrt{d}.
+    \end{align*}
+    \item \label{ass:linear_mdp:rew} (Linear rewards.) For each $h \in [H]$ there exists $\theta_h \in \R^d$ with $\norm{\theta_h}_2 \le \sqrt{d}$ and $r_h(s, a) = \inner{\phi(s, a)}{\theta_h}$.
+    \item \label{ass:linear_mdp:feat} (Bounded features.) $\norm{\phi(s, a)}_2 \le 1$ for all $(s, a) \in \cS \times \cA$.
+\end{enumerate}
+\end{assumption}
+
+\begin{remark}\label{rem:linear_mdp_consequences}
+\Cref{ass:linear_mdp} immediately implies that for any function $f \colon \cS \to \R$, the conditional expectation $[P_h f](s, a) = \inner{\phi(s, a)}{\int_\cS f(s')\, \mathrm{d}\mu_h(s')}$ is itself linear in $\phi(s, a)$. Combined with the linear reward, this means $Q_h^\pi$ is linear in $\phi(s, a)$ for any deterministic policy $\pi$; the parameter of $Q_h^*$ has norm at most $H \sqrt{d}$ since $\norm{V_{h+1}^*}_\infty \le H$ and $\norm{\mu_h(\cS)}_2 \le \sqrt{d}$. The boundedness $\norm{\phi} \le 1$ and $\norm{\theta_h} \le \sqrt{d}$ jointly enforce $r_h(s, a) \in [-\sqrt{d}, \sqrt{d}]$; the additional convention $r_h \in [0, 1]$ may be obtained by a rescaling absorbed into universal constants.
+\end{remark}
+
+\begin{definition}[LSVI-UCB algorithm]\label{def:lsvi_ucb}
+The least-squares value-iteration UCB algorithm (LSVI-UCB) is parameterised by $\lambda > 0$ and a bonus coefficient $\beta > 0$. At the start of episode $k$, it computes value functions $\{Q_h^k\}_{h=1}^H$, $\{V_h^k\}_{h=1}^H$ by backward induction: set $V_{H+1}^k \equiv 0$, and for $h = H, H{-}1, \ldots, 1$:
+\begin{align}
+\Lam_h^k
+&\;\coloneqq\; \lambda I + \sum_{\tau=1}^{k-1} \phi(s_h^\tau, a_h^\tau) \phi(s_h^\tau, a_h^\tau)^\top, \label{eq:Lambda_def}\\
+\wh{w}_h^k
+&\;\coloneqq\; (\Lam_h^k)^{-1} \sum_{\tau=1}^{k-1} \phi(s_h^\tau, a_h^\tau)\Bigl[ r_h(s_h^\tau, a_h^\tau) + V_{h+1}^k(s_{h+1}^\tau) \Bigr], \label{eq:w_hat_def} \\
+Q_h^k(s, a)
+&\;\coloneqq\; \min\!\Bigl\{ \inner{\phi(s, a)}{\wh{w}_h^k} + \beta\, \norm{\phi(s, a)}_{(\Lam_h^k)^{-1}},\; H \Bigr\}, \label{eq:Q_def}\\
+V_h^k(s)
+&\;\coloneqq\; \max_{a \in \cA} Q_h^k(s, a),
+\quad \pi_h^k(s) \;\coloneqq\; \mathop{\mathrm{argmax}}_{a \in \cA} Q_h^k(s, a). \label{eq:V_def}
+\end{align}
+The agent then executes $\pi^k$ in episode $k$.
+\end{definition}
+
+\begin{remark}\label{rem:V_func_class}
+The truncation $\min\{\cdot, H\}$ in Eq.~\eqref{eq:Q_def} ensures $V_h^k \in [0, H]$, which is needed both for the optimism induction and for a finite-resolution covering argument on the data-dependent function class $\cV = \{V_h^k\}_{k,h}$. Without the truncation, $V_h^k$ would not be uniformly bounded and the self-normalised concentration would lose its dimension-free form.
+\end{remark}
+
+\begin{definition}[Confidence-set bonus]\label{def:beta}
+Fix $\delta \in (0, 1)$. Define the \emph{shorthand log factor}
+\begin{align}\label{eq:iota_def}
+\iota \;\coloneqq\; \log\!\Bigl( \tfrac{2 d K H}{\delta} \Bigr),
+\end{align}
+and set the bonus coefficient
+\begin{align}\label{eq:beta_def}
+\beta \;\coloneqq\; C_\beta \cdot d H \sqrt{\iota},
+\end{align}
+for a universal constant $C_\beta > 0$ specified in \Cref{lem:concentration}. The choice of $C_\beta$ is what makes the high-probability event $\cE$ in \Cref{def:good_event} hold.
+\end{definition}
+
+\begin{definition}[Good event $\cE$]\label{def:good_event}
+Let $\cE$ denote the event that, simultaneously for every $k \in [K]$, every $h \in [H]$, and every $(s, a) \in \cS \times \cA$,
+\begin{align}\label{eq:good_event}
+\Bigl| \inner{\phi(s, a)}{\wh{w}_h^k} - r_h(s, a) - [P_h V_{h+1}^k](s, a) \Bigr| \;\le\; \beta\, \norm{\phi(s, a)}_{(\Lam_h^k)^{-1}}.
+\end{align}
+\end{definition}
+
+\begin{remark}\label{rem:event_role}
+The event $\cE$ is the analytical centerpiece. Eq.~\eqref{eq:good_event} bounds the one-step Bellman error at every visit; it is high-probability (\Cref{lem:concentration}) and the entire rest of the argument is deterministic on $\cE$. The bound depends on $V_{h+1}^k$ inside $\wh{w}_h^k$, but the right-hand side does not depend on $V_{h+1}^k$ thanks to the bonus structure: on $\cE$, $Q_h^k$ overestimates the Bellman backup $r_h + P_h V_{h+1}^k$ by at most $2 \beta \norm{\phi}_{\Lam^{-1}}$ and underestimates it by at most $0$ (after the $\min\{\cdot, H\}$ truncation), which gives optimism.
+\end{remark}

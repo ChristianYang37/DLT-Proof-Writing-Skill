@@ -1,0 +1,81 @@
+\section{The bump-function family}\label{sec:bump-family}
+
+We construct a finite family of regression functions in $\Sobball$ that are well separated in $\Ltwo$ yet close in $\Linf$. The construction is the standard scaled-bump family at resolution $m$, indexed by binary strings.
+
+\paragraph{The base bump.}
+Fix once and for all a function $\psi \in C^\infty_c(\R^d)$ supported in the open cube $(0,1)^d$ with $\psi \not\equiv 0$. The choice of $\psi$ does not affect the rate; it only affects the constants $c_{\msf{lb}}$ and $n_0$ in \Cref{thm:main}.
+
+\paragraph{Grid translates.}
+Let $m \geq 2$ be an integer (to be chosen later as $m \asymp n^{1/(2s+d)}$). For $k \in [m]^d$, define
+\begin{align}\label{eq:psi-k-def}
+\psi_k(x) \;:=\; \psi\bigl(m \cdot (x - z_k)\bigr),
+\qquad z_k := \bigl((k_1 - 1)/m, \ldots, (k_d - 1)/m\bigr).
+\end{align}
+Each $\psi_k$ is $C^\infty$ and supported in $R_k$ (\Cref{def:balanced-design}); the supports $\{R_k\}_{k \in [m]^d}$ are pairwise disjoint.
+
+\paragraph{Hypothesis family.}
+For each $\omega \in \{0,1\}^{m^d}$ (indexed by $k \in [m]^d$), define
+\begin{align}\label{eq:f-omega-def}
+f_\omega(x) \;:=\; \frac{c_\psi}{m^s} \sum_{k \in [m]^d} \omega_k \, \psi_k(x),
+\qquad c_\psi := \frac{1}{\Wnorm{\psi}}.
+\end{align}
+Since $\Wnorm{\psi} > 0$ (because $\psi$ has a non-zero derivative of some order $\leq s$, indeed $\Ltwonorm{\psi} > 0$), $c_\psi$ is well-defined and positive.
+
+The next lemma collects the relevant norms.
+
+\begin{lemma}[Norms of the bump family]\label{lem:bump-norms}
+For every integer $m \geq 2$ and every $\omega, \omega' \in \{0,1\}^{m^d}$:
+\begin{enumerate}[label=(\roman*)]
+\item\label{lem:bump-norms:sob} $\Wnorm{f_\omega} \leq 1$, so $f_\omega \in \Sobball$.
+\item\label{lem:bump-norms:l2} $\Ltwonorm{f_\omega - f_{\omega'}}^2 \;=\; c_\psi^2 \, m^{-(2s+d)} \, \Ltwonorm{\psi}^2 \, \rH(\omega, \omega')$.
+\item\label{lem:bump-norms:linf} $\Linfnorm{f_\omega - f_{\omega'}} \;\leq\; c_\psi \, m^{-s} \, \Linfnorm{\psi}$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+The proof is a direct change of variables, using that the $\psi_k$ have disjoint supports. Write $g_\psi := \Wnorm{\psi}$ for brevity.
+
+\smallskip\noindent\textbf{Part \ref{lem:bump-norms:sob}.}
+For any multi-index $\alpha$ with $|\alpha| \leq s$ and any $k \in [m]^d$, the chain rule gives
+\begin{align*}
+\partial^\alpha \psi_k(x) \;=\; m^{|\alpha|} \cdot (\partial^\alpha \psi)\bigl(m \cdot (x - z_k)\bigr).
+\end{align*}
+By the change of variable $y = m(x - z_k)$ (Jacobian $m^{-d}$) over $R_k$,
+\begin{align*}
+\int_{R_k} \bigl(\partial^\alpha \psi_k(x)\bigr)^2 \, dx
+\;=\; m^{2|\alpha|} \int_{[0,1]^d} (\partial^\alpha \psi(y))^2 \cdot m^{-d} \, dy
+\;=\; m^{2|\alpha| - d} \, \Ltwonorm{\partial^\alpha \psi}^2.
+\end{align*}
+Because the $\psi_k$ have disjoint supports, the derivatives $\partial^\alpha \psi_k$ are also pairwise disjointly supported, hence
+\begin{align}\label{eq:f-omega-sob}
+\Wnorm{f_\omega}^2
+\;=\; \frac{c_\psi^2}{m^{2s}} \sum_{|\alpha| \leq s} \sum_{k} \omega_k^2 \int_{R_k} \bigl(\partial^\alpha \psi_k\bigr)^2 dx
+\;=\; \frac{c_\psi^2}{m^{2s}} \sum_{k} \omega_k^2 \sum_{|\alpha| \leq s} m^{2|\alpha| - d} \Ltwonorm{\partial^\alpha \psi}^2.
+\end{align}
+For each $|\alpha| \leq s$, $m^{2|\alpha| - d} \leq m^{2s - d}$ since $m \geq 1$. Substituting and using $\omega_k^2 \leq 1$ and $\sum_k 1 = m^d$,
+\begin{align*}
+\Wnorm{f_\omega}^2
+\;\leq\; \frac{c_\psi^2}{m^{2s}} \cdot m^d \cdot m^{2s - d} \, g_\psi^2
+\;=\; c_\psi^2 \, g_\psi^2
+\;=\; 1,
+\end{align*}
+where the last equality uses $c_\psi = 1/g_\psi$. This proves \ref{lem:bump-norms:sob}.
+
+\smallskip\noindent\textbf{Part \ref{lem:bump-norms:l2}.}
+Set $h := f_\omega - f_{\omega'} = (c_\psi/m^s) \sum_k (\omega_k - \omega'_k) \psi_k$. By disjoint supports,
+\begin{align*}
+\Ltwonorm{h}^2
+\;=\; \frac{c_\psi^2}{m^{2s}} \sum_{k} (\omega_k - \omega'_k)^2 \int_{R_k} \psi_k(x)^2 \, dx
+\;=\; \frac{c_\psi^2}{m^{2s}} \cdot m^{-d} \, \Ltwonorm{\psi}^2 \sum_{k} (\omega_k - \omega'_k)^2,
+\end{align*}
+where the integral evaluation uses the same change of variable as above with $\alpha = 0$. Since $\omega_k, \omega'_k \in \{0,1\}$, $(\omega_k - \omega'_k)^2 = \1\{\omega_k \neq \omega'_k\}$, so $\sum_k (\omega_k - \omega'_k)^2 = \rH(\omega, \omega')$. This proves \ref{lem:bump-norms:l2}.
+
+\smallskip\noindent\textbf{Part \ref{lem:bump-norms:linf}.}
+For any $x \in [0,1]^d$, $x$ lies in at most one cell $R_k$ (the cells are disjoint and cover $[0,1]^d$), so the sum $\sum_k \omega_k \psi_k(x)$ has at most one non-zero term, bounded by $\Linfnorm{\psi}$. Hence
+\begin{align*}
+\Linfnorm{f_\omega - f_{\omega'}}
+\;\leq\; \frac{c_\psi}{m^s} \sup_{x \in [0,1]^d} \Bigl| \sum_k (\omega_k - \omega'_k) \psi_k(x) \Bigr|
+\;\leq\; \frac{c_\psi}{m^s} \Linfnorm{\psi},
+\end{align*}
+proving \ref{lem:bump-norms:linf} and completing the proof.
+\end{proof}

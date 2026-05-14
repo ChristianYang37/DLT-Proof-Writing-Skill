@@ -1,0 +1,79 @@
+\section{Proof of the main theorem}\label{sec:proof-of-thm}
+
+\begin{proof}[Proof of \Cref{thm:main}]
+The proof proceeds in three steps. We first convert the probability lower bound of \Cref{lem:prob-lb} into an expectation lower bound via Markov's inequality. We then choose $m$ to balance the rate. We close by checking that all hypotheses of the lemmas are satisfied and assembling the constants.
+
+\smallskip\noindent\textbf{Step 1 (probability to expectation via Markov).}
+Fix an estimator $\fhat$. For each $\omega \in \Hpack$ define the event
+\begin{align*}
+\mathcal{E}_\omega \;:=\; \bigl\{ \Ltwonorm{\fhat - f_\omega} \geq c_\rho \, m^{-s} \bigr\}.
+\end{align*}
+Markov's inequality applied to the non-negative random variable $\Ltwonorm{\fhat - f_\omega}^2$ gives
+\begin{align}\label{eq:markov}
+\E_{P_{f_\omega}}\bigl[ \Ltwonorm{\fhat - f_\omega}^2 \bigr]
+\;\geq\; (c_\rho \, m^{-s})^2 \cdot P_{f_\omega}(\mathcal{E}_\omega)
+\;=\; c_\rho^2 \, m^{-2s} \cdot P_{f_\omega}(\mathcal{E}_\omega).
+\end{align}
+Taking the supremum over $\omega \in \Hpack \subseteq \Sobball$ (the inclusion holds by \Cref{lem:bump-norms}\ref{lem:bump-norms:sob}) and then the infimum over estimators,
+\begin{align}\label{eq:risk-to-prob}
+\inf_{\fhat} \sup_{\fstar \in \Sobball} \E_{\Dn}\bigl[ \Ltwonorm{\fhat - \fstar}^2 \bigr]
+\;\geq\;
+\inf_{\fhat} \sup_{\omega \in \Hpack} \E_{P_{f_\omega}}\bigl[ \Ltwonorm{\fhat - f_\omega}^2 \bigr]
+\;\geq\;
+c_\rho^2 \, m^{-2s} \cdot \inf_{\fhat} \sup_{\omega \in \Hpack} P_{f_\omega}(\mathcal{E}_\omega).
+\end{align}
+The first inequality uses $\Hpack \subseteq \Sobball$; the second uses Eq.~\eqref{eq:markov} on a per-$\omega$ basis, followed by the elementary identity $\inf_{\fhat} \sup_\omega [c \cdot a_\omega(\fhat)] = c \cdot \inf_{\fhat} \sup_\omega a_\omega(\fhat)$ for $c \geq 0$.
+
+\smallskip\noindent\textbf{Step 2 (choose $m$ to satisfy hypotheses, apply \Cref{lem:prob-lb}).}
+We choose
+\begin{align}\label{eq:m-choice}
+m \;=\; m(n) \;:=\; \Bigl\lceil \bigl( n / (\alpha_\star \, \sigma^2) \bigr)^{1/(2s + d)} \Bigr\rceil,
+\end{align}
+where $\alpha_\star = (\log 2) / (256 \, C_{\msf{KL}})$ is the constant from \Cref{lem:prob-lb}. We verify hypothesis Eq.~\eqref{eq:m-condition}: by construction $m \geq (n/(\alpha_\star \sigma^2))^{1/(2s+d)}$, hence $m^{2s + d} \geq n/(\alpha_\star \sigma^2)$, which rearranges to $n/(\sigma^2 m^{2s+d}) \leq \alpha_\star$, as required.
+
+For \Cref{lem:prob-lb} to apply we also need $m \geq 2$ and $m^d \geq 16$. Both hold for $n \geq n_0$ for some $n_0 = n_0(s, d, \sigma, \psi)$ (since $m(n) \to \infty$ as $n \to \infty$). We take $n_0$ to be the smallest such $n$.
+
+Therefore by \Cref{lem:prob-lb},
+\begin{align}\label{eq:prob-lb-applied}
+\inf_{\fhat} \sup_{\omega \in \Hpack} P_{f_\omega}(\mathcal{E}_\omega)
+\;\geq\; c_{\msf{prob}}.
+\end{align}
+
+\smallskip\noindent\textbf{Step 3 (assemble).}
+Substituting Eq.~\eqref{eq:prob-lb-applied} into Eq.~\eqref{eq:risk-to-prob},
+\begin{align*}
+\mathfrak{M}_n
+\;\geq\;
+c_\rho^2 \, c_{\msf{prob}} \cdot m^{-2s}.
+\end{align*}
+By Eq.~\eqref{eq:m-choice} and the elementary inequality $\lceil x \rceil \leq x + 1 \leq 2 x$ valid for $x \geq 1$,
+\begin{align}\label{eq:m-upper}
+m \;\leq\; 2 \, \bigl( n / (\alpha_\star \, \sigma^2) \bigr)^{1/(2s+d)}
+\qquad\text{for } n \geq n_0,
+\end{align}
+where the bound $n / (\alpha_\star \sigma^2) \geq 1$ is absorbed into $n_0$. Therefore
+\begin{align}\label{eq:m-lower}
+m^{-2s}
+\;\geq\; 2^{-2s} \, \bigl( n / (\alpha_\star \sigma^2) \bigr)^{-2s/(2s+d)}
+\;=\; 2^{-2s} \, (\alpha_\star \sigma^2)^{2s/(2s+d)} \, n^{-2s/(2s+d)}.
+\end{align}
+Combining,
+\begin{align*}
+\mathfrak{M}_n
+\;\geq\; c_\rho^2 \, c_{\msf{prob}} \, 2^{-2s} \, (\alpha_\star \sigma^2)^{2s/(2s+d)} \cdot n^{-2s/(2s+d)}
+\;=\; c_{\msf{lb}} \cdot n^{-2s/(2s+d)},
+\end{align*}
+where
+\begin{align*}
+c_{\msf{lb}} \;:=\; c_\rho^2 \, c_{\msf{prob}} \, 2^{-2s} \, (\alpha_\star \sigma^2)^{2s/(2s+d)} \;>\; 0.
+\end{align*}
+This is Eq.~\eqref{eq:main-bound}, completing the proof.
+\end{proof}
+
+\begin{remark}\label{rem:constants}
+The constant $c_{\msf{lb}}$ depends on $s, d, \sigma$, and on the fixed bump function $\psi$ (through $c_\psi, \Ltwonorm{\psi}, \Linfnorm{\psi}, \Wnorm{\psi}, C_{\msf{KL}}$). The dependence on $\sigma$ is $c_{\msf{lb}} \asymp (\sigma^2)^{2s/(2s+d)} = \sigma^{4s/(2s+d)}$, i.e., $c_{\msf{lb}} \to 0$ as $\sigma \to 0$, recovering the standard noise scaling for the minimax rate.
+\end{remark}
+
+\begin{remark}[Alternative reductions]\label{rem:alt-fano}
+Several variants of the Fano-style argument exist (e.g. Birgé--Massart's $L_1$-version, Yu's lemma with $\chi^2$). All yield the same rate; we chose Tsybakov's formulation for transparency in the constant tracking.
+\end{remark}

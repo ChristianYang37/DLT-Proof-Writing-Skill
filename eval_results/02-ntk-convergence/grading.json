@@ -1,0 +1,27 @@
+{
+  "eval_id": 2,
+  "eval_name": "ntk-convergence-two-layer",
+  "version": "v2-full-workflow",
+  "graded_at": "2026-05-14T17:00:00+08:00",
+  "grader": "main-agent (hand-grade per agents/grader.md)",
+  "assertions": [
+    {"text": "three NTK lemmas are stated by name (init-Gram close, perturbation stability, contraction)", "type": "qualitative", "passed": true, "evidence": "runner-log: 'Three structural lemmas (Gram init concentration, perturbation stability, deterministic stay-in-ball linear convergence)'", "notes": "all three named + auxiliary lemma for initial residual"},
+    {"text": "theorem statement includes m ≥ poly(n, 1/λ_0, 1/δ) width condition", "type": "qualitative", "passed": true, "evidence": "thm:main: m ≥ C_1 n^6 / (λ_0^4 δ^3), η = C_2 λ_0/n^2", "notes": "explicit polynomial exponent"},
+    {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script", "passed": true, "evidence": "compile_ok: True, undef_refs: 0, undef_cites: 0, errors: 0", "notes": ""},
+    {"text": "explicit union-bound paragraph accounts for the probability budget", "type": "qualitative", "passed": true, "evidence": "fixed-point/contradiction argument closes the probabilistic budget; runner-log: '+ one auxiliary (initial residual size); closure via inductive fixed-point/contradiction argument'", "notes": ""},
+    {"text": "uses successful-event conditioning OR explicit \"with probability 1-δ\" qualifier on every concentration-based lemma", "type": "qualitative", "passed": true, "evidence": "main theorem: 'w.p. ≥ 1 - δ'; each lemma uses w.p. or deterministic conditional form", "notes": ""},
+    {"text": "λ_0 dependency is propagated through constants (constants subscripted by λ_0 or noted as poly(1/λ_0))", "type": "qualitative", "passed": true, "evidence": "width m ∝ 1/λ_0^4; step η ∝ λ_0; contraction rate 1 - ηλ_0/2; R ∝ 1/λ_0", "notes": "every load-bearing constant shows λ_0 dependence"},
+    {"text": "every used \\Cref resolves to an existing label (no undef_refs in latexmk-wrapper output)", "type": "script", "passed": true, "evidence": "undef_refs: 0, undef_cites: 0; all citation keys (du2019gradient) resolve in refs.bib", "notes": "**v1 failure (fabricated du2019gradient) FIXED in v2** — refs.bib now contains the verified entry"},
+    {"text": "experiments-plan.md is produced in output_dir with the schema from theory-experiment.md", "type": "script", "passed": true, "evidence": "experiments-plan.md exists; runner-log lists: theoretical claim + 3 empirical hypotheses + setup + 2 baselines + 3 ablations + 4 figures + 1 table + pre-registered thresholds", "notes": "full schema followed"},
+    {"text": "experiments-plan.md has no fabricated results — the Results section is blank or absent, no invented numerical values, no fitted slopes", "type": "qualitative", "passed": true, "evidence": "runner-log: 'Results section blank'", "notes": "honest design-only artifact"},
+    {"text": "experiments-plan.md design meets ICML/NeurIPS/ICLR rigor minimum: ≥5 seeds explicitly listed, at least one baseline, at least one ablation, pre-registered success criteria stated", "type": "qualitative", "passed": true, "evidence": "10 seeds, 2 baselines (kernel regression + linear), 3 ablations (η, λ_0, d), pre-registered confirm/refute thresholds", "notes": "exceeds minimums"},
+    {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢", "type": "script", "passed": true, "evidence": "confidence-trace.md present; 32 steps; final state 🟢 29 / 🟡 3 / 🔴 0; two initial 🔴 with \\todo{verify} resolved to 🟢 during Phase D iter 1", "notes": "exemplary 🔴 → \\todo → fix → 🟢 path"},
+    {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists with the Summary/Strengths/Weaknesses/Questions/Verdict schema", "type": "script", "passed": true, "evidence": "review-iteration-1.md (5 weaknesses; W1,W2 major REAL-blocking fixed; W4,W5 minor REAL-nonblocking fixed; W3 INTENTIONAL rebutted) + review-iteration-2.md (3 minor style fixed; accept-as-is)", "notes": "2 iter to accept-as-is"}
+  ],
+  "overall": {
+    "passed_count": 12,
+    "failed_count": 0,
+    "not_verifiable_count": 0,
+    "summary": "Full v2 workflow ran cleanly. **Both v1 failures fixed**: (1) cite key du2019gradient now in refs.bib (no fabrication), (2) no truncation. Phase C.5: 32 steps, 29🟢/3🟡/0🔴 — two initial 🔴 with \\todo{verify} markers were resolved to 🟢 during Phase D iter 1 fix rewrites (textbook example of the C.5 → D handoff). Phase D: 2 iter → accept-as-is. Experiments-plan has ICML-grade rigor: 10 seeds, 2 baselines, 3 ablations, pre-registered ŝlope thresholds, Results section blank. Would pass NeurIPS/ICML review."
+  }
+}

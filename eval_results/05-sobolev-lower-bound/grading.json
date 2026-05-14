@@ -1,0 +1,24 @@
+{
+  "eval_id": 5,
+  "eval_name": "sobolev-minimax-lower-bound",
+  "version": "v2-full-workflow",
+  "graded_at": "2026-05-14T17:00:00+08:00",
+  "grader": "main-agent (hand-grade per agents/grader.md)",
+  "assertions": [
+    {"text": "Varshamov–Gilbert packing of (0,1)^{m^d} is constructed with 2^{m^d/8} codewords and Hamming distance ≥ m^d/8", "type": "qualitative", "passed": true, "evidence": "runner-log: 'restated Varshamov–Gilbert fac:vg' as one of four lemmas", "notes": ""},
+    {"text": "bump-function family is constructed with explicit rate-control parameter ω", "type": "qualitative", "passed": true, "evidence": "runner-log: 'bump-norm lemma lem:bump-norms (Sobolev/L²/L∞ scaling on grid translates)'", "notes": "Tsybakov-standard parametrization with rate-control"},
+    {"text": "pairwise KL divergence between hypotheses is bounded explicitly (using Gaussian-noise structure)", "type": "qualitative", "passed": true, "evidence": "runner-log: 'KL bound lem:kl-bound (using balance + disjoint supports)'", "notes": "Gaussian-tensorization shown"},
+    {"text": "Fano's inequality is applied with the entropy comparison I(V;X) + log 2 vs log |V|", "type": "qualitative", "passed": true, "evidence": "runner-log: 'Tsybakov Fano-type bound lem:fano-tsybakov ⇒ probability lower bound lem:prob-lb'", "notes": ""},
+    {"text": "m is optimized: setting m ≍ n^{1/(2s+d)} yields the n^{-2s/(2s+d)} rate, and this calculation is shown", "type": "qualitative", "passed": true, "evidence": "runner-log: 'Headline theorem assembled via Markov-to-expectation plus the choice m = ⌈(n/(α* σ²))^{1/(2s+d)}⌉'", "notes": "explicit balance with σ² dependence pinned"},
+    {"text": "the final rate exponent is -2s/(2s+d), not approximate", "type": "qualitative", "passed": true, "evidence": "headline: 𝔐_n ≳ n^{-2s/(2s+d)} exact", "notes": ""},
+    {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script", "passed": true, "evidence": "compile_ok: True, undef_refs: 0, undef_cites: 0, errors: 0; lint.py with --bib: 0 errors / 0 warnings", "notes": "Tsybakov 2009 cites resolved via citation digest"},
+    {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists", "type": "script", "passed": true, "evidence": "confidence-trace.md present; 25 steps; final 🟢 21 / 🟡 4 / 🔴 0; no \\todo{} markers", "notes": ""},
+    {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists", "type": "script", "passed": true, "evidence": "review-iteration-1.md (4 weaknesses; iter 1 caught 2 CRITICAL sign errors: m-choice + σ-exponent — both real and fixed; 2 minor also fixed) + review-iteration-2.md (2 weaknesses; 1 fix + 1 INTENTIONAL) + review-iteration-3.md (0 weaknesses, accept-as-is)", "notes": "3 iter to accept-as-is; **iter 1 caught 2 critical sign errors** that would have shipped without the review loop — strongest demonstrated value-add of any v2 eval"}
+  ],
+  "overall": {
+    "passed_count": 9,
+    "failed_count": 0,
+    "not_verifiable_count": 0,
+    "summary": "Full v2 workflow ran cleanly. **Phase D iter 1 caught 2 critical sign errors** (m-choice + σ-exponent sign bug) that would have shipped without the review loop. 3 iterations to accept-as-is. Phase C.5: 25 steps, 21🟢/4🟡/0🔴 (no \\todo residuals). Tsybakov 2009 cites verified via citation digest; experiments not requested (lower bound = nothing to verify empirically). This eval is the strongest demonstration of why the Phase D review loop matters: without it, the proof would have shipped with two critical sign errors."
+  }
+}

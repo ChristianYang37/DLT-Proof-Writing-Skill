@@ -1,0 +1,56 @@
+\section{Elliptical Potential and the Cumulative Bonus}\label{sec:elliptical}
+
+\begin{lemma}[Elliptical potential, restated]\label{lem:elliptical}
+Let $\phi_1, \ldots, \phi_T \in \R^d$ with $\norm{\phi_t}_2 \le 1$ for all $t$, and define $\Lam_t \coloneqq \lambda I + \sum_{s=1}^{t-1} \phi_s \phi_s^\top$ with $\lambda \ge 1$. Then
+\begin{align}\label{eq:elliptical_sum}
+\sum_{t=1}^T \min\!\Bigl\{1,\; \norm{\phi_t}_{\Lam_t^{-1}}^2 \Bigr\}
+\;\le\; 2 \log \frac{\det(\Lam_{T+1})}{\det(\lambda I)}
+\;\le\; 2 d \log\!\Bigl(1 + \tfrac{T}{d \lambda}\Bigr).
+\end{align}
+\end{lemma}
+
+\begin{proof}
+This is the standard elliptical-potential lemma; see Lemma~11 of \cite{abbasi2011improved}. The first inequality is proved by the determinant-update identity $\det(\Lam_{t+1}) = \det(\Lam_t) (1 + \norm{\phi_t}_{\Lam_t^{-1}}^2)$ together with $\min\{1, x\} \le 2 \log(1 + x)$ for $x \ge 0$; the second uses $\det(\Lam_{T+1}) \le \bigl( \mathrm{tr}(\Lam_{T+1})/d \bigr)^d \le (\lambda + T/d)^d$ via AM-GM and $\norm{\phi_t}_2 \le 1$.
+\end{proof}
+
+\begin{lemma}[Bound on $T_2$]\label{lem:T2_bound}
+On the event $\cE$, with $\lambda = 1$ and $T = K H$,
+\begin{align}\label{eq:T2_bound_final}
+T_2 \;\le\; 2 \sqrt{2}\, C_\beta\, d^{3/2}\, H^{3/2}\, \sqrt{T}\, \iota
+\;=\; \Otil\!\bigl( d^{3/2}\, H^{3/2}\, \sqrt{T} \bigr).
+\end{align}
+\end{lemma}
+
+\begin{proof}
+We first split $T_2$ over $h$:
+\begin{align*}
+T_2
+\;=\; & ~ 2 \beta \sum_{h=1}^H \sum_{k=1}^K \norm{\phi(s_h^k, a_h^k)}_{(\Lam_h^k)^{-1}}.
+\end{align*}
+For each fixed $h$, $\norm{\phi(s_h^k, a_h^k)}_{(\Lam_h^k)^{-1}} \le \norm{\phi(s_h^k, a_h^k)}_2 / \sqrt{\lambda} \le 1$ using $\lambda = 1$ and $\norm{\phi} \le 1$. Cauchy--Schwarz over $k$ then gives
+\begin{align*}
+\sum_{k=1}^K \norm{\phi(s_h^k, a_h^k)}_{(\Lam_h^k)^{-1}}
+\;\le\; & ~ \sqrt{K} \cdot \sqrt{\textstyle \sum_{k=1}^K \norm{\phi(s_h^k, a_h^k)}_{(\Lam_h^k)^{-1}}^2} \\
+\;=\; & ~ \sqrt{K} \cdot \sqrt{\textstyle \sum_{k=1}^K \min\!\bigl\{1,\, \norm{\phi(s_h^k, a_h^k)}_{(\Lam_h^k)^{-1}}^2\bigr\}} \\
+\;\le\; & ~ \sqrt{K} \cdot \sqrt{2 d \log(1 + K / d)},
+\end{align*}
+where the first step is Cauchy--Schwarz $\sum a_k \le \sqrt{K}\sqrt{\sum a_k^2}$, the second uses the pointwise identity $a_k^2 = \min\{1, a_k^2\}$ from $a_k \le 1$ (shown above), and the third applies \Cref{lem:elliptical} with feature dimension $d$, horizon-$h$ feature stream, and $\lambda = 1$.
+
+Summing over $h \in [H]$:
+\begin{align*}
+T_2
+\;\le\; & ~ 2 \beta \cdot H \cdot \sqrt{K} \cdot \sqrt{2 d \log(1 + K/d)} \\
+\;\le\; & ~ 2 \beta \sqrt{2 H T \cdot d \log(1 + T/d)},
+\end{align*}
+where the last step uses $H \sqrt{K} = \sqrt{H \cdot H K} = \sqrt{H T}$ and absorbs constants. Substituting $\beta = C_\beta\, d H \sqrt{\iota}$ from Eq.~\eqref{eq:beta_def},
+\begin{align*}
+T_2 \;\le\; 2 C_\beta\, d H \sqrt{\iota} \cdot \sqrt{2 H T \cdot d\, \iota}
+\;=\; 2 \sqrt{2}\, C_\beta\, d^{3/2}\, H^{3/2}\, \sqrt{T} \cdot \iota
+\;=\; \Otil\!\bigl( d^{3/2}\, H^{3/2}\, \sqrt{T} \bigr).
+\end{align*}
+The transition from $H \sqrt K$ to $H^{3/2} \sqrt T$ uses $T = K H$, i.e., $H\sqrt K = \sqrt{H \cdot H K} = \sqrt{HT}$, hence $\beta \cdot H \sqrt K \cdot \sqrt d = \beta\, \sqrt{HT}\, \sqrt{d} = (dH\sqrt\iota) \cdot \sqrt{dHT\iota} \asymp d^{3/2} H^{3/2}\sqrt T \cdot \iota$. This is exactly Eq.~\eqref{eq:T2_bound_final}; this gives the assertion.
+\end{proof}
+
+\begin{remark}\label{rem:T2_d_three_halves}
+The dimension factor $d^{3/2}$ in $T_2$ arises as $\beta \cdot \sqrt{d} = O(dH\sqrt\iota) \cdot \sqrt{d} = O(d^{3/2} H \sqrt\iota)$: the $d$ in $\beta$ comes from the $\varepsilon$-net over $\cV$ (\Cref{lem:concentration}), and the additional $\sqrt{d}$ comes from the elliptical-potential factor $\sqrt{2 d \log(1 + T/d)}$. This decomposition makes clear why $d^{3/2}$ is the tight LSVI-UCB regret exponent for $d$: shaving either factor requires either a finer covering argument (improving $\beta$ to $\sqrt{d} H \sqrt\iota$) or a tighter elliptical-potential variant.
+\end{remark}

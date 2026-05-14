@@ -1,0 +1,41 @@
+\section{Preliminaries}
+\label{sec:prelim}
+
+\paragraph{Notation.}
+We write $\Pr[\cdot]$ for probability and $\E[\cdot]$ for expectation under a fixed
+underlying probability space rich enough to support the random variables that follow.
+Real intervals are written $[a, b]$ with $a \le b$. For a real-valued random variable
+$X$ and $\lambda \in \R$, $\E[e^{\lambda X}]$ denotes the moment-generating function
+(MGF) of $X$ at $\lambda$, which may be $+\infty$; under the boundedness hypotheses
+we use it is always finite. We do not require $\E X = 0$ globally; centering is
+stated where needed.
+
+\paragraph{Setup.}
+Throughout, let $n \ge 1$ be an integer and let $X_1, \ldots, X_n$ be
+\emph{independent} real-valued random variables. For each $i \in \{1, \ldots, n\}$
+we fix constants $a_i \le b_i$ with $X_i \in [a_i, b_i]$ almost surely and write
+$\mu_i := \E X_i \in [a_i, b_i]$. Let
+\begin{align*}
+S_n \;:=\; \sum_{i=1}^n X_i,
+\qquad
+\mu \;:=\; \E S_n \;=\; \sum_{i=1}^n \mu_i,
+\qquad
+v \;:=\; \sum_{i=1}^n (b_i - a_i)^2.
+\end{align*}
+The centered summands are $Y_i := X_i - \mu_i$; they satisfy $\E Y_i = 0$ and
+$Y_i \in [a_i - \mu_i,\, b_i - \mu_i]$ almost surely, an interval of the same
+length $b_i - a_i$ as the original support of $X_i$. The independence of the $X_i$
+descends to the $Y_i$, since each $Y_i$ is a deterministic function of $X_i$ alone.
+
+\begin{fact}[Range invariance under centering]\label{fac:range-invariance}
+If $X \in [a, b]$ almost surely with $\E X = \mu$, then $Y := X - \mu$ satisfies
+$Y \in [a - \mu, b - \mu]$ almost surely, with $\E Y = 0$ and
+$(b - \mu) - (a - \mu) = b - a$.
+\end{fact}
+
+\noindent
+The fact is immediate from linearity of expectation and an additive shift of the
+support; we record it explicitly because the equality of \emph{range lengths}
+$(b - a)$ before and after centering is what allows the right-hand side of
+Hoeffding's inequality to be stated in terms of the raw ranges $b_i - a_i$ rather
+than the centered ranges.

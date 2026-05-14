@@ -1,0 +1,87 @@
+\section{Local Fano application}\label{sec:fano-application}
+
+We instantiate Tsybakov's Fano-type bound on the bump family. The version we use, stated below for convenience, is Theorem 2.5 of \cite{tsybakov2009introduction}.
+
+\begin{lemma}[Tsybakov's Fano-type bound, restated from~\cite{tsybakov2009introduction}]\label{lem:fano-tsybakov}
+Let $(\mathcal{X}, \mathcal{A})$ be a measurable space and $\{\probP_\theta : \theta \in \Theta\}$ a family of probability measures on it. Let $d(\cdot,\cdot)$ be a semi-metric on $\Theta$. Suppose there exist $\theta_0, \theta_1, \ldots, \theta_M \in \Theta$ with $M \geq 2$ such that:
+\begin{enumerate}[label=(\roman*)]
+\item\label{lem:fano-tsybakov:sep} $d(\theta_j, \theta_k) \geq 2\rho$ for all $0 \leq j < k \leq M$, with $\rho > 0$;
+\item\label{lem:fano-tsybakov:kl} $\frac{1}{M} \sum_{j=1}^{M} \KL(\probP_{\theta_j} \,\|\, \probP_{\theta_0}) \leq \alpha \log M$ with $0 < \alpha < 1/8$.
+\end{enumerate}
+Then
+\begin{align}\label{eq:fano-prob-bound}
+\inf_{\widehat{\theta}} \sup_{\theta \in \{\theta_0,\ldots,\theta_M\}} \probP_\theta\bigl( d(\widehat{\theta}, \theta) \geq \rho \bigr)
+\;\geq\; \frac{\sqrt{M}}{1 + \sqrt{M}} \biggl(1 - 2\alpha - \sqrt{\tfrac{2\alpha}{\log M}}\biggr),
+\end{align}
+where the infimum is over all measurable estimators $\widehat{\theta}: \mathcal{X} \to \Theta$.
+\end{lemma}
+
+\begin{lemma}[Probability lower bound for the bump family]\label{lem:prob-lb}
+Under \Cref{ass:design-noise} with balance constant $C_{\msf{bal}}$, there exist constants $c_\rho = c_\rho(\psi) > 0$ and $c_{\msf{prob}} > 0$ (universal) such that the following holds. Let $m \geq 2$ be an integer with $m^d \geq 8$, and assume
+\begin{align}\label{eq:m-condition}
+\frac{n}{\sigma^2 \, m^{2s + d}} \;\leq\; \alpha_\star,
+\qquad
+\alpha_\star \;:=\; \frac{\log 2}{256 \, C_{\msf{KL}}}.
+\end{align}
+Let $\Hpack \subseteq \{0,1\}^{m^d}$ be the Varshamov--Gilbert packing of \Cref{fac:vg} (with $K = m^d$). Then
+\begin{align}\label{eq:prob-lb}
+\inf_{\fhat} \sup_{\omega \in \Hpack} P_{f_\omega}\bigl( \Ltwonorm{\fhat - f_\omega} \geq c_\rho \, m^{-s} \bigr)
+\;\geq\; c_{\msf{prob}},
+\end{align}
+where the infimum is over all measurable estimators $\fhat: \R^n \to \Ltwo([0,1]^d)$.
+\end{lemma}
+
+\begin{proof}
+We apply \Cref{lem:fano-tsybakov} with $\Theta = \Hpack$, $\theta_j$ identified with $\omega^{(j)} \in \Hpack$ (and the corresponding regression function $f_{\omega^{(j)}} \in \Sobball$), and semi-metric $d(\omega, \omega') := \Ltwonorm{f_\omega - f_{\omega'}}$. Set $M+1 := |\Hpack|$, so by \Cref{fac:vg} (which requires $m^d \geq 8$, satisfied by hypothesis),
+\begin{align}\label{eq:M-lb}
+M \;\geq\; 2^{m^d / 8} \;-\; 1.
+\end{align}
+In particular, since $2^{m^d/8} - 1 \geq 2^{m^d/8}/2$ for $m^d \geq 8$, we have $\log M \geq (m^d / 8) \log 2 - \log 2 \geq (m^d / 16) \log 2$ whenever $m^d \geq 16$; we absorb the finitely many integer cases $8 \leq m^d < 16$ into the $n_0$ threshold and write $\log M \geq (m^d / 16) \log 2$ in what follows.
+
+\smallskip\noindent\textbf{Verify hypothesis \ref{lem:fano-tsybakov:sep} (separation).}
+By \Cref{lem:bump-norms}\ref{lem:bump-norms:l2} and the pairwise-Hamming lower bound in \Cref{fac:vg},
+\begin{align}\label{eq:sep-direct}
+\Ltwonorm{f_{\omega^{(j)}} - f_{\omega^{(k)}}}^2
+\;=\; c_\psi^2 \, \Ltwonorm{\psi}^2 \, m^{-(2s + d)} \, \rH(\omega^{(j)}, \omega^{(k)})
+\;\geq\; \frac{c_\psi^2 \, \Ltwonorm{\psi}^2}{8} \, m^{-2s}.
+\end{align}
+Therefore $\Ltwonorm{f_{\omega^{(j)}} - f_{\omega^{(k)}}} \geq 2\rho$ for all $0 \leq j < k \leq M$ with
+\begin{align}\label{eq:rho-def}
+\rho \;:=\; c_\rho \, m^{-s},
+\qquad
+c_\rho \;:=\; \frac{c_\psi \, \Ltwonorm{\psi}}{2 \sqrt{8}} \;>\; 0.
+\end{align}
+
+\smallskip\noindent\textbf{Verify hypothesis \ref{lem:fano-tsybakov:kl} (KL).}
+By \Cref{lem:kl-bound} and Eq.~\eqref{eq:m-condition},
+\begin{align*}
+\KL\bigl(P_{f_{\omega^{(j)}}} \,\|\, P_{f_{\omega^{(0)}}}\bigr)
+\;\leq\; \frac{C_{\msf{KL}} \, n}{\sigma^2 \, m^{2s}}
+\;=\; C_{\msf{KL}} \cdot m^d \cdot \frac{n}{\sigma^2 \, m^{2s + d}}
+\;\leq\; \alpha_\star \, C_{\msf{KL}} \, m^d.
+\end{align*}
+Averaging over $j \in [M]$ does not change this uniform bound. Using $\log M \geq (m^d / 16) \log 2$ from above and the definition $\alpha_\star = (\log 2) / (256 \, C_{\msf{KL}})$,
+\begin{align}\label{eq:kl-alpha}
+\frac{1}{M} \sum_{j=1}^M \KL\bigl(P_{f_{\omega^{(j)}}} \,\|\, P_{f_{\omega^{(0)}}}\bigr)
+\;\leq\; \alpha_\star \, C_{\msf{KL}} \, m^d
+\;\leq\; \alpha_\star \, C_{\msf{KL}} \cdot \frac{16}{\log 2} \, \log M
+\;=\; \frac{1}{16} \, \log M.
+\end{align}
+Thus the hypothesis of \Cref{lem:fano-tsybakov} holds with $\alpha = 1/16 < 1/8$.
+
+\smallskip\noindent\textbf{Invoke Fano.}
+\Cref{lem:fano-tsybakov} with $\rho$ as in Eq.~\eqref{eq:rho-def}, $M$ from Eq.~\eqref{eq:M-lb}, and $\alpha = 1/16$ yields
+\begin{align*}
+\inf_{\fhat} \sup_{\omega \in \Hpack} P_{f_\omega}\bigl( \Ltwonorm{\fhat - f_\omega} \geq \rho \bigr)
+\;\geq\; \frac{\sqrt{M}}{1 + \sqrt{M}} \biggl(1 - \tfrac{1}{8} - \sqrt{\tfrac{1/8}{\log M}}\biggr).
+\end{align*}
+For $m^d \geq 16$ (which we may assume by enlarging $n_0$), $\log M \geq (m^d/16)\log 2 \geq \log 2$, so $\sqrt{1/(8 \log M)} \leq \sqrt{1/(8 \log 2)} \leq 0.43$ and $\sqrt{M}/(1+\sqrt{M}) \geq 1/2$. Substituting,
+\begin{align}\label{eq:fano-numerical}
+\inf_{\fhat} \sup_{\omega \in \Hpack} P_{f_\omega}\bigl( \Ltwonorm{\fhat - f_\omega} \geq \rho \bigr)
+\;\geq\; \tfrac{1}{2} \cdot \bigl( \tfrac{7}{8} - 0.43 \bigr)
+\;\geq\; 0.22.
+\end{align}
+Setting $c_{\msf{prob}} := 0.22$ (or any smaller universal constant) gives Eq.~\eqref{eq:prob-lb} with $\rho = c_\rho m^{-s}$.
+
+This completes the proof.
+\end{proof}

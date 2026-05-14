@@ -1,0 +1,57 @@
+\section{Optimism via Backward Induction}\label{sec:optimism}
+
+\begin{lemma}[Per-step Bellman gap on $\cE$]\label{lem:per-step}
+On the event $\cE$, for every $k \in [K]$, $h \in [H]$, and $(s, a) \in \cS \times \cA$,
+\begin{align}\label{eq:per_step_lower}
+Q_h^k(s, a) - r_h(s, a) - [P_h V_{h+1}^k](s, a) &\;\le\; 2 \beta\, \norm{\phi(s, a)}_{(\Lam_h^k)^{-1}}, \\
+Q_h^k(s, a) - r_h(s, a) - [P_h V_{h+1}^k](s, a) &\;\ge\; 0
+\quad \text{or}\quad Q_h^k(s, a) = H. \label{eq:per_step_upper}
+\end{align}
+\end{lemma}
+
+\begin{proof}
+We work on $\cE$ throughout. Recall from Eq.~\eqref{eq:Q_def} that $Q_h^k(s, a) = \min\{ \widetilde{Q}_h^k(s, a),\, H \}$ with $\widetilde{Q}_h^k(s, a) \coloneqq \inner{\phi(s, a)}{\wh{w}_h^k} + \beta \norm{\phi(s, a)}_{(\Lam_h^k)^{-1}}$.
+
+\textbf{Upper inequality (Eq.~\eqref{eq:per_step_lower}).} By Eq.~\eqref{eq:good_event} (which holds on $\cE$), $\inner{\phi(s,a)}{\wh{w}_h^k} \le r_h(s,a) + [P_h V_{h+1}^k](s,a) + \beta \norm{\phi(s,a)}_{(\Lam_h^k)^{-1}}$, hence
+\begin{align*}
+Q_h^k(s, a) \;\le\; \widetilde{Q}_h^k(s, a)
+\;\le\; r_h(s, a) + [P_h V_{h+1}^k](s, a) + 2 \beta \norm{\phi(s, a)}_{(\Lam_h^k)^{-1}}.
+\end{align*}
+
+\textbf{Lower inequality (Eq.~\eqref{eq:per_step_upper}).} Consider two cases. If $Q_h^k(s,a) = H$, the second branch of the disjunction holds. Otherwise $Q_h^k(s, a) = \widetilde{Q}_h^k(s, a) \le H$, and by Eq.~\eqref{eq:good_event} applied to the lower direction,
+\begin{align*}
+Q_h^k(s, a)
+\;=\; & ~ \inner{\phi(s, a)}{\wh{w}_h^k} + \beta\, \norm{\phi(s, a)}_{(\Lam_h^k)^{-1}} \\
+\;\ge\; & ~ r_h(s, a) + [P_h V_{h+1}^k](s, a) - \beta \norm{\phi(s, a)}_{(\Lam_h^k)^{-1}} + \beta \norm{\phi(s, a)}_{(\Lam_h^k)^{-1}} \\
+\;=\; & ~ r_h(s, a) + [P_h V_{h+1}^k](s, a),
+\end{align*}
+where the first step is the definition of $\widetilde{Q}_h^k$ in the un-truncated branch, the second uses Eq.~\eqref{eq:good_event} on $\cE$, and the third is algebra. This completes the proof.
+\end{proof}
+
+\begin{lemma}[Optimism]\label{lem:optimism}
+On the event $\cE$, for every $k \in [K]$, every $h \in [H+1]$, and every $s \in \cS$,
+\begin{align}\label{eq:optimism_main}
+V_h^k(s) \;\ge\; V_h^*(s).
+\end{align}
+\end{lemma}
+
+\begin{proof}
+We proceed by backward induction on $h$, conditional on $\cE$.
+
+\textbf{Base case ($h = H+1$).} Both $V_{H+1}^k$ and $V_{H+1}^*$ are identically zero by convention, so Eq.~\eqref{eq:optimism_main} holds with equality.
+
+\textbf{Inductive step.} Assume Eq.~\eqref{eq:optimism_main} holds at step $h + 1$. Fix $s \in \cS$ and let $a^* = \pi_h^*(s) \in \argmax_a Q_h^*(s, a)$. Then for that $a^*$,
+\begin{align*}
+V_h^k(s)
+\;\ge\; & ~ Q_h^k(s, a^*) \\
+\;\ge\; & ~ \min\bigl\{r_h(s, a^*) + [P_h V_{h+1}^k](s, a^*),\; H\bigr\} \\
+\;\ge\; & ~ \min\bigl\{r_h(s, a^*) + [P_h V_{h+1}^*](s, a^*),\; H\bigr\} \\
+\;=\; & ~ \min\bigl\{Q_h^*(s, a^*),\; H\bigr\} \\
+\;=\; & ~ V_h^*(s),
+\end{align*}
+where the first step is $V_h^k(s) = \max_a Q_h^k(s, a)$ by Eq.~\eqref{eq:V_def}, the second step is the lower inequality of \Cref{lem:per-step} (Eq.~\eqref{eq:per_step_upper}: either $Q_h^k(s, a^*) \ge r_h(s, a^*) + [P_h V_{h+1}^k](s, a^*)$ or $Q_h^k(s, a^*) = H$, both of which lower-bound by $\min\{r_h + P_h V_{h+1}^k, H\}$), the third step is monotonicity of $f \mapsto P_h f$ together with the inductive hypothesis $V_{h+1}^k \ge V_{h+1}^*$ and monotonicity of $\min\{\cdot, H\}$, the fourth is the Bellman equation $Q_h^*(s, a^*) = r_h(s, a^*) + [P_h V_{h+1}^*](s, a^*)$, and the last uses $Q_h^*(s, a^*) \le H$ (since $r \in [0, 1]$ and there are $H - h + 1 \le H$ remaining steps), so $\min\{Q_h^*(s, a^*), H\} = Q_h^*(s, a^*) = V_h^*(s)$. This closes the induction.
+\end{proof}
+
+\begin{remark}\label{rem:optimism_role}
+\Cref{lem:optimism} converts the upper-bound bonus structure of LSVI-UCB into a one-sided guarantee: on $\cE$, $V_1^k(s_1^k) \ge V_1^*(s_1^k)$, so the per-episode regret $V_1^*(s_1^k) - V_1^{\pi^k}(s_1^k)$ is bounded above by the \emph{algorithm's} estimate gap $V_1^k(s_1^k) - V_1^{\pi^k}(s_1^k)$. This is what feeds into the regret decomposition in \Cref{lem:decomposition}.
+\end{remark}

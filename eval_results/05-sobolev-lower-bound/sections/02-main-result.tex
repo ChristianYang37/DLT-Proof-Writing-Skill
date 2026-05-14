@@ -1,0 +1,18 @@
+\section{Main result}\label{sec:main-result}
+
+\begin{theorem}[Minimax lower bound over the Sobolev ball]\label{thm:main}
+Under \Cref{ass:design-noise}, there exist constants $c_{\msf{lb}} = c_{\msf{lb}}(s, d, \sigma) > 0$ and $n_0 = n_0(s, d)$ such that for all $n \geq n_0$,
+\begin{align}\label{eq:main-bound}
+\mathfrak{M}_n
+\;=\;
+\inf_{\fhat} \sup_{\fstar \in \Sobball}
+\E_{\Dn} \bigl[\, \Ltwonorm{\fhat - \fstar}^2 \,\bigr]
+\;\geq\;
+c_{\msf{lb}} \cdot n^{-2s/(2s+d)}.
+\end{align}
+In particular, $\mathfrak{M}_n \gtrsim n^{-2s/(2s+d)}$.
+\end{theorem}
+
+\begin{remark}\label{rem:main-tightness}
+The rate $n^{-2s/(2s+d)}$ in \Cref{thm:main} is the well-known minimax rate for Sobolev regression. The matching upper bound (e.g.\ via spline / wavelet projection or local polynomial regression) is classical and not pursued here.
+\end{remark}

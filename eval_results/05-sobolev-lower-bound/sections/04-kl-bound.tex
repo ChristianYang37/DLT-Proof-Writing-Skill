@@ -1,0 +1,53 @@
+\section{KL divergence between hypotheses}\label{sec:kl-bound}
+
+Recall from \Cref{def:risk} that $P_f$ denotes the law of $(Y_1,\ldots,Y_n) = (f(x_i) + \eps_i)_{i=1}^n$ under \Cref{ass:design-noise}. We bound the KL divergence between $P_{f_\omega}$ and $P_{f_{0_\msf{cw}}}$, where $f_{0_\msf{cw}} \equiv 0$ corresponds to the zero codeword $0_\msf{cw} := (0,\ldots,0) \in \{0,1\}^{m^d}$ (denoted $f_0$ below).
+
+\begin{lemma}[KL bound for the bump family]\label{lem:kl-bound}
+Suppose the fixed design is balanced at scale $m$ in the sense of \Cref{def:balanced-design}, with constant $C_{\msf{bal}} \geq 1$. Then for every $\omega \in \{0,1\}^{m^d}$,
+\begin{align}\label{eq:kl-bound}
+\KL(P_{f_\omega} \,\|\, P_{f_0})
+\;\leq\; C_{\msf{KL}} \cdot \frac{n}{\sigma^2 \, m^{2s}},
+\qquad
+C_{\msf{KL}} := \tfrac{1}{2} \, c_\psi^2 \, \Linfnorm{\psi}^2 \, C_{\msf{bal}}.
+\end{align}
+\end{lemma}
+
+\begin{proof}
+The proof has two steps: invoke the closed-form Gaussian KL, then bound the empirical norm of the bump family using the design's balance property.
+
+\smallskip\noindent\textbf{Step 1 (Gaussian KL).}
+By \Cref{fac:gaussian-kl} applied to $f = f_\omega$ and $g = f_0 \equiv 0$,
+\begin{align}\label{eq:kl-step1}
+\KL(P_{f_\omega} \,\|\, P_{f_0})
+\;=\; \frac{1}{2\sigma^2} \sum_{i=1}^{n} f_\omega(x_i)^2.
+\end{align}
+
+\smallskip\noindent\textbf{Step 2 (bounding $\sum_i f_\omega(x_i)^2$).}
+By Eq.~\eqref{eq:f-omega-def} and the disjointness of the supports of the $\psi_k$, partitioning the design points by their cell index gives
+\begin{align*}
+\sum_{i=1}^n f_\omega(x_i)^2
+\;=\; \frac{c_\psi^2}{m^{2s}} \sum_{k \in [m]^d} \omega_k^2 \sum_{i : x_i \in R_k} \psi_k(x_i)^2
+\;\leq\; \frac{c_\psi^2 \, \Linfnorm{\psi}^2}{m^{2s}} \sum_{k \in [m]^d} \omega_k^2 \cdot |\{i : x_i \in R_k\}|,
+\end{align*}
+where the inequality uses $\psi_k(x_i)^2 \leq \Linfnorm{\psi}^2$ pointwise. By balance (\Cref{def:balanced-design}), $|\{i : x_i \in R_k\}| \leq C_{\msf{bal}} \, n / m^d$; combined with $\omega_k^2 \leq 1$ and $\sum_k 1 = m^d$,
+\begin{align}\label{eq:kl-step2}
+\sum_{i=1}^n f_\omega(x_i)^2
+\;\leq\; \frac{c_\psi^2 \, \Linfnorm{\psi}^2}{m^{2s}} \cdot m^d \cdot \frac{C_{\msf{bal}} \, n}{m^d}
+\;=\; \frac{C_{\msf{bal}} \, c_\psi^2 \, \Linfnorm{\psi}^2 \, n}{m^{2s}}.
+\end{align}
+
+\smallskip\noindent\textbf{Step 3 (combine).}
+Substituting Eq.~\eqref{eq:kl-step2} into Eq.~\eqref{eq:kl-step1},
+\begin{align*}
+\KL(P_{f_\omega} \,\|\, P_{f_0})
+\;\leq\; \frac{1}{2\sigma^2} \cdot \frac{C_{\msf{bal}} \, c_\psi^2 \, \Linfnorm{\psi}^2 \, n}{m^{2s}}
+\;=\; \frac{C_{\msf{KL}} \cdot n}{\sigma^2 \, m^{2s}},
+\end{align*}
+which matches Eq.~\eqref{eq:kl-bound}.
+
+This completes the proof.
+\end{proof}
+
+\begin{remark}\label{rem:kl-form}
+We state \Cref{lem:kl-bound} for KL between $P_{f_\omega}$ and the reference $P_{f_0}$ because this is the form required by Tsybakov's Fano-type bound (\Cref{fac:vg}'s companion theorem, used in \Cref{sec:fano-application}). The same bound holds for $\KL(P_{f_\omega} \| P_{f_{\omega'}})$ for any pair $\omega, \omega'$, by the same argument with $\omega - \omega'$ in place of $\omega$ (entries in $\{-1, 0, 1\}$, but the bound $|\omega_k - \omega'_k|^2 \leq 1$ still holds).
+\end{remark}

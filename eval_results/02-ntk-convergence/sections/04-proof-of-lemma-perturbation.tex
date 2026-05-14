@@ -1,0 +1,60 @@
+\section{Proof of \texorpdfstring{\Cref{lem:perturbation}}{Lemma 2}}\label{sec:proof_perturbation}
+
+\begin{proof}[Proof of \Cref{lem:perturbation}]
+The proof has three steps. We first define, for each input $i \in [n]$, the random set $S_i \subseteq [m]$ of neurons whose ReLU activation pattern can flip under a perturbation of size $\le R$; we then bound $|S_i|$ in high probability using Gaussian small-ball; finally we convert this to an operator-norm bound on $\Hb(\Wb) - \Hb(\Wb(0))$.
+
+\paragraph{Step 1: identifying flippable neurons.}
+For each $i \in [n]$ and $r \in [m]$, define the event
+\begin{align}\label{eq:flip_event}
+A_{i, r}(R) \;\defeq\; \big\{ \, \exists \, \wb \in \R^d \text{ with } \norm{\wb - \wb_r(0)}_2 \le R \text{ and } \one[\wb^\top \xb_i \ge 0] \ne \one[\wb_r(0)^\top \xb_i \ge 0] \, \big\}.
+\end{align}
+On the complement $A_{i,r}(R)^c$, every $\wb$ within distance $R$ of $\wb_r(0)$ produces the same ReLU pattern as $\wb_r(0)$ on input $\xb_i$. The key set-containment is
+\begin{align}\label{eq:flip_containment}
+A_{i, r}(R) \;\subseteq\; \big\{ \, |\wb_r(0)^\top \xb_i| \le R \, \big\}.
+\end{align}
+Indeed, if there exists $\wb$ with $\norm{\wb - \wb_r(0)}_2 \le R$ flipping the sign of $\wb^\top \xb_i$ relative to $\wb_r(0)^\top \xb_i$, then by Cauchy-Schwarz $|\wb^\top \xb_i - \wb_r(0)^\top \xb_i| \le R$ (using $\norm{\xb_i}=1$, \Cref{ass:data}), while $\wb^\top \xb_i$ and $\wb_r(0)^\top \xb_i$ have opposite signs, so the segment between them contains $0$, forcing $|\wb_r(0)^\top \xb_i| \le R$.
+
+\paragraph{Step 2: bounding the expected count.}
+By Eq.~\eqref{eq:flip_containment} and \Cref{fac:smallball} applied to $\wb_r(0)^\top \xb_i \sim \mathcal N(0, 1)$ (which uses $\norm{\xb_i}=1$ from \Cref{ass:data}),
+\begin{align}\label{eq:flip_prob}
+\Pr[A_{i,r}(R)] \;\le\; \Pr\big[ |\wb_r(0)^\top \xb_i| \le R \big] \;\le\; R.
+\end{align}
+Let $S_i \defeq \{ r \in [m] : A_{i, r}(R) \text{ occurs} \}$ and $|S_i|$ its cardinality. Then $\E |S_i| \le m R$ by linearity, since the events $A_{i, r}(R)$ are iid across $r$. By Markov, $|S_i| \le 3 m R$ with probability $\ge 2/3$. To get a high-probability bound at level $\delta/(3n)$, we use a stronger concentration. Each $\one[A_{i,r}(R)]$ is a Bernoulli random variable bounded in $[0, 1]$, so by Hoeffding's inequality (\Cref{fac:hoeffding}, applied to the centered indicators $\one[A_{i,r}(R)] - \Pr[A_{i,r}(R)]$ with bound $b = 1$ and threshold $t = R$),
+\begin{align*}
+\Pr\!\Big[ \, \tfrac{1}{m} |S_i| \;\ge\; 2R \, \Big]
+\;\le\; \Pr\!\Big[ \, \tfrac{1}{m}\textstyle\sum_{r=1}^m \big( \one[A_{i,r}(R)] - \Pr[A_{i,r}(R)] \big) \;\ge\; R \, \Big]
+\;\le\; \exp\!\Big( - \tfrac{m R^2}{2} \Big),
+\end{align*}
+where the first inequality uses $\Pr[A_{i,r}(R)] \le R$ from Eq.~\eqref{eq:flip_prob} to inflate the event: $\{\tfrac{1}{m}|S_i| \ge 2R\} \subseteq \{\tfrac{1}{m} \sum_r (\one[A_{i,r}(R)] - \Pr[A_{i,r}(R)]) \ge 2R - R = R\}$; the second applies one-sided Hoeffding (\Cref{fac:hoeffding} restricted to one tail) to the centered Bernoullis with $b = 1$. The right-hand side is $\le \delta / (3n)$ as soon as $m R^2 \ge 2 \log(3 n / \delta)$. Union-bounding over $i \in [n]$, with probability $\ge 1 - \delta/3$,
+\begin{align}\label{eq:flip_count}
+|S_i| \;\le\; 2 m R \qquad \text{for every } i \in [n].
+\end{align}
+
+\paragraph{Step 3: from neuron flips to operator-norm.}
+Fix any $\Wb$ with $\norm{\wb_r - \wb_r(0)}_2 \le R$ for every $r$, and any $i, j \in [n]$. Comparing Eq.~\eqref{eq:gram_W} at $\Wb$ and at $\Wb(0)$, term by term:
+\begin{align*}
+\Hb(\Wb)_{ij} - \Hb(\Wb(0))_{ij}
+\;=\; \frac{\xb_i^\top \xb_j}{m} \sum_{r = 1}^m \Big( \one[\wb_r^\top \xb_i \ge 0] \one[\wb_r^\top \xb_j \ge 0] - \one[\wb_r(0)^\top \xb_i \ge 0] \one[\wb_r(0)^\top \xb_j \ge 0] \Big).
+\end{align*}
+For any $r$ such that neither $A_{i,r}(R)$ nor $A_{j,r}(R)$ occurs, the two activation patterns coincide and the summand vanishes. Hence only $r \in S_i \cup S_j$ contributes, and each such contribution is bounded by $|\xb_i^\top \xb_j|/m \le 1/m$ by Cauchy-Schwarz and \Cref{ass:data}. Thus
+\begin{align}\label{eq:H_pertW_entry}
+\big| \Hb(\Wb)_{ij} - \Hb(\Wb(0))_{ij} \big|
+\;\le\; \frac{|S_i \cup S_j|}{m}
+\;\le\; \frac{|S_i| + |S_j|}{m}.
+\end{align}
+On the event of Eq.~\eqref{eq:flip_count}, the right-hand side is at most $4 R$ for every $i, j$.
+
+Finally, by $\opnorm{\mathbf A} \le n \max_{i,j} |\mathbf A_{ij}|$ (the same bound used in the proof of \Cref{lem:init_gram}),
+\begin{align*}
+\opnorm{ \Hb(\Wb) - \Hb(\Wb(0)) }
+\;\le\; n \cdot 4 R
+\;\le\; n \cdot 4 \cdot \tfrac{c \lambda_0}{n^2}
+\;=\; \tfrac{4 c \lambda_0}{n}
+\;\le\; \tfrac{\lambda_0}{4},
+\end{align*}
+where the second inequality applies the lemma's hypothesis $R \le c \lambda_0 / n^2$, and the last inequality uses any $c \le 1/16$ together with $n \ge 1$. The conclusion holds simultaneously for every admissible $\Wb$ on the high-probability event of Eq.~\eqref{eq:flip_count} (which depends only on $\Wb(0)$, not on $\Wb$). This completes the proof.
+\end{proof}
+
+\begin{remark}\label{rem:perturbation_uniformity}
+The high-probability event in \Cref{lem:perturbation} is a property of the initialization $\Wb(0)$ alone (it asserts a uniform bound on $|S_i|$ for every $i$), so the conclusion holds simultaneously for every $\Wb$ in the $R$-ball, with no further union bound over $\Wb$. This is what enables the contradiction argument in \Cref{sec:proof_main}.
+\end{remark}

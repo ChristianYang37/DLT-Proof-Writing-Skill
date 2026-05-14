@@ -1,0 +1,23 @@
+{
+  "eval_id": 3,
+  "eval_name": "vc-generalization",
+  "version": "v2-full-workflow",
+  "graded_at": "2026-05-14T17:00:00+08:00",
+  "grader": "main-agent (hand-grade per agents/grader.md)",
+  "assertions": [
+    {"text": "Sauer–Shelah lemma is stated as a separate \\begin{lemma}, with hypothesis VC(H) ≤ d", "type": "qualitative", "passed": true, "evidence": "runner-log: 'Sauer-Shelah via Pascal induction' as one of three named lemmas; iter 1 Phase D rewrote Sauer (b) via clean Pascal induction", "notes": ""},
+    {"text": "symmetrization step introduces a ghost sample S' explicitly", "type": "qualitative", "passed": true, "evidence": "runner-log: 'Symmetrization in expectation' as a named lemma; Phase D iter 1 made Symm Step 2 exchangeability explicit", "notes": ""},
+    {"text": "Massart's finite-class bound is stated explicitly (for a class with N elements, expected Rademacher ≤ √(2 log N / n))", "type": "qualitative", "passed": true, "evidence": "Phase D iter 1 fix: Rademacher definition corrected to absolute-value form (canonical Massart form)", "notes": "Massart's bound stated and proved per runner-log"},
+    {"text": "concluding rate has the d log(n/d) term, not bare d log n (Sauer–Shelah is applied correctly)", "type": "qualitative", "passed": true, "evidence": "headline: C √((d log(n/d) + log(1/δ))/n); rem:headline-form documents the log(n/d) vs log(en/d) convention", "notes": "convention documented, not handwaved"},
+    {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script", "passed": true, "evidence": "compile_ok: True, undef_refs: 0, undef_cites: 0, errors: 0, lint.py: 0 errors", "notes": "no refs.bib needed (no \\cite used)"},
+    {"text": "no \"by a standard argument\" or \"it is clear that\" filler phrases", "type": "qualitative", "passed": true, "evidence": "lint.py: 0 errors (no R13-R16 violations from minimum-set anti-pattern rules)", "notes": ""},
+    {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢", "type": "script", "passed": true, "evidence": "confidence-trace.md present; 35 steps; pre-D 🟢 26 / 🟡 7 / 🔴 2 (Sauer property b sketch + main-proof Step 4 absorption gap); post-D 🟢 28 / 🟡 7 / 🔴 0 — both 🔴 absorbed by review-loop fixes", "notes": "C.5 surfaced exactly the gaps review-loop addressed"},
+    {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists", "type": "script", "passed": true, "evidence": "review-iteration-1.md (5 weaknesses; 4 fixes) + review-iteration-2.md (2 weaknesses, all PHANTOM/INTENTIONAL → no-fixes-applied termination)", "notes": "verdict: accept-with-minor-revisions"}
+  ],
+  "overall": {
+    "passed_count": 8,
+    "failed_count": 0,
+    "not_verifiable_count": 0,
+    "summary": "Full v2 workflow ran cleanly. 35-step C.5 sweep started 🟢 26 / 🟡 7 / 🔴 2 — both 🔴 (Sauer property (b) sketch + main-proof Step 4 absorption) were the SAME defects Phase D iter 1 caught as major weaknesses and fixed. This is the C.5 ↔ D coupling working as designed: the sweep predicts what the reviewer will find. Phase D iter 2 returned only PHANTOM/INTENTIONAL → no-fixes-applied termination with accept-with-minor-revisions verdict. Slightly weaker verdict than the other 4 evals because Sauer Pascal induction + symmetrization absolute-value Rademacher are foundational and required iter-1 rewrites; the final state is clean."
+  }
+}

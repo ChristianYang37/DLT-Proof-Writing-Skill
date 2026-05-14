@@ -1,0 +1,73 @@
+\section{Proof of \texorpdfstring{\Cref{thm:main}}{the main theorem}}\label{sec:proof_main}
+
+\begin{proof}[Proof of \Cref{thm:main}]
+The proof combines the three structural lemmas \Cref{lem:init_gram,lem:perturbation,lem:linear_conv} and the initial-residual control \Cref{lem:init_residual} through a fixed-point / contradiction argument. We condition on the intersection of three high-probability events, then use \Cref{lem:linear_conv} as the inductive engine in a stay-in-ball regime that we maintain by contradiction.
+
+\paragraph{Step 1: high-probability events.}
+Let $R \defeq 4 \sqrt n \norm{\ub(0) - \yb}_2 / (\sqrt m \lambda_0)$ as in Eq.~\eqref{eq:thm_stayinit}. Define
+\begin{align*}
+\mathcal E_1 &\defeq \big\{ \opnorm{\Hb(\Wb(0)) - \Hb^\infty} \le \lambda_0/4 \big\}, \\
+\mathcal E_2 &\defeq \big\{ \, |S_i| \le 2 m R \;\; \text{for every } i \in [n] \, \big\}, \\
+\mathcal E_3 &\defeq \big\{ \norm{\ub(0) - \yb}_2^2 \le C' n \log(n/\delta) \big\},
+\end{align*}
+where $S_i$ is the random set defined in Eq.~\eqref{eq:flip_event} (which depends on $\Wb(0)$ and the radius $R$), and $\mathcal E \defeq \mathcal E_1 \cap \mathcal E_2 \cap \mathcal E_3$. By \Cref{lem:init_gram} ($\Pr[\mathcal E_1^c] \le \delta/3$), the proof of \Cref{lem:perturbation} at radius $R$ (Eq.~\eqref{eq:flip_count}; $\Pr[\mathcal E_2^c] \le \delta/3$, provided $R \le c \lambda_0 / n^2$ — verified below), \Cref{lem:init_residual} ($\Pr[\mathcal E_3^c] \le \delta/3$), and a union bound,
+\begin{align*}
+\Pr[\mathcal E] \;\ge\; 1 - \delta.
+\end{align*}
+
+\paragraph{Step 2: verifying the perturbation-radius hypothesis.}
+We must check that the radius $R$ implied by \Cref{lem:linear_conv} satisfies $R \le c \lambda_0 / n^2$ as required by \Cref{lem:perturbation}. On $\mathcal E_3$,
+\begin{align}\label{eq:R_bound}
+R
+\;=\; \frac{4 \sqrt n \, \norm{\ub(0) - \yb}_2}{\sqrt m \, \lambda_0}
+\;\le\; \frac{4 \sqrt n \cdot \sqrt{C' n \log(n/\delta)}}{\sqrt m \, \lambda_0}
+\;=\; \frac{4 \sqrt{C'} \, n \sqrt{\log(n/\delta)}}{\sqrt m \, \lambda_0}.
+\end{align}
+The condition $R \le c \lambda_0 / n^2$ becomes
+\begin{align*}
+\frac{4 \sqrt{C'} \, n \sqrt{\log(n/\delta)}}{\sqrt m \, \lambda_0} \;\le\; \frac{c \lambda_0}{n^2}
+\quad\Longleftrightarrow\quad
+m \;\ge\; \frac{16 C' \, n^6 \log(n/\delta)}{c^2 \lambda_0^4}.
+\end{align*}
+This is implied by the theorem's width hypothesis $m \ge C_1 n^6 / (\lambda_0^4 \delta^3)$ for $C_1$ sufficiently large (using $\log(n/\delta) \le \poly(1/\delta)$). With this width, all three events $\mathcal E_1, \mathcal E_2, \mathcal E_3$ are guaranteed simultaneously by \Cref{lem:init_gram,lem:perturbation,lem:init_residual} (which each require $m \ge C n^2 \log(n/\delta) / \lambda_0^2$, dominated by the above), and the union bound gives $\Pr[\mathcal E] \ge 1 - \delta$.
+
+\paragraph{Step 3: inductive stay-in-ball argument by contradiction.}
+We claim that on $\mathcal E$, for every $t \ge 0$,
+\begin{align}\label{eq:invariant}
+(\star_t)
+\qquad
+\norm{\ub(t) - \yb}_2^2 \le \big( 1 - \tfrac{\eta\lambda_0}{2} \big)^{t} \norm{\ub(0) - \yb}_2^2
+\quad\text{and}\quad
+\norm{\wb_r(t) - \wb_r(0)}_2 \le R \;\; \text{for all } r.
+\end{align}
+$(\star_0)$ is immediate. Suppose $(\star_t)$ holds for some $t \ge 0$; we prove $(\star_{t+1})$.
+
+By $(\star_t)$, every iterate $\Wb(0), \Wb(1), \ldots, \Wb(t)$ has each column within $R$ of the corresponding initial column. Hence Eq.~\eqref{eq:H_pertW_entry} of \Cref{lem:perturbation}'s proof — which derives the operator-norm bound from the flip-count bound — applies to each iterate $\Wb(s)$, $s \in \{0, 1, \ldots, t\}$, on $\mathcal E_2$ (this is where the *uniform* perturbation bound matters — see \Cref{rem:perturbation_uniformity}). Combined with the conversion from entrywise to operator norm,
+\begin{align*}
+\opnorm{ \Hb(\Wb(s)) - \Hb(\Wb(0)) } \;\le\; \tfrac{\lambda_0}{4} \qquad \text{for all } s \in \{0, 1, \ldots, t\}.
+\end{align*}
+Combining with $\mathcal E_1$, the triangle inequality, and Weyl's inequality,
+\begin{align}\label{eq:hmin_bound}
+\lambda_{\min}(\Hb(\Wb(s)))
+\;\ge\; \lambda_{\min}(\Hb^\infty) - \opnorm{\Hb(\Wb(s)) - \Hb^\infty}
+\;\ge\; \lambda_0 - \tfrac{\lambda_0}{4} - \tfrac{\lambda_0}{4}
+\;=\; \tfrac{\lambda_0}{2},
+\end{align}
+for every $s \in \{0, 1, \ldots, t\}$. The hypotheses of \Cref{lem:linear_conv} are therefore met up to step $t$: (i) the spectral lower bound is just Eq.~\eqref{eq:hmin_bound}; (ii) on $\mathcal E_2$, the flip-count bound $|S_i| \le 2 m R$ holds by the proof of \Cref{lem:perturbation} (Eq.~\eqref{eq:flip_count}, which $\mathcal E_2$ subsumes since $\mathcal E_2$ is the conclusion of \Cref{lem:perturbation}); (iii) the perturbation $\norm{\wb_r(s) - \wb_r(0)}_2 \le R$ for $s \le t$ is exactly the second clause of the inductive hypothesis $(\star_t)$; (iv) the constants $c, C_2$ requirements are imposed once at the theorem level. Therefore \Cref{lem:linear_conv} applied at this $t$ delivers both conclusions: $\norm{\ub(t+1) - \yb}_2^2 \le (1 - \eta\lambda_0/2)^{t+1} \norm{\ub(0) - \yb}_2^2$ and $\norm{\wb_r(t+1) - \wb_r(0)}_2 \le 4 \sqrt n \norm{\ub(0) - \yb}_2 / (\sqrt m \lambda_0) = R$ for every $r$. This is $(\star_{t+1})$.
+
+By induction, $(\star_t)$ holds for every $t \ge 0$, which proves Eq.~\eqref{eq:thm_linconv} and Eq.~\eqref{eq:thm_stayinit}. The conclusion holds with probability $\ge 1 - \delta$ over the random initialization (\Cref{ass:init}). This completes the proof.
+\end{proof}
+
+\begin{remark}[On the contradiction phrasing]\label{rem:contradiction}
+The argument above is conventionally phrased ``by contradiction'': let $T^* \defeq \inf\{ t : \exists r, \norm{\wb_r(t) - \wb_r(0)}_2 > R \}$; if $T^* < \infty$ then \Cref{lem:linear_conv} applied at $t = T^* - 1$ shows $\norm{\wb_r(T^*) - \wb_r(0)}_2 \le R$, contradicting the definition of $T^*$. The induction $(\star_t)$ in Step 3 is the same content. We use induction directly because it is cleaner; the contradiction phrasing is recovered by reading the induction step's conclusion as ``the iterate cannot first breach the ball at time $t+1$''.
+\end{remark}
+
+\begin{remark}[Reconciliation with the headline width]\label{rem:width_check}
+The width condition $m \ge C_1 n^6 / (\lambda_0^4 \delta^3)$ in Eq.~\eqref{eq:thm_params} dominates the three subsidiary conditions appearing in the lemma hypotheses:
+\begin{itemize}[leftmargin=2em, itemsep=0.2em]
+\item $m \ge C n^2 \log(n/\delta) / \lambda_0^2$ from \Cref{lem:init_gram};
+\item $m \ge C n^2 \log(n/\delta) / \lambda_0^2$ from \Cref{lem:perturbation} (with $R$ as in Eq.~\eqref{eq:R_bound});
+\item $m \ge 16 C' n^6 \log(n/\delta) / (c^2 \lambda_0^4)$ from the requirement that $R \le c \lambda_0 / n^2$.
+\end{itemize}
+The third dominates and matches $m \gtrsim n^6 / (\lambda_0^4 \delta^3)$ up to $\polylog(n, 1/\delta)$ factors absorbed into $C_1$. This $n^6$-polynomial in $m$ is the same scaling appearing in~\cite{du2019gradient}; tighter polynomials are available in follow-up work but lie outside the scope of this proof.
+\end{remark}

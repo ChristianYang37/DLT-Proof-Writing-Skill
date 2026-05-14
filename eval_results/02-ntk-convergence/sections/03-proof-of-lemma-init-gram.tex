@@ -1,0 +1,78 @@
+\section{Proof of \texorpdfstring{\Cref{lem:init_gram}}{Lemma 1} and \texorpdfstring{\Cref{lem:init_residual}}{the initial residual bound}}\label{sec:proof_init_gram}
+
+\subsection{Concentration of the initial Gram matrix}\label{subsec:init_gram}
+
+\begin{proof}[Proof of \Cref{lem:init_gram}]
+The proof proceeds in two steps. First, we apply Hoeffding's inequality entrywise to obtain a uniform entrywise concentration $|\Hb(\Wb(0))_{ij} - \Hb^\infty_{ij}| \le \tfrac{\lambda_0}{4 n}$; second, we convert entrywise to operator-norm control via the elementary bound $\opnorm{\mathbf A} \le n \max_{ij} |\mathbf A_{ij}|$.
+
+\paragraph{Step 1: entrywise Hoeffding.}
+Fix $i, j \in [n]$. By Eq.~\eqref{eq:gram_W} and Eq.~\eqref{eq:gram_infty},
+\begin{align}\label{eq:Hij_dif}
+\Hb(\Wb(0))_{ij} - \Hb^\infty_{ij}
+\;=\; \frac{1}{m} \sum_{r=1}^m Z_r^{(ij)},
+\qquad
+Z_r^{(ij)} \;\defeq\; \xb_i^\top \xb_j \big( \one[E_{i,r}] \one[E_{j,r}] - \E[ \one[E_{i,r}] \one[E_{j,r}] ] \big),
+\end{align}
+with $E_{i,r} \defeq \{ \wb_r(0)^\top \xb_i \ge 0 \}$. Across $r \in [m]$, the variables $\{Z_r^{(ij)}\}_r$ are independent because $\{\wb_r(0)\}_r$ is iid (\Cref{ass:init}). Each $Z_r^{(ij)}$ has mean zero and is bounded: $|\one[E_{i,r}] \one[E_{j,r}]| \le 1$, $|\xb_i^\top \xb_j| \le \norm{\xb_i}_2 \norm{\xb_j}_2 = 1$ by Cauchy-Schwarz and \Cref{ass:data}, so $|Z_r^{(ij)}| \le 2$.
+
+Apply \Cref{fac:hoeffding} with $b = 2$ at the level $t = \tfrac{\lambda_0}{4 n}$:
+\begin{align*}
+\Pr\!\Big[ \, \big|\Hb(\Wb(0))_{ij} - \Hb^\infty_{ij}\big| \;\ge\; \tfrac{\lambda_0}{4 n} \, \Big]
+\;\le\; 2 \exp\!\Big( - \tfrac{m \lambda_0^2}{128 \, n^2} \Big).
+\end{align*}
+Union-bounding over the $n^2$ index pairs $(i,j)$,
+\begin{align}\label{eq:entrywise_union}
+\Pr\!\Big[ \, \max_{i, j \in [n]} \big|\Hb(\Wb(0))_{ij} - \Hb^\infty_{ij}\big| \;\ge\; \tfrac{\lambda_0}{4 n} \, \Big]
+\;\le\; 2 n^2 \exp\!\Big( - \tfrac{m \lambda_0^2}{128 \, n^2} \Big).
+\end{align}
+The right-hand side is at most $\delta/3$ as soon as $m \ge \tfrac{128 \, n^2}{\lambda_0^2} \log(6 n^2 / \delta)$, which is implied by the lemma's hypothesis $m \ge C n^2 \log(n/\delta) / \lambda_0^2$ for a sufficiently large universal $C$.
+
+\paragraph{Step 2: entrywise to operator norm.}
+On the event $\{ \max_{i,j} |\Hb(\Wb(0))_{ij} - \Hb^\infty_{ij}| \le \tfrac{\lambda_0}{4n} \}$, the elementary inequality $\opnorm{\mathbf A} \le \sqrt{ \norm{\mathbf A}_1 \norm{\mathbf A}_\infty } \le n \max_{i,j} |\mathbf A_{ij}|$ for $\mathbf A \in \R^{n \times n}$ (which itself follows from $\opnorm{\mathbf A}^2 \le \norm{\mathbf A}_F^2 \le n^2 \max_{ij} \mathbf A_{ij}^2$) gives
+\begin{align*}
+\opnorm{ \Hb(\Wb(0)) - \Hb^\infty }
+\;\le\; n \cdot \tfrac{\lambda_0}{4 n}
+\;=\; \tfrac{\lambda_0}{4}.
+\end{align*}
+By Weyl's inequality, $\lambda_{\min}(\Hb(\Wb(0))) \ge \lambda_{\min}(\Hb^\infty) - \opnorm{\Hb(\Wb(0)) - \Hb^\infty} \ge \lambda_0 - \tfrac{\lambda_0}{4} = \tfrac{3 \lambda_0}{4}$. This completes the proof.
+\end{proof}
+
+\subsection{Initial residual bound}\label{subsec:init_residual}
+
+\begin{proof}[Proof of \Cref{lem:init_residual}]
+The strategy is to apply Hoeffding's inequality to each $\ub_i(0)$ separately, then union-bound.
+
+Fix $i \in [n]$. By Eq.~\eqref{eq:network} at $\Wb = \Wb(0)$,
+\begin{align*}
+\ub_i(0)
+\;=\; \frac{1}{\sqrt m} \sum_{r=1}^m a_r \, \sigma(\wb_r(0)^\top \xb_i)
+\;=\; \frac{1}{\sqrt m} \sum_{r=1}^m Y_r^{(i)},
+\qquad
+Y_r^{(i)} \;\defeq\; a_r \, \sigma(\wb_r(0)^\top \xb_i).
+\end{align*}
+Condition on the first-layer draws $\Wb(0)$ and let $b_r \defeq \sigma(\wb_r(0)^\top \xb_i) \ge 0$. Then $\E[Y_r^{(i)} \mid \Wb(0)] = b_r \E[a_r] = 0$ (since $a_r$ is symmetric Rademacher and independent of $\Wb(0)$), $|Y_r^{(i)}| \le b_r$ a.s., and the $Y_r^{(i)}$ are conditionally independent across $r$. Apply \Cref{fac:hoeffding} conditionally to $\ub_i(0) = m^{-1/2} \sum_r Y_r^{(i)}$: the random variables $\tilde Y_r \defeq Y_r^{(i)}$ are independent with $\E\tilde Y_r = 0$ and $|\tilde Y_r| \le b_r$, so applying \Cref{fac:hoeffding} (in its un-normalized form $\Pr[|\sum_r \tilde Y_r| \ge u] \le 2 \exp(- u^2 / (2\sum_r b_r^2))$) gives, for any $u \ge 0$,
+\begin{align}\label{eq:cond_hoeffding_init}
+\Pr\!\Big[ \, m^{-1/2} \big|\textstyle\sum_r Y_r^{(i)}\big| \;\ge\; u \;\Big|\; \Wb(0) \Big] \;\le\; 2 \exp\!\Big( - \frac{m u^2}{2 \sum_r b_r^2} \Big).
+\end{align}
+We now bound $\sum_r b_r^2$ in expectation and high probability. Each $b_r^2 = \sigma(\wb_r(0)^\top \xb_i)^2 \le (\wb_r(0)^\top \xb_i)^2$, and $(\wb_r(0)^\top \xb_i)^2 \sim \chi^2_1$ by \Cref{ass:init} and $\norm{\xb_i}=1$. Hence $\sum_r b_r^2 \le \sum_r (\wb_r(0)^\top \xb_i)^2 \eqqcolon V$ with $V \sim \chi^2_m$, and $\E V = m$. A standard $\chi^2$ tail (e.g.\ Lemma 1 of Laurent-Massart 2000, $\Pr[V \ge m + 2\sqrt{m x} + 2 x] \le e^{-x}$ for $x \ge 0$) at $x = c m$ for small $c > 0$ gives $\Pr[V \ge 2 m] \le \exp(- c' m)$ for some absolute $c' > 0$. On the event $\{\sum_r b_r^2 \le 2m\}$ (which has probability $\ge 1 - \exp(-c' m)$), Eq.~\eqref{eq:cond_hoeffding_init} simplifies to
+\begin{align*}
+\Pr\!\big[ \, |\ub_i(0)| \;\ge\; u \;\big|\; \Wb(0), \, \textstyle\sum_r b_r^2 \le 2 m \big] \;\le\; 2 \exp(- u^2 / 4).
+\end{align*}
+Taking $u = \sqrt{4 \log(12 n / \delta)}$ yields $|\ub_i(0)| \le u$ with conditional probability $\ge 1 - \delta / (6n)$; integrating over the conditioning,
+\begin{align*}
+\Pr\!\Big[ \, |\ub_i(0)| \;\ge\; 2 \sqrt{\log(12n/\delta)} \, \Big] \;\le\; \delta/(6n) + \exp(- c' m).
+\end{align*}
+For $m \ge C n^2 \log(n/\delta) / \lambda_0^2$ as in the lemma hypothesis (a non-vacuous constraint, $m \ge \Omega(\log(1/\delta))$), the second term is dominated by the first. Union-bounding over $i \in [n]$,
+\begin{align*}
+\Pr\!\Big[ \, \max_{i \in [n]} |\ub_i(0)| \;\le\; 2 \sqrt{\log(12 n / \delta)} \, \Big] \;\ge\; 1 - \delta/3.
+\end{align*}
+On this event, by $(a - b)^2 \le 2 a^2 + 2 b^2$ (AM-GM) and $|y_i| \le 1$ (\Cref{ass:data}),
+\begin{align*}
+\norm{\ub(0) - \yb}_2^2
+\;=\; \sum_{i=1}^n (\ub_i(0) - y_i)^2
+\;\le\; \sum_{i=1}^n \big( 2 \ub_i(0)^2 + 2 y_i^2 \big)
+\;\le\; 8 n \log(12 n / \delta) + 2 n
+\;\le\; C' n \log(n / \delta),
+\end{align*}
+for a sufficiently large universal $C' > 0$ (absorbing the additive constants). This completes the proof.
+\end{proof}

@@ -1,0 +1,47 @@
+\section{Preliminaries}\label{sec:preliminaries}
+
+\paragraph{Notation.}
+Throughout, $\XX$ is an arbitrary measurable input space, $\DD$ is a probability distribution on $\XX \times \{0,1\}$, and $\HH \subset \{0,1\}^{\XX}$ is a fixed hypothesis class of binary classifiers. We write $S = \{(x_i, y_i)\}_{i=1}^n \in (\XX \times \{0,1\})^n$ for an i.i.d.\ sample from $\DD$. For $h \in \HH$, define the \emph{population risk} and the \emph{empirical risk}
+\begin{align*}
+\Risk(h) \;:=\; \Pr_{(x,y) \sim \DD}\bigl[ h(x) \ne y \bigr],
+\qquad
+\eRisk_n(h) \;:=\; \frac{1}{n} \sum_{i=1}^{n} \1\bigl[ h(x_i) \ne y_i \bigr].
+\end{align*}
+We use $\eps_1, \ldots, \eps_n$ for i.i.d.\ Rademacher signs ($\Pr[\eps_i = +1] = \Pr[\eps_i = -1] = 1/2$), independent of $S$. Throughout, $c, C, C_1, C_2, \ldots$ denote universal positive constants whose values may change from line to line. We use $\log$ for the natural logarithm.
+
+\paragraph{VC dimension and the growth function.}
+For a finite set $A = \{a_1, \ldots, a_m\} \subset \XX$, the \emph{projection} of $\HH$ onto $A$ is
+\begin{align*}
+\HH\big|_{A} \;:=\; \bigl\{ (h(a_1), \ldots, h(a_m)) : h \in \HH \bigr\} \;\subset\; \{0,1\}^{m}.
+\end{align*}
+
+\begin{definition}[Growth function]\label{def:growth}
+The \emph{growth function} of $\HH$ at sample size $m$ is
+\begin{align*}
+\growth_{\HH}(m) \;:=\; \max_{A \subset \XX,\, |A| = m} \bigl| \HH\big|_{A} \bigr|.
+\end{align*}
+\end{definition}
+
+\begin{definition}[VC dimension]\label{def:vc}
+A set $A \subset \XX$ with $|A| = m$ is \emph{shattered} by $\HH$ if $|\HH|_A| = 2^m$. The \emph{VC dimension} of $\HH$, denoted $\VC(\HH)$, is the largest integer $d$ such that some $A \subset \XX$ with $|A| = d$ is shattered by $\HH$. If $\HH$ shatters arbitrarily large sets, then $\VC(\HH) = \infty$.
+\end{definition}
+
+\begin{remark}\label{rem:zero-one}
+The conclusion of the main theorem concerns the binary $0/1$ loss; for general bounded losses $\ell: \mathcal{Y}^2 \to [0,1]$ derived from a binary class, the loss class $\ell \circ \HH$ has VC dimension equal to that of $\HH$, so the same bound applies.
+\end{remark}
+
+\paragraph{Rademacher complexity.}
+
+\begin{definition}[Empirical and population Rademacher complexity]\label{def:rademacher}
+For any function class $\FF \subset \{0,1\}^{\XX \times \{0,1\}}$ and a sample $S = \{z_i\}_{i=1}^n$, the \emph{empirical Rademacher complexity} (in the absolute-value variant used throughout this section) is
+\begin{align*}
+\widehat{\Rad}_S(\FF) \;:=\; \E_{\eps}\!\left[ \sup_{f \in \FF} \Bigl| \frac{1}{n} \sum_{i=1}^{n} \eps_i f(z_i) \Bigr| \;\bigg|\; S \right],
+\end{align*}
+and the \emph{population Rademacher complexity} is $\Rad_n(\FF) := \E_{S}[\widehat{\Rad}_S(\FF)]$. We use the absolute-value form because it arises directly from symmetrization with the two-sided event $\sup_g |\mu - \widehat\mu_n|$; the unsigned variant differs by at most a factor of $2$.
+\end{definition}
+
+For the hypothesis class $\HH$ with $0/1$ loss, the loss class
+\begin{align*}
+\GG \;:=\; \bigl\{ g_h(x,y) := \1[h(x) \ne y] \;:\; h \in \HH \bigr\}.
+\end{align*}
+satisfies $\growth_{\GG}(m) = \growth_{\HH}(m)$ and $\VC(\GG) = \VC(\HH) = d$, since the map $h \mapsto g_h$ is a bijection and $g_h(x,y) = h(x) \oplus y$ depends on $h$ only through its $\{0,1\}$ output on $x$.

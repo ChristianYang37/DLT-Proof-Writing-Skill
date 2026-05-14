@@ -1,0 +1,139 @@
+\section{Hoeffding's inequality}
+\label{sec:main-theorem}
+
+\begin{theorem}[Hoeffding's inequality]\label{thm:hoeffding}
+Let $X_1, \ldots, X_n$ be independent real-valued random variables and let
+$a_i \le b_i$ be real constants with $X_i \in [a_i, b_i]$ almost surely for each
+$i \in \{1, \ldots, n\}$. Set $S_n := \sum_{i=1}^n X_i$ and $\mu := \E S_n$. Then for
+every $t \ge 0$,
+\begin{align}\label{eq:hoeffding-two-sided}
+\Pr\bigl[\,\lvert S_n - \mu \rvert \;\ge\; t\,\bigr]
+\;\le\; 2 \exp\!\Biggl( - \frac{2 t^2}{\sum_{i=1}^n (b_i - a_i)^2} \Biggr).
+\end{align}
+\end{theorem}
+
+\begin{proof}
+The proof follows the Chernoff method: bound the upper tail $\Pr[S_n - \mu \ge t]$
+by applying Markov's inequality to the exponential moment of $S_n - \mu$, factor
+across independent summands, apply \Cref{lem:hoeffding-lemma} to each factor, and
+optimize the resulting bound over the free parameter $\lambda > 0$. The lower tail
+is handled by symmetry, and a union bound combines them.
+
+Set $Y_i := X_i - \mu_i$, where $\mu_i := \E X_i$. By
+\Cref{fac:range-invariance}, each $Y_i$ satisfies $\E Y_i = 0$ and
+$Y_i \in [a_i - \mu_i, b_i - \mu_i]$ almost surely; this is an interval containing
+$0$ (since $\mu_i \in [a_i, b_i]$) of length $b_i - a_i$. The $Y_i$ are independent
+because each is a deterministic function of the corresponding $X_i$ alone, and the
+$X_i$ are independent by hypothesis. We have
+\begin{align*}
+S_n - \mu \;=\; \sum_{i=1}^n (X_i - \mu_i) \;=\; \sum_{i=1}^n Y_i.
+\end{align*}
+Write $v := \sum_{i=1}^n (b_i - a_i)^2$.
+
+\smallskip\noindent\textbf{Trivial cases.}
+If $t = 0$, the right-hand side of Eq.~\eqref{eq:hoeffding-two-sided} equals $2$
+and the left-hand side is a probability, so the bound holds with no further work.
+If $v = 0$, every $X_i$ is almost-surely constant (equal to $\mu_i$), hence $S_n =
+\mu$ almost surely, and the left-hand side is $0$ for every $t > 0$; the
+right-hand side is interpreted as $\lim_{v \to 0^+} 2 \exp(-2t^2/v) = 0$ for $t >
+0$, so the bound again holds (and is sharp). In the remainder of the proof we
+therefore assume $t > 0$ and $v > 0$.
+
+\smallskip\noindent\textbf{Step 1: upper-tail Chernoff bound.}
+Fix $\lambda > 0$. We bound $\Pr\bigl[\sum_i Y_i \ge t\bigr]$. The function
+$x \mapsto e^{\lambda x}$ is strictly increasing on $\R$, so
+$\{\sum_i Y_i \ge t\} = \{e^{\lambda \sum_i Y_i} \ge e^{\lambda t}\}$. Applying
+Markov's inequality to the nonnegative random variable $e^{\lambda \sum_i Y_i}$ at
+level $e^{\lambda t}$, we obtain
+\begin{align*}
+\Pr\!\Bigl[\textstyle\sum_{i=1}^n Y_i \ge t\Bigr]
+\;\le\; & ~ e^{-\lambda t} \cdot \E\!\Bigl[\exp\!\bigl(\lambda \textstyle\sum_{i=1}^n Y_i\bigr)\Bigr] \\
+\;=\; & ~ e^{-\lambda t} \cdot \E\!\Bigl[\textstyle\prod_{i=1}^n e^{\lambda Y_i}\Bigr] \\
+\;=\; & ~ e^{-\lambda t} \cdot \prod_{i=1}^n \E\!\bigl[e^{\lambda Y_i}\bigr] \\
+\;\le\; & ~ e^{-\lambda t} \cdot \prod_{i=1}^n \exp\!\Bigl(\tfrac{\lambda^2 (b_i - a_i)^2}{8}\Bigr) \\
+\;=\; & ~ \exp\!\Bigl(-\lambda t + \tfrac{\lambda^2}{8} \textstyle\sum_{i=1}^n (b_i - a_i)^2\Bigr) \\
+\;=\; & ~ \exp\!\Bigl(-\lambda t + \tfrac{\lambda^2 v}{8}\Bigr),
+\end{align*}
+where the first step is Markov's inequality applied to $e^{\lambda \sum_i Y_i}$
+with $\lambda > 0$, the second step rewrites the exponential of a sum as a product
+of exponentials, the third step uses independence of $Y_1, \ldots, Y_n$ to
+factor the expectation of the product into the product of expectations (each
+$e^{\lambda Y_i}$ being a deterministic function of $Y_i$, and the $Y_i$ being
+independent), the fourth step applies \Cref{lem:hoeffding-lemma} to each centered
+bounded random variable $Y_i \in [a_i - \mu_i, b_i - \mu_i]$ of range
+$(b_i - \mu_i) - (a_i - \mu_i) = b_i - a_i$ (so $(\beta - \alpha)^2 = (b_i - a_i)^2$
+in the lemma's notation), the fifth step combines the exponentials of a sum into
+the exponential of the sum, and the last step substitutes the abbreviation $v$.
+
+\smallskip\noindent\textbf{Step 2: optimize over $\lambda > 0$.}
+The right-hand side of Step 1 is the exponential of the quadratic
+$q(\lambda) := -\lambda t + \lambda^2 v / 8$ in $\lambda$. Since $v > 0$, $q$ is
+strictly convex with derivative $q'(\lambda) = -t + \lambda v / 4$, vanishing at
+\begin{align*}
+\lambda^\star \;:=\; \frac{4 t}{v} \;>\; 0,
+\end{align*}
+where positivity uses $t > 0$ and $v > 0$ (assumed in the trivial-case carve-out
+above). At this $\lambda^\star$,
+\begin{align*}
+q(\lambda^\star)
+\;=\; -\frac{4t^2}{v} + \frac{(4t / v)^2 \cdot v}{8}
+\;=\; -\frac{4t^2}{v} + \frac{2t^2}{v}
+\;=\; -\frac{2t^2}{v}.
+\end{align*}
+Since $\lambda^\star > 0$, it is a valid choice in the Markov step, and substituting
+into the bound of Step 1 gives
+\begin{align}\label{eq:upper-tail}
+\Pr\!\Bigl[\textstyle\sum_{i=1}^n Y_i \ge t\Bigr]
+\;\le\; \exp\!\Bigl(- \tfrac{2 t^2}{v}\Bigr).
+\end{align}
+
+\smallskip\noindent\textbf{Step 3: lower tail by symmetry.}
+Apply Step 1--Step 2 to the random variables $\widetilde{X}_i := -X_i$, which are
+independent and satisfy $\widetilde{X}_i \in [-b_i, -a_i]$ almost surely, with
+range length $(-a_i) - (-b_i) = b_i - a_i$ identical to the original. Their sum
+$\widetilde{S}_n := \sum_i \widetilde{X}_i = -S_n$ has mean
+$\E \widetilde{S}_n = -\mu$, so $\widetilde{S}_n - \E \widetilde{S}_n = -(S_n - \mu)$
+and
+\begin{align*}
+\Pr\bigl[S_n - \mu \le -t\bigr]
+\;=\; \Pr\bigl[-(S_n - \mu) \ge t\bigr]
+\;=\; \Pr\bigl[\widetilde{S}_n - \E \widetilde{S}_n \ge t\bigr]
+\;\le\; \exp\!\Bigl(-\tfrac{2 t^2}{v}\Bigr),
+\end{align*}
+where the last step is Eq.~\eqref{eq:upper-tail} applied to $\widetilde{X}_1, \ldots,
+\widetilde{X}_n$ (which carries the same value of $v$ because the range lengths are
+preserved under the sign flip).
+
+\smallskip\noindent\textbf{Step 4: union bound.}
+Combining the two tail bounds via the union of events
+$\{S_n - \mu \ge t\} \cup \{S_n - \mu \le -t\} = \{\lvert S_n - \mu \rvert \ge t\}$,
+\begin{align*}
+\Pr\bigl[\lvert S_n - \mu \rvert \ge t\bigr]
+\;\le\; \Pr\bigl[S_n - \mu \ge t\bigr] + \Pr\bigl[S_n - \mu \le -t\bigr]
+\;\le\; 2 \exp\!\Bigl(-\tfrac{2 t^2}{v}\Bigr).
+\end{align*}
+Substituting back $v = \sum_i (b_i - a_i)^2$ gives Eq.~\eqref{eq:hoeffding-two-sided}.
+This completes the proof.
+\end{proof}
+
+\begin{remark}[Tightness of the constant $2$ in the exponent]\label{rem:tightness}
+The constant $2$ in $-2 t^2 / \sum_i (b_i - a_i)^2$ matches the standard form of
+Hoeffding's inequality and is the exponent obtained by optimizing the Chernoff
+bound with Hoeffding's lemma. A matching lower bound (in the rate, not the
+constant inside the exponential) is given by the central limit theorem when the
+$X_i$ are i.i.d.\ with nontrivial variance: $\Pr[\lvert S_n - \mu \rvert \ge t]$ has
+Gaussian-type decay $\exp(-c t^2 / \sigma^2 n)$ for $t = O(\sigma \sqrt{n})$. The
+Hoeffding bound is loose precisely when $\sigma^2 \ll (b - a)^2 / 4$, i.e.\ when
+the bounded support of each summand vastly overestimates its variance; tighter
+bounds (Bernstein, Bennett) require a variance hypothesis.
+\end{remark}
+
+\begin{remark}[One-sided variant]\label{rem:one-sided}
+The proof produces a one-sided bound at Eq.~\eqref{eq:upper-tail}: for every $t \ge 0$,
+\begin{align*}
+\Pr\bigl[S_n - \mu \ge t\bigr] \;\le\; \exp\!\Bigl(-\tfrac{2 t^2}{\sum_i (b_i - a_i)^2}\Bigr),
+\end{align*}
+and likewise (by symmetry) for $\Pr[S_n - \mu \le -t]$. The factor of $2$ in
+Eq.~\eqref{eq:hoeffding-two-sided} is exactly the union-bound cost of combining the
+two tails.
+\end{remark}

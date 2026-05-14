@@ -1,0 +1,64 @@
+\section{Symmetrization}\label{sec:symmetrization}
+
+We reduce the expected supremum of the risk-vs.-empirical-risk gap to the Rademacher complexity of the loss class, via the standard ghost-sample argument.
+
+\begin{lemma}[Symmetrization in expectation]\label{lem:symmetrization}
+Let $\GG \subset \{0,1\}^{\XX \times \{0,1\}}$ be any class of $\{0,1\}$-valued functions, let $S = \{z_i\}_{i=1}^{n}$ be i.i.d.\ from a distribution $\DD$, and write $\mu(g) := \E_{z \sim \DD}[g(z)]$ and $\widehat{\mu}_n(g) := \tfrac{1}{n} \sum_i g(z_i)$. Let $\eps_1, \ldots, \eps_n$ be i.i.d.\ Rademacher signs independent of $S$. Then
+\begin{align}\label{eq:symm-expect}
+\E_{S}\!\left[ \sup_{g \in \GG} \bigl| \mu(g) - \widehat{\mu}_n(g) \bigr| \right]
+\;\le\;
+2 \, \E_{S, \eps}\!\left[ \sup_{g \in \GG} \Bigl| \frac{1}{n} \sum_{i=1}^{n} \eps_i\, g(z_i) \Bigr| \right].
+\end{align}
+\end{lemma}
+
+\begin{proof}
+The argument has three steps: introduce a ghost sample, randomize signs, and split via the triangle inequality. Let $S' = \{z'_i\}_{i=1}^{n}$ be an independent ``ghost'' i.i.d.\ sample from $\DD$, with $\widehat{\mu}'_n(g) := \tfrac{1}{n} \sum_i g(z'_i)$.
+
+\paragraph{Step 1: ghost-sample replacement.}
+For every $g \in \GG$, $\mu(g) = \E_{S'}[\widehat{\mu}'_n(g) \mid S]$. By Jensen's inequality applied to the convex function $|\cdot|$ and then to $\sup_g$ (which is also convex as a supremum of affine functions, so Jensen flips the direction with $\E$ outside the supremum and inside the absolute value),
+\begin{align*}
+\E_{S}\!\left[ \sup_{g} \bigl| \mu(g) - \widehat{\mu}_n(g) \bigr| \right]
+\;=\; & ~ \E_{S}\!\left[ \sup_{g} \bigl| \E_{S'}[ \widehat{\mu}'_n(g) - \widehat{\mu}_n(g) \mid S ] \bigr| \right] \\
+\;\le\; & ~ \E_{S}\!\left[ \sup_{g} \E_{S'}\!\bigl[ |\widehat{\mu}'_n(g) - \widehat{\mu}_n(g)| \;\big|\; S \bigr] \right] \\
+\;\le\; & ~ \E_{S, S'}\!\left[ \sup_{g} | \widehat{\mu}'_n(g) - \widehat{\mu}_n(g) | \right],
+\end{align*}
+where the first step uses $\mu(g) = \E_{S'}[\widehat{\mu}'_n(g)]$ (so $\widehat{\mu}_n$ can be pulled inside the $S'$-expectation since it does not depend on $S'$), the second step applies the conditional Jensen inequality $|\E[\cdot]| \le \E[|\cdot|]$ to each $g$ and uses monotonicity of $\sup_g$, and the third step swaps $\sup_g$ and $\E_{S'}$ at a cost of an upper bound (Jensen for $\sup$).
+
+\paragraph{Step 2: randomize signs.}
+Since $S$ and $S'$ are i.i.d.\ from the same distribution, the random tuple $((z_i, z'_i))_{i=1}^n$ is \emph{exchangeable}: for any deterministic sign vector $s = (s_1, \ldots, s_n) \in \{\pm 1\}^n$, the tuple $((u_i^{(s)}, v_i^{(s)}))_i$ defined by $(u_i^{(s)}, v_i^{(s)}) = (z_i, z'_i)$ if $s_i = +1$ and $(z'_i, z_i)$ if $s_i = -1$ has the same joint distribution as $((z_i, z'_i))_i$. Let $\eps_1, \ldots, \eps_n$ be i.i.d.\ Rademacher independent of $(S, S')$. Conditioning on $\eps$, the substitution rule above gives, for each fixed realization $s$ of $\eps$,
+\begin{align*}
+\E_{S, S'}\!\left[ \sup_{g} \Bigl| \frac{1}{n} \sum_{i} \bigl( g(v_i^{(s)}) - g(u_i^{(s)}) \bigr) \Bigr| \right]
+\;=\;
+\E_{S, S'}\!\left[ \sup_{g} \Bigl| \frac{1}{n} \sum_{i} \bigl( g(z'_i) - g(z_i) \bigr) \Bigr| \right].
+\end{align*}
+But $g(v_i^{(s)}) - g(u_i^{(s)}) = s_i \, (g(z'_i) - g(z_i))$ by the defining rule of the swap. Taking expectation over $\eps$ as well,
+\begin{align*}
+\E_{S, S'}\!\left[ \sup_{g} | \widehat{\mu}'_n(g) - \widehat{\mu}_n(g) | \right]
+\;=\;
+\E_{S, S', \eps}\!\left[ \sup_{g} \Bigl| \tfrac{1}{n} \sum_{i=1}^{n} \eps_i \bigl( g(z'_i) - g(z_i) \bigr) \Bigr| \right].
+\end{align*}
+
+\paragraph{Step 3: split the symmetric chain.}
+By the triangle inequality applied inside the supremum,
+\begin{align*}
+\sup_{g} \Bigl| \frac{1}{n} \sum_{i} \eps_i (g(z'_i) - g(z_i)) \Bigr|
+\;\le\;
+\sup_{g} \Bigl| \frac{1}{n} \sum_{i} \eps_i g(z'_i) \Bigr|
+\;+\;
+\sup_{g} \Bigl| \frac{1}{n} \sum_{i} \eps_i g(z_i) \Bigr|.
+\end{align*}
+Taking expectations and using that $(\eps, S) \stackrel{d}{=} (\eps, S')$ (the two halves are equally distributed),
+\begin{align*}
+\E_{S, S', \eps}\!\left[ \sup_{g} \Bigl| \frac{1}{n} \sum_i \eps_i (g(z'_i) - g(z_i)) \Bigr| \right]
+\;\le\; 2 \, \E_{S, \eps}\!\left[ \sup_{g} \Bigl| \frac{1}{n} \sum_i \eps_i g(z_i) \Bigr| \right].
+\end{align*}
+Chaining the bounds from Steps 1, 2, and 3 yields Eq.~\eqref{eq:symm-expect}. This completes the proof.
+\end{proof}
+
+\begin{remark}\label{rem:symm-expect-data-dep}
+The right-hand side of Eq.~\eqref{eq:symm-expect} is exactly $2\, \Rad_n(\GG)$ in the convention of \Cref{def:rademacher}, where $\GG$ is the class of $\{0,1\}$-valued losses associated to $\HH$. Conditioning on $S$ before taking the $\eps$-expectation yields the corresponding data-dependent statement: for every fixed $S$,
+\begin{align*}
+\E_{\eps}\!\left[ \sup_{g \in \GG} \Bigl| \frac{1}{n} \sum_i \eps_i\, g(z_i) \Bigr| \;\bigg|\; S \right]
+\;=\; \widehat{\Rad}_S(\GG).
+\end{align*}
+\end{remark}

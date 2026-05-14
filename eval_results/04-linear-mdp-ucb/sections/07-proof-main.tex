@@ -1,0 +1,43 @@
+\section{Proof of the Main Theorem}\label{sec:proof-main}
+
+\begin{proof}[Proof of \Cref{thm:main}]
+The proof proceeds in three steps: (1) intersect the high-probability events from \Cref{lem:concentration} (good event $\cE$) and \Cref{lem:azuma_mds} (martingale concentration on $T_1$); (2) apply the regret decomposition (\Cref{lem:decomposition}); (3) plug in the bound on $T_2$ from \Cref{lem:T2_bound}.
+
+\smallskip\noindent
+\textbf{Step 1: Union bound.} Let $\cE$ be the event from \Cref{def:good_event} and let $\cE_1$ be the event in \Cref{lem:azuma_mds} at confidence $\delta_0 = \delta / 2$. Apply \Cref{lem:concentration} at confidence $\delta / 2$ (i.e., re-parametrise the failure budget of that lemma to $\delta / 2$, which only adjusts $\iota$ by a factor $\log 2$ absorbed into $C_\beta$). Then by a union bound,
+\begin{align*}
+\Pr\bigl[ \cE \cap \cE_1 \bigr] \;\ge\; 1 - \delta / 2 - \delta / 2 \;=\; 1 - \delta.
+\end{align*}
+
+\smallskip\noindent
+\textbf{Step 2: Apply decomposition.} On $\cE \cap \cE_1$, by \Cref{lem:decomposition},
+\begin{align*}
+\Reg(K) \;\le\; T_1 + T_2 + T_3 \;=\; T_1 + T_2,
+\end{align*}
+with $T_3 = 0$ as set in Eq.~\eqref{eq:T3_def}.
+
+\smallskip\noindent
+\textbf{Step 3: Bound $T_1$ and $T_2$.}
+On $\cE_1$, by Eq.~\eqref{eq:T1_bound},
+\begin{align*}
+|T_1| \;\le\; 4 H \sqrt{T \log(4/\delta)} \;\le\; 4 H \sqrt{T \,\iota},
+\end{align*}
+where the second inequality uses $\log(4/\delta) \le \iota$ (which holds since $\iota = \log(2 d K H / \delta)$ and $4 \le 2 d K H$ for $d, K, H \ge 1$ and $d \ge 2$; for $d = 1$ we replace $\iota$ by $\iota + 2$ and absorb the constant). On $\cE$, by Eq.~\eqref{eq:T2_bound_final},
+\begin{align*}
+T_2 \;\le\; 2 \sqrt{2}\, C_\beta\, d^{3/2}\, H^{3/2}\, \sqrt{T}\, \iota \;=\; \Otil\!\bigl( d^{3/2}\, H^{3/2}\, \sqrt{T} \bigr).
+\end{align*}
+
+\smallskip\noindent
+\textbf{Combining.} Putting the two bounds together, on $\cE \cap \cE_1$,
+\begin{align*}
+\Reg(K)
+\;\le\; & ~ T_1 + T_2 \\
+\;\le\; & ~ 4 H \sqrt{T \,\iota} + 2 \sqrt{2}\, C_\beta\, d^{3/2}\, H^{3/2}\, \sqrt{T}\, \iota \\
+\;\le\; & ~ C\, d^{3/2}\, H^{3/2}\, \sqrt{T}\, \iota,
+\end{align*}
+where the first step is Step~2's bound, the second substitutes the bounds from Step~3, and the last step absorbs the smaller $T_1$ term into the dominant $T_2$ term (this holds because $H \sqrt{T\iota} \le d^{3/2} H^{3/2} \sqrt T \iota$ for $d \ge 1$ and $H \ge 1$) and combines constants into a single universal $C > 0$. The right-hand side equals the bound in Eq.~\eqref{eq:thm_main}; this gives the assertion.
+\end{proof}
+
+\begin{remark}\label{rem:tightness}
+The bound is tight up to logarithmic factors in the parameters $(d, H, K)$: \cite{jin2020provably} establish a matching lower bound (Theorem~3.2 in their paper) of $\Omega(\sqrt{d H^2 T})$ for the tabular sub-class of linear MDPs, so only the $d^{1/2}$ extra factor and $\iota$ are removable. Closing the $d^{1/2}$ gap remains an open problem in the LSVI-UCB regime; sharper rates require either changing the algorithm (e.g., to non-greedy bonus tuning) or strengthening \Cref{ass:linear_mdp}.
+\end{remark}

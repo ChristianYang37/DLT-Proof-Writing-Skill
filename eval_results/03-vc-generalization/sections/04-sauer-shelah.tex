@@ -1,0 +1,78 @@
+\section{Sauer--Shelah bound on the growth function}\label{sec:sauer-shelah}
+
+We control the cardinality of the projection $\HH|_A$ by the VC dimension via the classical Sauer--Shelah lemma.
+
+\begin{lemma}[Sauer--Shelah]\label{lem:sauer-shelah}
+Let $\HH \subset \{0,1\}^{\XX}$ have $\VC(\HH) = d \ge 1$. For every $m \in \mathbb{N}$ and every $A \subset \XX$ with $|A| = m$,
+\begin{align}\label{eq:sauer-binom}
+\bigl| \HH\big|_{A} \bigr| \;\le\; \sum_{i=0}^{d} \binom{m}{i}.
+\end{align}
+Consequently, the growth function $\growth_{\HH}(m)$ from \Cref{def:growth} satisfies
+\begin{align}\label{eq:sauer-emd}
+\growth_{\HH}(m) \;\le\; \sum_{i=0}^{d} \binom{m}{i} \;\le\; \left( \frac{e m}{d} \right)^d \qquad \text{for all } m \ge d.
+\end{align}
+\end{lemma}
+
+\begin{proof}
+We prove Eq.~\eqref{eq:sauer-binom} by induction on the pair $(m, |\HH|_A|)$, then derive the closed form Eq.~\eqref{eq:sauer-emd} algebraically.
+
+\paragraph{Step 1: induction on the binomial form.}
+Since $|\HH|_A|$ depends on $\HH$ only through its action on $A$, we may identify $\HH$ with the finite set $\HH|_A \subset \{0,1\}^A$ throughout this step. We prove by induction on $m \ge 0$ that for every finite $\HH \subset \{0,1\}^A$ with $\VC(\HH) \le d$,
+\begin{align*}
+|\HH| \;\le\; \sum_{i=0}^{d} \binom{m}{i}.
+\end{align*}
+
+\textbf{Base case ($m = 0$).} Both sides equal $1$ (a class on the empty domain has at most one element; $\binom{0}{0} = 1$ and higher terms vanish).
+
+\textbf{Inductive step ($m \ge 1$).} Fix $A = \{a_1, \ldots, a_m\}$. Define
+\begin{align*}
+\HH_1 \;:=\; \bigl\{ h|_{A \setminus \{a_m\}} : h \in \HH \bigr\} \;\subset\; \{0,1\}^{A \setminus \{a_m\}},
+\end{align*}
+(the restriction of $\HH$ to the first $m - 1$ coordinates), and
+\begin{align*}
+\HH_2 \;:=\; \bigl\{ h|_{A \setminus \{a_m\}} : \text{both } h^{(0)} \text{ and } h^{(1)} \text{ lie in } \HH \bigr\},
+\end{align*}
+where for any $h_0: A \setminus \{a_m\} \to \{0,1\}$, $h_0^{(b)}: A \to \{0,1\}$ is the extension with $h_0^{(b)}(a_m) = b$. That is, $\HH_2$ collects the patterns on $A \setminus \{a_m\}$ that are achieved by \emph{both} extensions in $\HH$.
+
+We claim:
+\begin{align}\label{eq:sauer-decomp}
+|\HH| \;=\; |\HH_1| + |\HH_2|.
+\end{align}
+Indeed, each pattern $h_0 \in \HH_1$ corresponds to either one $h \in \HH$ (extension at $a_m$ is unique) or both $h_0^{(0)}, h_0^{(1)} \in \HH$ (then $h_0 \in \HH_2$). So $|\HH| = |\HH_1| + |\HH_2|$, counting the "double" extensions once for each.
+
+\emph{Bounding $|\HH_1|$.} Since $\HH_1$ is a class on $A \setminus \{a_m\}$ of size $m - 1$, and $\VC(\HH_1) \le \VC(\HH) \le d$ (any set shattered by $\HH_1$ is also shattered by $\HH$, since shattering only depends on values at the shattered set), the inductive hypothesis gives
+\begin{align*}
+|\HH_1| \;\le\; \sum_{i=0}^{d} \binom{m-1}{i}.
+\end{align*}
+
+\emph{Bounding $|\HH_2|$.} We show $\VC(\HH_2) \le d - 1$. Suppose for contradiction that $\HH_2$ shatters some $B' \subset A \setminus \{a_m\}$ with $|B'| = d$. Then for every $\beta' \in \{0,1\}^{B'}$, there exists $h_0 \in \HH_2$ with $h_0|_{B'} = \beta'$. By the definition of $\HH_2$, both extensions $h_0^{(0)}, h_0^{(1)} \in \HH$. Hence the set $B := B' \cup \{a_m\}$ of size $d+1$ is shattered by $\HH$: every pattern in $\{0,1\}^B$ is realized (use $h_0^{(0)}$ for patterns with value $0$ at $a_m$, and $h_0^{(1)}$ for patterns with value $1$ at $a_m$, where $h_0$ is the $\HH_2$-witness for the projection to $B'$). This contradicts $\VC(\HH) \le d$. Therefore $\VC(\HH_2) \le d - 1$, and the inductive hypothesis (with $d$ replaced by $d - 1$ and $m$ by $m - 1$) gives
+\begin{align*}
+|\HH_2| \;\le\; \sum_{i=0}^{d-1} \binom{m-1}{i}.
+\end{align*}
+
+\emph{Combining.} Using Eq.~\eqref{eq:sauer-decomp} and Pascal's identity $\binom{m-1}{i} + \binom{m-1}{i-1} = \binom{m}{i}$,
+\begin{align*}
+|\HH|
+\;=\; & ~ |\HH_1| + |\HH_2| \\
+\;\le\; & ~ \sum_{i=0}^{d} \binom{m-1}{i} \;+\; \sum_{i=0}^{d-1} \binom{m-1}{i} \\
+\;=\; & ~ \binom{m-1}{0} \;+\; \sum_{i=1}^{d} \left( \binom{m-1}{i} + \binom{m-1}{i-1} \right) \\
+\;=\; & ~ \binom{m}{0} \;+\; \sum_{i=1}^{d} \binom{m}{i}
+\;=\; \sum_{i=0}^{d} \binom{m}{i},
+\end{align*}
+where the first equality is Eq.~\eqref{eq:sauer-decomp}; the second step applies the inductive hypothesis to $\HH_1, \HH_2$; the third step rewrites the two sums (shifting index in the second sum from $i$ to $i - 1$ takes $\sum_{i=0}^{d-1}\binom{m-1}{i} = \sum_{i=1}^{d}\binom{m-1}{i-1}$) and isolates the $i = 0$ term; the fourth step applies Pascal's identity to merge each pair $(i, i-1)$ into $\binom{m}{i}$ and uses $\binom{m-1}{0} = \binom{m}{0} = 1$. This completes the induction and establishes Eq.~\eqref{eq:sauer-binom} for arbitrary $A$ of size $m$, hence for the growth function $\growth_\HH(m)$.
+
+\paragraph{Step 2: closed-form bound.}
+For $m \ge d \ge 1$, we have
+\begin{align*}
+\sum_{i=0}^{d} \binom{m}{i}
+\;\le\; & ~ \sum_{i=0}^{d} \binom{m}{i} \left( \frac{m}{d} \right)^{d-i} \\
+\;\le\; & ~ \left( \frac{m}{d} \right)^{d} \sum_{i=0}^{m} \binom{m}{i} \left( \frac{d}{m} \right)^{i} \\
+\;=\; & ~ \left( \frac{m}{d} \right)^{d} \left( 1 + \frac{d}{m} \right)^{m} \\
+\;\le\; & ~ \left( \frac{m}{d} \right)^{d} e^{d} \;=\; \left( \frac{e m}{d} \right)^{d},
+\end{align*}
+where the first step uses $(m/d)^{d - i} \ge 1$ for $i \le d$ (since $m \ge d$), the second step extends the sum to $i = m$ (all added terms are nonnegative) and factors $(m/d)^d$ out, the third step applies the binomial theorem to $(1 + d/m)^m$, and the last step uses $(1 + x)^m \le e^{xm}$ with $x = d/m$. This gives Eq.~\eqref{eq:sauer-emd} and completes the proof.
+\end{proof}
+
+\begin{remark}\label{rem:sauer-tightness}
+The bound $\sum_{i \le d} \binom{m}{i}$ is tight: it is achieved by the class of all $\{0,1\}^A$-vectors of Hamming weight at most $d$, which has VC dimension exactly $d$. The closed form $(em/d)^d$ loses a constant factor but is the form used throughout downstream applications because it admits a clean logarithm.
+\end{remark}

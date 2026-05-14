@@ -1,0 +1,16 @@
+{
+  "name": "dlt-proof-writing-marketplace",
+  "version": "1.0.0",
+  "description": "DLT (Deep Learning Theory) Proof Writing Skill — an Agent Skill for rigorous, modular LaTeX proof drafting in deep learning theory, statistical learning, optimization, and RL theory.",
+  "author": "Christian Yang",
+  "homepage": "https://github.com/ChristianYang37/DLT-Proof-Writing-Skill",
+  "license": "CC-BY-NC-4.0",
+  "skills": [
+    {
+      "name": "dlt-proof-writing",
+      "path": "./proof-writing-skill",
+      "description": "Write rigorous, modular mathematical proofs in LaTeX for deep-learning-theory papers. Enforces a four-phase workflow (plan → preliminaries → statements/proofs → confidence sweep → peer-review loop), reference honesty, Occam's razor, and one-section-per-`.tex`-file project structure. Validated against 5 representative proofs (Hoeffding, NTK convergence, VC generalization, Linear MDP UCB regret, Sobolev minimax lower bound).",
+      "version": "1.0.0"
+    }
+  ]
+}

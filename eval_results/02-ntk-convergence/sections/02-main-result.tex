@@ -1,0 +1,83 @@
+\section{Main result and lemma decomposition}\label{sec:main_result}
+
+\subsection{Headline theorem}\label{subsec:headline}
+
+\begin{theorem}[Linear convergence of gradient descent]\label{thm:main}
+Fix any $\delta \in (0, 1)$. Suppose \Cref{ass:data,ass:init,ass:lambda0} hold and the width and step size satisfy
+\begin{align}\label{eq:thm_params}
+m \;\ge\; C_1 \cdot \frac{n^6}{\lambda_0^4 \delta^3},
+\qquad
+\eta \;=\; C_2 \cdot \frac{\lambda_0}{n^2},
+\end{align}
+for sufficiently large $C_1 > 0$ and sufficiently small $C_2 > 0$ universal constants. Then with probability at least $1 - \delta$ over the random initialization (\Cref{ass:init}), every iterate of gradient descent (Eq.~\eqref{eq:gd_update}) satisfies
+\begin{align}\label{eq:thm_linconv}
+\norm{\ub(t) - \yb}_2^2 \;\le\; \Big( 1 - \tfrac{\eta \lambda_0}{2} \Big)^t \, \norm{\ub(0) - \yb}_2^2
+\qquad \text{for all } t \ge 0.
+\end{align}
+Moreover, for every $r \in [m]$ and every $t \ge 0$,
+\begin{align}\label{eq:thm_stayinit}
+\norm{\wb_r(t) - \wb_r(0)}_2
+\;\le\;
+\frac{4 \sqrt n \, \norm{\ub(0) - \yb}_2}{\sqrt m \, \lambda_0}
+\;\eqqcolon\; R.
+\end{align}
+\end{theorem}
+
+\Cref{thm:main} establishes that gradient descent on the squared loss converges to zero training loss at a linear rate $1 - \eta \lambda_0/2$, while every weight stays within a $1/\sqrt m$ ball of its initialization. The proof factors through three lemmas, stated next.
+
+\subsection{Lemma decomposition}\label{subsec:decomp}
+
+\begin{lemma}[Initial Gram concentration]\label{lem:init_gram}
+Fix any $\delta \in (0, 1)$. Suppose \Cref{ass:data,ass:init} hold and
+\begin{align*}
+m \;\ge\; \frac{C \, n^2 \log(n / \delta)}{\lambda_0^2},
+\end{align*}
+for a sufficiently large universal constant $C > 0$. Then with probability at least $1 - \delta/3$ over the initialization,
+\begin{align*}
+\opnorm{\, \Hb(\Wb(0)) - \Hb^\infty \,} \;\le\; \tfrac{\lambda_0}{4},
+\end{align*}
+and in particular $\lambda_{\min}(\Hb(\Wb(0))) \ge \tfrac{3 \lambda_0}{4}$.
+\end{lemma}
+
+\begin{lemma}[Gram stability under bounded perturbation]\label{lem:perturbation}
+Fix any $\delta \in (0, 1)$ and let $R > 0$. Suppose \Cref{ass:data,ass:init} hold and
+\begin{align*}
+m \;\ge\; \frac{C \, n^2 \log(n/\delta)}{\lambda_0^2},
+\qquad
+R \;\le\; \frac{c \, \lambda_0}{n^2},
+\end{align*}
+for a sufficiently large universal constant $C > 0$ and a sufficiently small universal constant $c > 0$. Then with probability at least $1 - \delta/3$ over the initialization, the following holds for every $\Wb \in \R^{d \times m}$ with $\norm{\wb_r - \wb_r(0)}_2 \le R$ for all $r \in [m]$:
+\begin{align*}
+\opnorm{\, \Hb(\Wb) - \Hb(\Wb(0)) \,} \;\le\; \tfrac{\lambda_0}{4}.
+\end{align*}
+\end{lemma}
+
+\begin{lemma}[Linear convergence in a stay-in-ball regime]\label{lem:linear_conv}
+Let $R > 0$. Suppose that on a deterministic event the following hold simultaneously:
+\begin{itemize}[leftmargin=2em, itemsep=0.2em]
+\item $\lambda_{\min}(\Hb(\Wb(s))) \ge \tfrac{\lambda_0}{2}$ for every $s \in \{0, 1, \ldots, t\}$;
+\item For every $i \in [n]$, the set $S_i \defeq \{r \in [m] : A_{i, r}(R) \text{ occurs}\}$ of \Cref{lem:perturbation}'s proof satisfies $|S_i| \le 2 m R$ (Eq.~\eqref{eq:flip_count});
+\item For every $r \in [m]$ and every $s \in \{0, 1, \ldots, t\}$, $\norm{\wb_r(s) - \wb_r(0)}_2 \le R$;
+\item $R \le c \lambda_0 / n^2$ and $\eta = C_2 \lambda_0 / n^2$ for sufficiently small universal constants $c, C_2 > 0$.
+\end{itemize}
+Then, on the same event, both
+\begin{align*}
+\norm{\ub(s) - \yb}_2^2 \;\le\; \Big( 1 - \tfrac{\eta \lambda_0}{2} \Big)^s \, \norm{\ub(0) - \yb}_2^2
+\quad \text{for every } s \in \{0, 1, \ldots, t+1\},
+\end{align*}
+and, for every $r \in [m]$ and every $s \in \{0, 1, \ldots, t+1\}$,
+\begin{align*}
+\norm{\wb_r(s) - \wb_r(0)}_2
+\;\le\; \frac{4 \sqrt n \, \norm{\ub(0) - \yb}_2}{\sqrt m \, \lambda_0}.
+\end{align*}
+\end{lemma}
+
+\begin{lemma}[Initial residual bound]\label{lem:init_residual}
+Suppose \Cref{ass:data,ass:init} hold. Fix any $\delta \in (0, 1)$. Then with probability at least $1 - \delta/3$ over the initialization,
+\begin{align*}
+\norm{\ub(0) - \yb}_2^2 \;\le\; C' \, n \log(n/\delta),
+\end{align*}
+for a universal constant $C' > 0$. In particular, $\norm{\ub(0) - \yb}_2 \le \sqrt{C' n \log(n/\delta)}$.
+\end{lemma}
+
+\Cref{lem:linear_conv} is the deterministic mechanism: as long as the Gram matrix's spectrum stays above $\lambda_0/2$, the squared residual contracts by a factor $1 - \eta \lambda_0/2$ per step, and the per-neuron movement is bounded by $4\sqrt n \norm{\ub(0)-\yb}_2 / (\sqrt m \lambda_0)$, which is the radius $R$ in Eq.~\eqref{eq:thm_stayinit}. \Cref{lem:init_gram,lem:perturbation} together guarantee, with high probability over initialization, that the Gram spectrum *does* stay above $\lambda_0/2$ throughout training, by a fixed-point / contradiction argument carried out in \Cref{sec:proof_main}. \Cref{lem:init_residual} controls the magnitude of $\norm{\ub(0)-\yb}_2$ so that the perturbation radius $R$ implied by \Cref{lem:linear_conv} fits inside the perturbation hypothesis of \Cref{lem:perturbation}, which is where the width requirement $m \gtrsim n^6 / (\lambda_0^4 \delta^3)$ enters.

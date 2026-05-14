@@ -1,0 +1,72 @@
+\section{Preliminaries}\label{sec:preliminaries}
+
+\paragraph{Notation.}
+We write $[N] := \{1,\ldots,N\}$. Universal positive constants are denoted by $c, C, c_0, C_1, \ldots$, possibly depending on $s$, $d$, $\sigma$, and a fixed bump function $\psi$ to be defined below; their values may change from line to line. The dependence on $s, d, \sigma, \psi$ is suppressed in $\lesssim$, $\gtrsim$, and $\asymp$.
+
+For a multi-index $\alpha = (\alpha_1,\ldots,\alpha_d) \in \N_{\geq 0}^d$, let $|\alpha| = \sum_i \alpha_i$ and $\partial^\alpha = \partial_{x_1}^{\alpha_1} \cdots \partial_{x_d}^{\alpha_d}$. For $s \in \N_{\geq 1}$, the Sobolev seminorm and norm on $[0,1]^d$ are
+\begin{align*}
+\norm{f}_{W^s_2}^2 \;:=\; \sum_{|\alpha| \leq s} \int_{[0,1]^d} \bigl(\partial^\alpha f(x)\bigr)^2 \, dx.
+\end{align*}
+We write $\Ltwonorm{f}^2 := \int_{[0,1]^d} f(x)^2 \, dx$ and $\Linfnorm{f} := \sup_{x \in [0,1]^d} |f(x)|$.
+
+The \emph{empirical design norm} on a fixed sample $(x_1,\ldots,x_n) \in ([0,1]^d)^n$ is
+\begin{align*}
+\empnorm{h}^2 \;:=\; \frac{1}{n} \sum_{i=1}^{n} h(x_i)^2.
+\end{align*}
+
+\begin{definition}[Sobolev unit ball]\label{def:sobolev-ball}
+The unit ball of the Sobolev space $W^s_2([0,1]^d)$ is
+\begin{align*}
+\Sobball \;:=\; \bigl\{ f : [0,1]^d \to \R \;:\; f \in W^s_2([0,1]^d),\; \Wnorm{f} \leq 1 \bigr\}.
+\end{align*}
+\end{definition}
+
+\begin{assumption}[Fixed design and Gaussian noise]\label{ass:design-noise}
+The smoothness index $s \in \N_{\geq 1}$ and dimension $d \in \N_{\geq 1}$ are fixed. The sample size satisfies $n \geq n_0(s,d)$, where $n_0$ is a constant defined in the proof. The design $(x_1,\ldots,x_n) \in ([0,1]^d)^n$ is fixed and balanced in the sense of \Cref{def:balanced-design} below. For each $f \in \Sobball$, observations $Y_i = f(x_i) + \eps_i$ are drawn with $\eps_1,\ldots,\eps_n \overset{\mathrm{i.i.d.}}{\sim} N(0, \sigma^2)$ and $\sigma > 0$ known.
+\end{assumption}
+
+\begin{remark}\label{rem:design-noise}
+\Cref{ass:design-noise} is the standard fixed-design Gaussian regression setup. The balanced-design condition is mild and is satisfied by the regular grid $x_i = ((i_1 - 1/2)/n^{1/d}, \ldots)$ on $[0,1]^d$ whenever $n$ is a $d$-th power; it ensures that each grid cell used in the bump construction contains a controllable number of design points. The Gaussian-noise assumption yields the closed-form KL divergence used in \Cref{fac:gaussian-kl}.
+\end{remark}
+
+\begin{definition}[Grid and balanced design]\label{def:balanced-design}
+For an integer $m \geq 1$, partition $[0,1]^d$ into $m^d$ disjoint half-open cells
+\begin{align*}
+R_k \;:=\; \prod_{\ell=1}^{d} \Bigl[\tfrac{k_\ell - 1}{m}, \tfrac{k_\ell}{m}\Bigr),
+\qquad k = (k_1,\ldots,k_d) \in [m]^d,
+\end{align*}
+of equal volume $m^{-d}$ (boundary points assigned to the cell with smaller index). The design $(x_1,\ldots,x_n)$ is \emph{balanced at scale $m$} if every cell $R_k$ contains at most $C_{\mathsf{bal}} \cdot n / m^d$ design points, for a universal constant $C_{\mathsf{bal}} \geq 1$.
+\end{definition}
+
+\begin{remark}\label{rem:balanced-design}
+The regular grid $x_i$ described in \Cref{rem:design-noise} is balanced at every scale $m$ that divides $n^{1/d}$; one may take $C_{\mathsf{bal}} = 1$ in that case. We state \Cref{def:balanced-design} more generally so that the lower bound also covers approximately uniform designs.
+\end{remark}
+
+\begin{definition}[Risk and minimax risk]\label{def:risk}
+The $\Ltwo$-risk of an estimator $\fhat = \fhat(\Dn)$ at $\fstar \in \Sobball$ is
+\begin{align*}
+R(\fhat, \fstar) \;:=\; \E_{\Dn} \bigl[\, \Ltwonorm{\fhat - \fstar}^2 \,\bigr],
+\end{align*}
+where the expectation is taken over the noise $(\eps_1,\ldots,\eps_n)$. The minimax risk over $\Sobball$ is
+\begin{align*}
+\mathfrak{M}_n \;:=\; \inf_{\fhat} \sup_{\fstar \in \Sobball} R(\fhat, \fstar),
+\end{align*}
+with the infimum over all measurable estimators $\fhat: (\R^n) \to \Ltwo([0,1]^d)$.
+\end{definition}
+
+\begin{fact}[Restatement of Varshamov--Gilbert,~\cite{tsybakov2009introduction}]\label{fac:vg}
+For every integer $K \geq 8$, there exists a subset $\{\omega^{(0)}, \omega^{(1)}, \ldots, \omega^{(M)}\} \subset \{0,1\}^K$ with $\omega^{(0)} = (0,\ldots,0)$ such that
+\begin{align*}
+M \;\geq\; 2^{K/8} \qquad\text{and}\qquad
+\rH(\omega^{(j)}, \omega^{(k)}) \;\geq\; K/8 \quad \forall\; 0 \leq j < k \leq M,
+\end{align*}
+where $\rH$ denotes Hamming distance.
+\end{fact}
+
+\begin{fact}[KL for Gaussian fixed-design regression]\label{fac:gaussian-kl}
+Under \Cref{ass:design-noise}, for two regression functions $f, g$, the laws $P_f, P_g$ of the observation vector $(Y_1,\ldots,Y_n)$ satisfy
+\begin{align*}
+\KL(P_f \,\|\, P_g) \;=\; \frac{1}{2\sigma^2} \sum_{i=1}^{n} \bigl(f(x_i) - g(x_i)\bigr)^2
+\;=\; \frac{n}{2\sigma^2} \empnorm{f - g}^2.
+\end{align*}
+\end{fact}

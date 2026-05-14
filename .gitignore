@@ -1,0 +1,38 @@
+# LaTeX build artifacts
+*.aux
+*.log
+*.out
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.toc
+*.bbl
+*.blg
+*.brf
+*.cb
+*.cb2
+*.dvi
+*.idx
+*.ind
+*.lof
+*.lot
+*.run.xml
+.output/
+.proof-research/sweep-step-*.md
+
+# macOS
+.DS_Store
+
+# editor / tooling
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+
+# Python
+*.egg-info/
+.venv/
+venv/

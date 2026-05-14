@@ -1,0 +1,58 @@
+% ============================================================
+% Macros and theorem-environment preamble.
+% ============================================================
+
+% --- Math operators / shortcuts ---
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\renewcommand{\Pr}{\mathbb{P}}
+\newcommand{\1}{\mathbf{1}}
+\DeclareMathOperator*{\Var}{Var}
+
+% --- TODO macro (used for verify-flags) ---
+\providecommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+
+% --- Theorem environments via aliascnt (cleveref-safe) ---
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+
+\newaliascnt{lemma}{theorem}
+\newtheorem{lemma}[lemma]{Lemma}
+\aliascntresetthe{lemma}
+
+\newaliascnt{proposition}{theorem}
+\newtheorem{proposition}[proposition]{Proposition}
+\aliascntresetthe{proposition}
+
+\newaliascnt{corollary}{theorem}
+\newtheorem{corollary}[corollary]{Corollary}
+\aliascntresetthe{corollary}
+
+\theoremstyle{definition}
+\newaliascnt{definition}{theorem}
+\newtheorem{definition}[definition]{Definition}
+\aliascntresetthe{definition}
+
+\newaliascnt{assumption}{theorem}
+\newtheorem{assumption}[assumption]{Assumption}
+\aliascntresetthe{assumption}
+
+\newaliascnt{fact}{theorem}
+\newtheorem{fact}[fact]{Fact}
+\aliascntresetthe{fact}
+
+\theoremstyle{remark}
+\newaliascnt{remark}{theorem}
+\newtheorem{remark}[remark]{Remark}
+\aliascntresetthe{remark}
+
+% --- Cleveref names ---
+\crefname{theorem}{Theorem}{Theorems}
+\crefname{lemma}{Lemma}{Lemmas}
+\crefname{proposition}{Proposition}{Propositions}
+\crefname{corollary}{Corollary}{Corollaries}
+\crefname{definition}{Definition}{Definitions}
+\crefname{assumption}{Assumption}{Assumptions}
+\crefname{fact}{Fact}{Facts}
+\crefname{remark}{Remark}{Remarks}
+\crefname{equation}{Eq.}{Eqs.}

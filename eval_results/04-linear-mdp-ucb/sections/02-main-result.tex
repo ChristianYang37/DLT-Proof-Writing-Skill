@@ -1,0 +1,28 @@
+\section{Main Result}\label{sec:main}
+
+\begin{theorem}[Regret bound for LSVI-UCB]\label{thm:main}
+Fix $\delta \in (0, 1)$. Under \Cref{ass:linear_mdp}, run LSVI-UCB (\Cref{def:lsvi_ucb}) with regulariser $\lambda = 1$ and bonus coefficient $\beta = C_\beta \, d H \sqrt{\iota}$ as in Eq.~\eqref{eq:iota_def} and Eq.~\eqref{eq:beta_def}. Then with probability at least $1 - \delta$,
+\begin{align}\label{eq:thm_main}
+\Reg(K)
+\;\le\;
+C\, d^{3/2}\, H^{3/2} \, \sqrt{T} \cdot \iota
+\;=\;
+\Otil\!\bigl(d^{3/2} \sqrt{H^3 \, T}\bigr),
+\end{align}
+where $T = K H$ and $C > 0$ is a universal constant.
+\end{theorem}
+
+\begin{remark}\label{rem:rate_unpacking}
+Substituting $T = K H$, the bound reads $\Otil(d^{3/2} \sqrt{H^3 K}) = \Otil(d^{3/2} H \sqrt{H K})$, matching the rate in \cite{jin2020provably}. The rate is equivalently written $\Otil(d^{3/2} H \sqrt{H T})$ via $H^{3/2}\sqrt T = H \sqrt{H T}$. The user's prompt phrases this as $\Otil(d^{3/2} \sqrt{H T})$ with an additional $\sqrt H$ absorbed into the leading constant; we have stated the more conservative form here so that no factor of $\sqrt H$ is hidden. The $d^{3/2}$ scaling arises from two sources: a factor of $\sqrt{d}$ from the elliptical-potential bound on the cumulative bonus and a factor of $d$ from the $\varepsilon$-net over the value-function class $\cV$ (see \Cref{lem:concentration} and \Cref{rem:T2_d_three_halves}).
+\end{remark}
+
+\begin{remark}\label{rem:proof_skeleton}
+The proof has five components, assembled in \Cref{sec:proof-main}:
+\begin{enumerate}[label=(\arabic*), leftmargin=2em, itemsep=0.2em]
+    \item \Cref{lem:concentration} establishes $\Pr[\cE] \ge 1 - \delta$ via self-normalised concentration over an $\varepsilon$-net of the value class $\cV$ and a union bound.
+    \item \Cref{lem:optimism} shows that on $\cE$, $V_1^k(s) \ge V_1^*(s)$ for every $k$ and $s$, by backward induction on $h$.
+    \item \Cref{lem:per-step} bounds the one-step Bellman discrepancy on $\cE$ by $2 \beta \norm{\phi}_{(\Lam_h^k)^{-1}}$.
+    \item \Cref{lem:decomposition} expands $\Reg(K)$ into three terms $T_1 + T_2 + T_3$, of which $T_1, T_3$ are martingales and $T_2$ is the cumulative bonus.
+    \item \Cref{lem:elliptical} closes $T_2$ via the elliptical-potential lemma; \Cref{lem:azuma_mds} closes $T_1$ and $T_3$ via Azuma--Hoeffding.
+\end{enumerate}
+\end{remark}

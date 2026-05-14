@@ -1,0 +1,101 @@
+{
+  "skill_name": "dlt-proof-writing",
+  "description": "Test prompts spanning the major proof types covered by this skill. Each eval is a realistic user prompt the skill should handle end-to-end (plan → preliminaries → statements/proofs → confidence sweep → review loop). Assertions mix script-checkable (compilation, lint rules, macro usage) and qualitative (correct decomposition, named-technique application).",
+  "evals": [
+    {
+      "id": 1,
+      "name": "hoeffding-prove",
+      "prompt": "Prove Hoeffding's inequality: for independent random variables $X_1, \\ldots, X_n$ with $X_i \\in [a_i, b_i]$ almost surely and $S_n = \\sum_{i=1}^n X_i$, $$\\Pr\\bigl[\\,|S_n - \\E[S_n]| \\geq t\\,\\bigr] \\;\\leq\\; 2 \\exp\\bigl(-\\tfrac{2t^2}{\\sum_i (b_i - a_i)^2}\\bigr).$$ Use the standard MGF / Chernoff approach: Markov's inequality on $\\exp(\\lambda(S_n - \\E S_n))$, apply Hoeffding's lemma (sub-Gaussianity of bounded centered variables) to bound the MGF, then optimize over $\\lambda > 0$. Save the proof to hoeffding.tex with full preamble and macros following the project conventions.",
+      "expected_output": "A standalone LaTeX file `hoeffding.tex` with: (a) preamble using aliascnt + cleveref + standard macros (\\E, \\Pr, \\norm, \\poly); (b) theorem statement with bounded-RV hypothesis and explicit failure-probability bound; (c) Hoeffding's lemma as a separate `\\begin{lemma}` (sub-Gaussianity of bounded RV); (d) main proof following MGF → Markov → Hoeffding's-lemma → optimize-λ structure; (e) explicit derivative calculation when optimizing λ (no phantom optimization); (f) trailing-justification block style for the chained inequalities; (g) all displays in align*/align with proper trailing punctuation; (h) `\\eqref` prefixed with `Eq.~` throughout. Should compile cleanly via latexmk.",
+      "files": [],
+      "assertions": [
+        {"text": "scripts/latexmk-wrapper.py reports compile_ok=true on the output file", "type": "script"},
+        {"text": "proof uses MGF / Chernoff approach (Markov on exp(λS) + Hoeffding's lemma + optimize λ), not a different route", "type": "qualitative"},
+        {"text": "Hoeffding's lemma is stated explicitly as a separate \\begin{lemma} with proof, not invoked as a black box", "type": "qualitative"},
+        {"text": "the optimization over λ shows the first-order condition or AM-GM step explicitly", "type": "qualitative"},
+        {"text": "no \\[ ... \\] math displays (only align/align*)", "type": "script"},
+        {"text": "all in-prose \\eqref uses are prefixed with Eq.~", "type": "script"},
+        {"text": "no fabricated citations (every \\cite resolves in the .bib if one is created)", "type": "script"},
+        {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method", "type": "script"},
+        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists with the Summary/Strengths/Weaknesses/Questions/Verdict schema", "type": "script"}
+      ]
+    },
+    {
+      "id": 2,
+      "name": "ntk-convergence-two-layer",
+      "prompt": "Prove that for a two-layer ReLU network $f(x) = \\frac{1}{\\sqrt{m}} \\sum_{r=1}^m a_r \\sigma(w_r^\\top x)$ with $w_r(0) \\sim \\mathcal{N}(0, I)$ and $a_r \\sim \\text{Unif}\\{\\pm 1\\}$, gradient descent on the squared loss with step size $\\eta = O(\\lambda_0 / n^2)$ achieves linear convergence to zero training loss provided $m \\gtrsim \\poly(n, 1/\\lambda_0, 1/\\delta)$. Follow the three-lemma NTK skeleton in the style of Du–Zhai–Poczos–Singh 2019: (1) the empirical Gram matrix at initialization concentrates around the population NTK $H^\\infty$; (2) the Gram matrix is stable under small weight perturbations; (3) if the Gram matrix stays bounded below, the loss decays exponentially and weights stay near init. Close with the fixed-point / contradiction argument. Define $\\lambda_0 := \\lambda_{\\min}(H^\\infty)$ as the single spectral assumption. Also produce an `experiments-plan.md` per the skill's theory-experiment.md conventions — design only (no fabricated results, Results section blank) — that empirically verifies the predicted linear convergence rate and the width-vs-convergence-speed scaling.",
+      "expected_output": "An appendix-grade LaTeX file (~3-5 pages) with: (a) Assumption block for $\\lambda_0 > 0$; (b) three named lemmas: lem:init-gram-close, lem:gram-stability, lem:contraction; (c) a `main` lemma tying them together via fixed-point argument; (d) main theorem `\\begin{theorem}` whose proof is 5-10 lines of cross-references citing the three lemmas; (e) `with probability at least 1 - δ` budget explicit, plus a union bound paragraph; (f) the anti-concentration → Markov → Frobenius ≥ operator → Weyl chain in lem:init-gram-close; (g) width condition $m \\gtrsim \\poly(n, 1/\\lambda_0, 1/\\delta)$ in theorem statement.",
+      "files": [],
+      "assertions": [
+        {"text": "three NTK lemmas are stated by name (init-Gram close, perturbation stability, contraction)", "type": "qualitative"},
+        {"text": "theorem statement includes m ≥ poly(n, 1/λ_0, 1/δ) width condition", "type": "qualitative"},
+        {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script"},
+        {"text": "explicit union-bound paragraph accounts for the probability budget", "type": "qualitative"},
+        {"text": "uses successful-event conditioning OR explicit \"with probability 1-δ\" qualifier on every concentration-based lemma", "type": "qualitative"},
+        {"text": "λ_0 dependency is propagated through constants (constants subscripted by λ_0 or noted as poly(1/λ_0))", "type": "qualitative"},
+        {"text": "every used \\Cref resolves to an existing label (no undef_refs in latexmk-wrapper output)", "type": "script"},
+        {"text": "experiments-plan.md is produced in output_dir with the schema from theory-experiment.md (Theoretical claim, Empirical hypothesis, Setup, Metrics with verifies-which-theorem mapping, Baselines, Ablations, Plots, Pre-registered success criteria, Reproducibility)", "type": "script"},
+        {"text": "experiments-plan.md has no fabricated results — the Results section is blank or absent, no invented numerical values, no fitted slopes", "type": "qualitative"},
+        {"text": "experiments-plan.md design meets ICML/NeurIPS/ICLR rigor minimum: ≥5 seeds explicitly listed, at least one baseline, at least one ablation, pre-registered success criteria stated", "type": "qualitative"},
+        {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method", "type": "script"},
+        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists with the Summary/Strengths/Weaknesses/Questions/Verdict schema", "type": "script"}
+      ]
+    },
+    {
+      "id": 3,
+      "name": "vc-generalization",
+      "prompt": "Prove the VC generalization bound: for a hypothesis class $\\mathcal{H} \\subset \\{0,1\\}^\\mathcal{X}$ with VC dimension $d$, with probability at least $1 - \\delta$ over an i.i.d. sample $S = \\{(x_i, y_i)\\}_{i=1}^n$ from any distribution $\\mathcal{D}$, $$\\sup_{h \\in \\mathcal{H}} |R(h) - \\hat{R}_n(h)| \\;\\leq\\; C \\sqrt{\\tfrac{d \\log(n/d) + \\log(1/\\delta)}{n}}$$ for some universal constant $C$. Use the standard pipeline: (1) symmetrization with a ghost sample to reduce to Rademacher complexity, (2) Sauer–Shelah lemma to bound the growth function by $\\binom{n}{\\leq d}$, (3) Massart's finite class bound on the Rademacher complexity of a class with $N$ elements. State each ingredient as a separate `\\begin{lemma}` and assemble in the main theorem.",
+      "expected_output": "A LaTeX file with: (a) the main `\\begin{theorem}` statement; (b) `\\begin{lemma}` for symmetrization (introducing ghost sample $S'$); (c) `\\begin{lemma}` for Sauer–Shelah (cites a standard reference); (d) `\\begin{lemma}` for Massart's bound on Rademacher complexity of a finite class; (e) main proof that strings them together; (f) projection / restriction notation for the growth function $\\Pi_\\mathcal{H}(n)$; (g) `\\poly` slack not used (we want the explicit $\\sqrt{d \\log(n/d)/n}$ rate).",
+      "files": [],
+      "assertions": [
+        {"text": "Sauer–Shelah lemma is stated as a separate \\begin{lemma}, with hypothesis VC(H) ≤ d", "type": "qualitative"},
+        {"text": "symmetrization step introduces a ghost sample S' explicitly", "type": "qualitative"},
+        {"text": "Massart's finite-class bound is stated explicitly (for a class with N elements, expected Rademacher ≤ √(2 log N / n))", "type": "qualitative"},
+        {"text": "concluding rate has the d log(n/d) term, not bare d log n (Sauer–Shelah is applied correctly)", "type": "qualitative"},
+        {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script"},
+        {"text": "no \"by a standard argument\" or \"it is clear that\" filler phrases", "type": "qualitative"},
+        {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method", "type": "script"},
+        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists with the Summary/Strengths/Weaknesses/Questions/Verdict schema", "type": "script"}
+      ]
+    },
+    {
+      "id": 4,
+      "name": "linear-mdp-ucb-regret",
+      "prompt": "Prove a sublinear regret bound of $\\tilde{O}(d^{3/2} \\sqrt{HT})$ for the LSVI-UCB algorithm on linear MDPs, following Jin–Yang–Wang–Jordan 2020. The setting: finite-horizon MDP with horizon $H$, $T$ episodes, transition $P_h(\\cdot | s, a) = \\langle \\phi(s,a), \\mu_h \\rangle$ where $\\phi: \\mathcal{S} \\times \\mathcal{A} \\to \\mathbb{R}^d$ is a known feature map. Use the standard structure: (1) define the successful event $\\mathcal{E}$ as the intersection of confidence-set events $\\{\\theta^*_h \\in \\hat{\\mathcal{C}}_{k,h}\\}$ for all $k, h$; (2) show $\\Pr[\\mathcal{E}] \\geq 1 - \\delta$ by Hoeffding-type concentration + union bound; (3) on $\\mathcal{E}$, do backward induction to show value-function optimism; (4) decompose total regret into $T_1$ (concentration error) $+ T_2$ (estimation variance) $+ T_3$ (martingale); (5) close $T_2$ via the elliptical potential lemma. Also produce an `experiments-plan.md` per the skill's theory-experiment.md conventions — design only (no fabricated results, Results section blank) — that empirically verifies the $\\sqrt{T}$ regret scaling and the $d^{3/2}$ feature-dimension dependence on synthetic linear MDPs.",
+      "expected_output": "An appendix-grade LaTeX file with: (a) MDP setup as `\\begin{assumption}` blocks (Linear MDP + bounded total rewards); (b) the successful event $\\mathcal{E}$ defined explicitly with $\\Pr[\\mathcal{E}] \\geq 1 - \\delta$; (c) optimism via backward induction (`induction on h, downward from H+1`); (d) three-term regret decomposition labeled $T_1, T_2, T_3$; (e) elliptical potential lemma stated as `\\begin{lemma}` (cited or restated from Abbasi-Yadkori et al. 2011); (f) the final concluding regret bound carrying the $d^{3/2} \\sqrt{HT}$ rate up to log factors.",
+      "files": [],
+      "assertions": [
+        {"text": "successful event 𝓔 is defined explicitly with its component events and its probability lower-bounded via union bound", "type": "qualitative"},
+        {"text": "main derivation is conducted \"on event 𝓔\" — derivations after the event definition are treated as deterministic", "type": "qualitative"},
+        {"text": "regret is decomposed into named terms (T_1 + T_2 + T_3 or similar)", "type": "qualitative"},
+        {"text": "elliptical potential lemma is stated explicitly (not invoked as \"by standard arguments\")", "type": "qualitative"},
+        {"text": "backward induction over h is explicit (states inductive hypothesis at h+1, derives at h)", "type": "qualitative"},
+        {"text": "final regret rate carries d^{3/2} √(HT) (or √H T with appropriate d factor) modulo log factors", "type": "qualitative"},
+        {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script"},
+        {"text": "experiments-plan.md is produced in output_dir with the schema from theory-experiment.md (Theoretical claim, Empirical hypothesis, Setup, Metrics with verifies-which-theorem mapping, Baselines, Ablations, Plots, Pre-registered success criteria, Reproducibility)", "type": "script"},
+        {"text": "experiments-plan.md has no fabricated results — the Results section is blank or absent, no invented numerical values, no fitted slopes", "type": "qualitative"},
+        {"text": "experiments-plan.md design meets ICML/NeurIPS/ICLR rigor minimum: ≥5 seeds explicitly listed, at least one baseline, at least one ablation, pre-registered success criteria stated", "type": "qualitative"},
+        {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method", "type": "script"},
+        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists with the Summary/Strengths/Weaknesses/Questions/Verdict schema", "type": "script"}
+      ]
+    },
+    {
+      "id": 5,
+      "name": "sobolev-minimax-lower-bound",
+      "prompt": "Prove the minimax lower bound $\\inf_{\\hat{f}} \\sup_{f^* \\in W^s_2([0,1]^d), \\|f^*\\|_{W^s_2} \\leq 1} \\E_{D_n} \\|\\hat{f} - f^*\\|_{L^2}^2 \\;\\gtrsim\\; n^{-2s/(2s+d)}$ for fixed-design nonparametric regression in the Sobolev class $W^s_2([0,1]^d)$ with i.i.d. Gaussian noise $\\sigma^2$. Use the standard recipe: (1) construct a Varshamov–Gilbert packing of $\\{0,1\\}^{m^d}$ giving $2^{m^d/8}$ codewords at pairwise Hamming distance $\\geq m^d/8$; (2) build a bump-function family $u_k(x) = \\sum_j \\tau_j^{(k)} \\frac{\\omega}{m^{s+d/2}} g(m(x - x^{(j)}))$ for a fixed smooth bump $g$ supported in a unit cell; (3) bound the pairwise KL divergence $\\KL(P_{u_k} \\| P_{u_{k'}})$ using the Gaussian-noise structure; (4) apply local Fano to reduce estimation to multiple hypothesis testing; (5) choose $m \\asymp n^{1/(2s+d)}$ to balance and obtain the rate $n^{-2s/(2s+d)}$.",
+      "expected_output": "A LaTeX file with: (a) precise problem setup (Sobolev space definition, noise model); (b) Varshamov–Gilbert lemma stated as `\\begin{lemma}` (cited); (c) explicit construction of the bump family with the rate-controlling parameter $\\omega$; (d) KL bound computation explicit; (e) Fano inequality stated as `\\begin{lemma}` (cited); (f) closing step: set $m \\asymp n^{1/(2s+d)}$ and compute the resulting rate; (g) the rate exponent $-2s/(2s+d)$ matches the well-known minimax rate exactly.",
+      "files": [],
+      "assertions": [
+        {"text": "Varshamov–Gilbert packing of (0,1)^{m^d} is constructed with 2^{m^d/8} codewords and Hamming distance ≥ m^d/8", "type": "qualitative"},
+        {"text": "bump-function family is constructed with explicit rate-control parameter ω", "type": "qualitative"},
+        {"text": "pairwise KL divergence between hypotheses is bounded explicitly (using Gaussian-noise structure)", "type": "qualitative"},
+        {"text": "Fano's inequality is applied with the entropy comparison I(V;X) + log 2 vs log |V|", "type": "qualitative"},
+        {"text": "m is optimized: setting m ≍ n^{1/(2s+d)} yields the n^{-2s/(2s+d)} rate, and this calculation is shown", "type": "qualitative"},
+        {"text": "the final rate exponent is -2s/(2s+d), not approximate", "type": "qualitative"},
+        {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script"},
+        {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method", "type": "script"},
+        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists with the Summary/Strengths/Weaknesses/Questions/Verdict schema", "type": "script"}
+      ]
+    }
+  ]
+}

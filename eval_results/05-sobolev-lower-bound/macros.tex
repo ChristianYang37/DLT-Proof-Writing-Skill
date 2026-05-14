@@ -1,0 +1,97 @@
+% ============================================================
+% macros.tex --- Sobolev minimax lower bound
+% ============================================================
+
+% --- Theorem environments via aliascnt (cleveref-safe) ---
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{aliascnt}
+\usepackage{enumitem}
+\usepackage[capitalize]{cleveref}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+
+\newaliascnt{lemma}{theorem}
+\newtheorem{lemma}[lemma]{Lemma}
+\aliascntresetthe{lemma}
+
+\newaliascnt{proposition}{theorem}
+\newtheorem{proposition}[proposition]{Proposition}
+\aliascntresetthe{proposition}
+
+\newaliascnt{corollary}{theorem}
+\newtheorem{corollary}[corollary]{Corollary}
+\aliascntresetthe{corollary}
+
+\theoremstyle{definition}
+\newaliascnt{definition}{theorem}
+\newtheorem{definition}[definition]{Definition}
+\aliascntresetthe{definition}
+
+\newaliascnt{assumption}{theorem}
+\newtheorem{assumption}[assumption]{Assumption}
+\aliascntresetthe{assumption}
+
+\newaliascnt{fact}{theorem}
+\newtheorem{fact}[fact]{Fact}
+\aliascntresetthe{fact}
+
+\theoremstyle{remark}
+\newaliascnt{remark}{theorem}
+\newtheorem{remark}[remark]{Remark}
+\aliascntresetthe{remark}
+
+\crefname{theorem}{Theorem}{Theorems}
+\crefname{lemma}{Lemma}{Lemmas}
+\crefname{proposition}{Proposition}{Propositions}
+\crefname{corollary}{Corollary}{Corollaries}
+\crefname{definition}{Definition}{Definitions}
+\crefname{assumption}{Assumption}{Assumptions}
+\crefname{fact}{Fact}{Facts}
+\crefname{remark}{Remark}{Remarks}
+\crefname{equation}{Eq.}{Eqs.}
+
+% --- Asymptotic notation ---
+\DeclareMathOperator{\poly}{poly}
+\newcommand{\Otil}{\widetilde{O}}
+\newcommand{\Omegatil}{\widetilde{\Omega}}
+
+% --- Number sets and operators ---
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\E}{\mathbb{E}}
+\renewcommand{\Pr}{\mathbb{P}}
+\newcommand{\1}{\mathbf{1}}
+
+% --- Norm and inner product ---
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
+
+% --- Function-space norms ---
+\newcommand{\Ltwo}{L^{2}}
+\newcommand{\Linf}{L^{\infty}}
+\newcommand{\Wnorm}[1]{\norm{#1}_{W^{s}_{2}}}
+\newcommand{\Ltwonorm}[1]{\norm{#1}_{\Ltwo}}
+\newcommand{\Linfnorm}[1]{\norm{#1}_{\Linf}}
+\newcommand{\empnorm}[1]{\norm{#1}_{n}}
+
+% --- Sobolev ball, distributions ---
+\newcommand{\Sobball}{\mathcal{F}}
+\newcommand{\Hpack}{\mathcal{H}}
+\newcommand{\KL}{\mathrm{KL}}
+
+% --- Estimators ---
+\newcommand{\fhat}{\widehat{f}}
+\newcommand{\fstar}{f^{*}}
+
+% --- Probability and risk ---
+\newcommand{\probP}{P}
+\newcommand{\probQ}{Q}
+\newcommand{\Dn}{\mathcal{D}_{n}}
+
+% --- Misc ---
+\newcommand{\rH}{\rho_{H}}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\del}{\delta}
+\newcommand{\msf}[1]{\mathsf{#1}}

@@ -1,0 +1,24 @@
+\section{Main result}\label{sec:main}
+
+\begin{theorem}[VC generalization bound]\label{thm:vc-generalization}
+Let $\HH \subset \{0,1\}^{\XX}$ be a hypothesis class with $\VC(\HH) = d \ge 1$, let $\DD$ be any distribution on $\XX \times \{0,1\}$, and let $S$ be an i.i.d.\ sample of size $n \ge d$ from $\DD$. There exists a universal constant $C > 0$ such that, for every $\delta \in (0, 1)$, with probability at least $1 - \delta$ over the draw of $S$,
+\begin{align}\label{eq:vc-main}
+\sup_{h \in \HH} \bigl| \Risk(h) - \eRisk_n(h) \bigr|
+\;\le\;
+C \sqrt{\frac{d \log(n/d) + \log(1/\delta)}{n}}.
+\end{align}
+\end{theorem}
+
+\begin{remark}\label{rem:scope}
+The bound is distribution-free: no condition on $\DD$ is imposed beyond i.i.d.\ sampling. Its proof proceeds in three named steps — symmetrization (\Cref{lem:symmetrization}), the Sauer--Shelah bound on the growth function (\Cref{lem:sauer-shelah}), and Massart's finite-class Rademacher bound (\Cref{lem:massart}) — assembled in \Cref{sec:proof-of-main} with a McDiarmid concentration step.
+\end{remark}
+
+\begin{remark}[Headline form convention]\label{rem:headline-form}
+The conclusion Eq.~\eqref{eq:vc-main} is interpreted with $\log(n/d)$ standing for the equivalent (within a universal constant) quantity $\log(en/d) = 1 + \log(n/d)$. This is the standard convention in the VC-generalization literature: for $n \ge e\, d$, $\log(en/d) \le 2 \log(n/d)$, while for $d \le n < e\, d$, $\log(n/d) < 1$ and $\log(en/d) \ge 1$, so the substitution costs only a multiplicative absolute constant absorbed into $C$. Our proof in fact establishes the slightly stronger
+\begin{align*}
+\sup_{h \in \HH} \bigl| \Risk(h) - \eRisk_n(h) \bigr|
+\;\le\;
+C' \sqrt{\frac{d \log(en/d) + \log(1/\delta)}{n}},
+\end{align*}
+with $C' = \sqrt{32}$, from which Eq.~\eqref{eq:vc-main} follows for some universal $C$ depending on $C'$.
+\end{remark}

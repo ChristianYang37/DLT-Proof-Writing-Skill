@@ -1,0 +1,109 @@
+\section{Hoeffding's lemma: MGF of a bounded centered random variable}
+\label{sec:hoeffding-lemma}
+
+This section proves the MGF bound that drives the Chernoff calculation in
+\Cref{sec:main-theorem}. The bound expresses the sub-Gaussianity of any bounded
+centered random variable, with variance proxy $(b-a)^2/4$.
+
+\begin{lemma}[Hoeffding's lemma]\label{lem:hoeffding-lemma}
+Let $Y$ be a real-valued random variable with $\E Y = 0$ and $Y \in [\alpha, \beta]$
+almost surely for some real numbers $\alpha \le 0 \le \beta$. Then for every
+$\lambda \in \R$,
+\begin{align}\label{eq:hoeffding-lemma}
+\E\!\bigl[e^{\lambda Y}\bigr] \;\le\; \exp\!\Bigl(\tfrac{\lambda^2 (\beta - \alpha)^2}{8}\Bigr).
+\end{align}
+\end{lemma}
+
+\begin{proof}
+The proof proceeds in two stages. First we control the second derivative of the
+log-MGF using a variance bound for distributions on a bounded interval; then we
+integrate this bound twice to obtain the claim.
+
+For $\lambda \in \R$, define the log-MGF
+\begin{align*}
+\psi(\lambda) \;:=\; \log \E\!\bigl[e^{\lambda Y}\bigr].
+\end{align*}
+The function $\psi$ is finite and infinitely differentiable on $\R$ because $Y$ is
+bounded almost surely; in particular, $|Y e^{\lambda Y}|$ and $|Y^2 e^{\lambda Y}|$
+are uniformly bounded on $\{\lambda : |\lambda| \le R\}$ for any $R > 0$, providing
+integrable envelopes that justify differentiation under the expectation by
+dominated convergence. We compute
+\begin{align*}
+\psi'(\lambda) \;=\; \frac{\E\!\bigl[Y e^{\lambda Y}\bigr]}{\E\!\bigl[e^{\lambda Y}\bigr]},
+\qquad
+\psi''(\lambda) \;=\; \frac{\E\!\bigl[Y^2 e^{\lambda Y}\bigr]}{\E\!\bigl[e^{\lambda Y}\bigr]}
+                    - \biggl(\frac{\E\!\bigl[Y e^{\lambda Y}\bigr]}{\E\!\bigl[e^{\lambda Y}\bigr]}\biggr)^{\!2}.
+\end{align*}
+
+\smallskip\noindent\textbf{Step 1: variance interpretation of $\psi''$.}
+Introduce the \emph{exponentially tilted} probability measure $\Pr_\lambda$ on the
+underlying space, defined by its Radon--Nikodym derivative with respect to $\Pr$,
+\begin{align*}
+\frac{d\Pr_\lambda}{d\Pr} \;:=\; \frac{e^{\lambda Y}}{\E\!\bigl[e^{\lambda Y}\bigr]}.
+\end{align*}
+This is a probability measure because the density is nonnegative and integrates to
+$1$ by construction. Let $\E_\lambda$ and $\Var_\lambda$ denote expectation and
+variance under $\Pr_\lambda$. By the change-of-measure formula, for any measurable
+function $g$ for which the expectations exist,
+\begin{align*}
+\E_\lambda[g(Y)] \;=\; \frac{\E\!\bigl[g(Y)\, e^{\lambda Y}\bigr]}{\E\!\bigl[e^{\lambda Y}\bigr]}.
+\end{align*}
+Applying this to $g(y) = y$ and $g(y) = y^2$, and substituting into the formulas for
+$\psi'$ and $\psi''$ above, gives
+\begin{align*}
+\psi'(\lambda) \;=\; \E_\lambda[Y],
+\qquad
+\psi''(\lambda) \;=\; \E_\lambda[Y^2] - (\E_\lambda[Y])^2 \;=\; \Var_\lambda(Y).
+\end{align*}
+
+\smallskip\noindent\textbf{Step 2: bound $\Var_\lambda(Y)$ via Popoviciu's inequality.}
+Under $\Pr_\lambda$, $Y$ is still supported in $[\alpha, \beta]$: the tilting changes
+the distribution but not the (almost-sure) support. For any random variable $Z$ taking
+values in $[\alpha, \beta]$, $Z - \tfrac{\alpha + \beta}{2}$ takes values in
+$[-\tfrac{\beta - \alpha}{2}, \tfrac{\beta - \alpha}{2}]$, so
+$(Z - \tfrac{\alpha + \beta}{2})^2 \le (\tfrac{\beta - \alpha}{2})^2$ almost surely.
+Variance is minimized by centering at the mean, so
+\begin{align}\label{eq:popoviciu}
+\Var(Z) \;\le\; \E\!\Bigl[\!\bigl(Z - \tfrac{\alpha + \beta}{2}\bigr)^{\!2}\Bigr]
+\;\le\; \Bigl(\tfrac{\beta - \alpha}{2}\Bigr)^{\!2} \;=\; \tfrac{(\beta - \alpha)^2}{4}.
+\end{align}
+This is \emph{Popoviciu's inequality on variances}. Applying it under $\Pr_\lambda$
+yields
+\begin{align}\label{eq:psi-pp-bound}
+\psi''(\lambda) \;=\; \Var_\lambda(Y) \;\le\; \frac{(\beta - \alpha)^2}{4}
+\qquad \text{for every } \lambda \in \R.
+\end{align}
+
+\smallskip\noindent\textbf{Step 3: integrate twice.}
+We have $\psi(0) = \log \E[e^{0 \cdot Y}] = \log 1 = 0$, and
+$\psi'(0) = \E_0[Y] = \E[Y] = 0$ by the centering hypothesis. By Taylor's theorem
+with Lagrange remainder, applied to the $C^2$ function $\psi$ on the interval
+between $0$ and $\lambda$ (which is well-defined for either sign of $\lambda$),
+there exists a point $\xi$ between $0$ and $\lambda$ such that
+\begin{align*}
+\psi(\lambda)
+\;=\; & ~ \psi(0) + \psi'(0)\, \lambda + \tfrac{1}{2}\, \psi''(\xi)\, \lambda^2 \\
+\;=\; & ~ \tfrac{1}{2}\, \psi''(\xi)\, \lambda^2 \\
+\;\le\; & ~ \tfrac{1}{2} \cdot \tfrac{(\beta - \alpha)^2}{4} \cdot \lambda^2 \\
+\;=\; & ~ \tfrac{\lambda^2 (\beta - \alpha)^2}{8},
+\end{align*}
+where the first step is Taylor's theorem with Lagrange remainder, the second step
+uses $\psi(0) = \psi'(0) = 0$, the third step applies the uniform bound
+$\psi''(\xi) \le (\beta - \alpha)^2/4$ from Eq.~\eqref{eq:psi-pp-bound} (which
+holds at every real $\xi$, in particular at the unspecified Lagrange point), and
+the last step is arithmetic. The Lagrange form is convenient here because it
+treats both signs of $\lambda$ uniformly: $\xi$ lies between $0$ and $\lambda$
+regardless of sign, and Eq.~\eqref{eq:psi-pp-bound} holds at every real argument.
+Exponentiating $\psi(\lambda) \le \lambda^2 (\beta - \alpha)^2 / 8$ gives
+Eq.~\eqref{eq:hoeffding-lemma}, which completes the proof.
+\end{proof}
+
+\begin{remark}[Sub-Gaussianity]\label{rem:subgaussian}
+\Cref{lem:hoeffding-lemma} states that a bounded centered random variable is
+\emph{sub-Gaussian} with variance proxy $\sigma^2 = (\beta - \alpha)^2/4$, in the
+standard form $\E e^{\lambda Y} \le \exp(\lambda^2 \sigma^2 / 2)$. The constant
+$1/8 = (1/4)/2$ in Eq.~\eqref{eq:hoeffding-lemma} matches the variance proxy $(\beta -
+\alpha)^2 / 4$ given by Popoviciu's inequality, which is the largest variance any
+distribution on $[\alpha, \beta]$ can have (attained by the symmetric two-point
+distribution on $\{\alpha, \beta\}$).
+\end{remark}

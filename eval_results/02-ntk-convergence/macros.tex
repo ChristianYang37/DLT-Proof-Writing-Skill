@@ -1,0 +1,89 @@
+% =====================================================================
+%  Macros and theorem-environment preamble.
+%  Uses aliascnt so that \Cref renders lemma/assumption/definition labels
+%  with their correct type names rather than collapsing to "Theorem X.Y".
+% =====================================================================
+
+% --- Theorem environments (aliascnt for cleveref-safe naming) ---------
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}     % provides \coloneqq used by \defeq
+\usepackage{aliascnt}
+\usepackage[capitalize]{cleveref}
+\usepackage{enumitem}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+
+\newaliascnt{lemma}{theorem}
+\newtheorem{lemma}[lemma]{Lemma}
+\aliascntresetthe{lemma}
+
+\newaliascnt{proposition}{theorem}
+\newtheorem{proposition}[proposition]{Proposition}
+\aliascntresetthe{proposition}
+
+\newaliascnt{corollary}{theorem}
+\newtheorem{corollary}[corollary]{Corollary}
+\aliascntresetthe{corollary}
+
+\theoremstyle{definition}
+\newaliascnt{definition}{theorem}
+\newtheorem{definition}[definition]{Definition}
+\aliascntresetthe{definition}
+
+\newaliascnt{assumption}{theorem}
+\newtheorem{assumption}[assumption]{Assumption}
+\aliascntresetthe{assumption}
+
+\newaliascnt{fact}{theorem}
+\newtheorem{fact}[fact]{Fact}
+\aliascntresetthe{fact}
+
+\theoremstyle{remark}
+\newaliascnt{remark}{theorem}
+\newtheorem{remark}[remark]{Remark}
+\aliascntresetthe{remark}
+
+\crefname{theorem}{Theorem}{Theorems}
+\crefname{lemma}{Lemma}{Lemmas}
+\crefname{proposition}{Proposition}{Propositions}
+\crefname{corollary}{Corollary}{Corollaries}
+\crefname{definition}{Definition}{Definitions}
+\crefname{assumption}{Assumption}{Assumptions}
+\crefname{fact}{Fact}{Facts}
+\crefname{remark}{Remark}{Remarks}
+\crefname{equation}{Eq.}{Eqs.}
+
+% --- Asymptotics and rates --------------------------------------------
+\DeclareMathOperator{\poly}{poly}
+\DeclareMathOperator{\polylog}{polylog}
+\newcommand{\Otil}{\widetilde{O}}
+
+% --- Common math shortcuts --------------------------------------------
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\renewcommand{\Pr}{\mathbb{P}}
+\newcommand{\one}{\mathbf{1}}
+\newcommand{\I}{\mathbf{I}}
+\newcommand{\eps}{\varepsilon}
+
+% --- Bold vectors / matrices ------------------------------------------
+\newcommand{\wb}{\mathbf{w}}
+\newcommand{\xb}{\mathbf{x}}
+\newcommand{\yb}{\mathbf{y}}
+\newcommand{\ub}{\mathbf{u}}
+\newcommand{\ab}{\mathbf{a}}
+\newcommand{\Wb}{\mathbf{W}}
+\newcommand{\Hb}{\mathbf{H}}
+
+% --- Norms and inner product ------------------------------------------
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
+\newcommand{\opnorm}[1]{\left\| #1 \right\|_{\mathrm{op}}}
+
+% --- Definitional equality --------------------------------------------
+\newcommand{\defeq}{\coloneqq}
+
+% --- Todo marker ------------------------------------------------------
+\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
+\usepackage{xcolor}
