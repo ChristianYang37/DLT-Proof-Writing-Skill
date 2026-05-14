@@ -42,12 +42,13 @@
 ## 📊 工作流图
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'primaryTextColor':'#000','primaryColor':'#fff','lineColor':'#555','textColor':'#000','edgeLabelBackground':'#ffffff','tertiaryTextColor':'#000','clusterTextColor':'#000','nodeTextColor':'#000'}}}%%
 flowchart TD
     Start(["用户请求一个证明"]) --> A
     A["Phase A — Plan<br/>读项目, 技术调研,<br/>选择 pattern, 拆分, TodoWrite"] --> B
     B["Phase B — Preliminaries<br/>Notation, Macros, Definitions,<br/>Assumptions, Facts"] --> C
     C["Phase C — Statements and Proofs<br/>陈述 lemma, 每条 review,<br/>写 proof, 每证 review<br/>(按节点迭代)"] --> CC
-    CC["Phase C.5 — Confidence Sweep<br/>枚举所有 derivation 步骤<br/>初始化为 🔴 from-memory<br/>fast-path 或 sub-agent 验证<br/>升级到 🟡 或 🟢"] --> D
+    CC["Phase C.5 — Confidence Sweep<br/>枚举所有 derivation 步骤<br/>初始化为 red (from-memory)<br/>fast-path 或 sub-agent 验证<br/>升级到 yellow 或 green"] --> D
     D["Phase D — Peer-Review Loop<br/>Reviewer sub-agent: Summary,<br/>Strengths, Weaknesses, Verdict<br/>作者验证每个 weakness<br/>Minimum-change 修复或反驳<br/>迭代，3 轮硬上限"]
     D -->|"accept-as-is 或 no-fixes"| Out(["交付物<br/>main.pdf, grading.json,<br/>confidence-trace.md,<br/>review-iter-N.md"])
     D -->|"仍有 weakness 且 iter 小于 3"| D
@@ -64,10 +65,11 @@ flowchart TD
 **Sub-agent 架构：**
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'primaryTextColor':'#000','primaryColor':'#fff','lineColor':'#555','textColor':'#000','edgeLabelBackground':'#ffffff','tertiaryTextColor':'#000','clusterTextColor':'#000','nodeTextColor':'#000'}}}%%
 flowchart LR
     Main(["主 Agent<br/>编排 workflow"])
     Sub1[["技术调研 sub-agents<br/>为高级工具生成 digest"]]
-    Sub2[["Sweep 验证 sub-agents<br/>独立重证 🔴 步骤"]]
+    Sub2[["Sweep 验证 sub-agents<br/>独立重证 red 步骤"]]
     Sub3[["Reviewer sub-agent<br/>对完整 PDF 做 peer review"]]
     Main -->|"Phase A.2"| Sub1
     Main -->|"Phase C.5 fire-and-forget"| Sub2

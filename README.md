@@ -42,12 +42,13 @@ It teaches an AI agent (Claude Code, or any Anthropic-Agent-Skills-compatible ru
 ## 📊 Workflow
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'primaryTextColor':'#000','primaryColor':'#fff','lineColor':'#555','textColor':'#000','edgeLabelBackground':'#ffffff','tertiaryTextColor':'#000','clusterTextColor':'#000','nodeTextColor':'#000'}}}%%
 flowchart TD
     Start(["User asks for a proof"]) --> A
     A["Phase A — Plan<br/>Read project, Technical recon,<br/>Pattern select, Decompose, TodoWrite"] --> B
     B["Phase B — Preliminaries<br/>Notation, Macros, Definitions,<br/>Assumptions, Facts"] --> C
     C["Phase C — Statements and Proofs<br/>State lemma, Per-stmt review,<br/>Write proof, Per-proof review<br/>(iterate per node)"] --> CC
-    CC["Phase C.5 — Confidence Sweep<br/>Enumerate all derivation steps<br/>Init 🔴 from-memory<br/>Fast-path or sub-agent verify<br/>Upgrade to 🟡 or 🟢"] --> D
+    CC["Phase C.5 — Confidence Sweep<br/>Enumerate all derivation steps<br/>Init red (from-memory)<br/>Fast-path or sub-agent verify<br/>Upgrade to yellow or green"] --> D
     D["Phase D — Peer-Review Loop<br/>Reviewer sub-agent: Summary,<br/>Strengths, Weaknesses, Verdict<br/>Author verifies each weakness<br/>Minimum-change fix or rebut<br/>Iterate, max 3 rounds"]
     D -->|"accept-as-is or no-fixes"| Out(["Deliverable<br/>main.pdf, grading.json,<br/>confidence-trace.md,<br/>review-iter-N.md"])
     D -->|"weaknesses remain, iter under 3"| D
@@ -64,10 +65,11 @@ flowchart TD
 **Sub-agent architecture:**
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'primaryTextColor':'#000','primaryColor':'#fff','lineColor':'#555','textColor':'#000','edgeLabelBackground':'#ffffff','tertiaryTextColor':'#000','clusterTextColor':'#000','nodeTextColor':'#000'}}}%%
 flowchart LR
     Main(["Main Agent<br/>orchestrates the workflow"])
     Sub1[["Tech-recon sub-agents<br/>spawn digests for advanced tools"]]
-    Sub2[["Sweep verifier sub-agents<br/>independently re-derive 🔴 steps"]]
+    Sub2[["Sweep verifier sub-agents<br/>independently re-derive red steps"]]
     Sub3[["Reviewer sub-agent<br/>peer-review the full PDF"]]
     Main -->|"Phase A.2"| Sub1
     Main -->|"Phase C.5 fire-and-forget"| Sub2
