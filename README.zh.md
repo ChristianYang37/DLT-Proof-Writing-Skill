@@ -42,47 +42,45 @@
 ## 📊 工作流图
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'primaryTextColor':'#000','primaryColor':'#fff','lineColor':'#555','textColor':'#000','edgeLabelBackground':'#ffffff','tertiaryTextColor':'#000','clusterTextColor':'#000','nodeTextColor':'#000'}}}%%
 flowchart TD
-    Start(["用户请求一个证明"]) --> A
-    A["Phase A — Plan<br/>读项目, 技术调研,<br/>选择 pattern, 拆分, TodoWrite"] --> B
-    B["Phase B — Preliminaries<br/>Notation, Macros, Definitions,<br/>Assumptions, Facts"] --> C
-    C["Phase C — Statements and Proofs<br/>陈述 lemma, 每条 review,<br/>写 proof, 每证 review<br/>(按节点迭代)"] --> CC
-    CC["Phase C.5 — Confidence Sweep<br/>枚举所有 derivation 步骤<br/>初始化为 red (from-memory)<br/>fast-path 或 sub-agent 验证<br/>升级到 yellow 或 green"] --> D
-    D["Phase D — Peer-Review Loop<br/>Reviewer sub-agent: Summary,<br/>Strengths, Weaknesses, Verdict<br/>作者验证每个 weakness<br/>Minimum-change 修复或反驳<br/>迭代，3 轮硬上限"]
-    D -->|"accept-as-is 或 no-fixes"| Out(["交付物<br/>main.pdf, grading.json,<br/>confidence-trace.md,<br/>review-iter-N.md"])
-    D -->|"仍有 weakness 且 iter 小于 3"| D
-
-    style A fill:#e1f5ff,stroke:#0288d1,stroke-width:2px,color:#000
-    style B fill:#fff4e1,stroke:#f57c00,stroke-width:2px,color:#000
-    style C fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,color:#000
-    style CC fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
-    style D fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
-    style Out fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#000
-    style Start fill:#eeeeee,stroke:#616161,stroke-width:2px,color:#000
+    Start([用户请求一个证明]) --> A
+    A[Phase A: Plan] --> B
+    B[Phase B: Preliminaries] --> C
+    C[Phase C: Statements and Proofs] --> CC
+    CC[Phase C.5: Confidence Sweep] --> D
+    D[Phase D: Peer-Review Loop]
+    D -->|accept-as-is| Out([交付物: PDF + traces])
+    D -->|仍有 weakness 且 iter 小于 3| D
 ```
+
+**各 phase 详细内容**（不放在图里以保证渲染稳定，完整工作流见 [`proof-writing-skill/SKILL.md`](proof-writing-skill/SKILL.md)）：
+
+- **Phase A — Plan**：读项目上下文 · 技术调研（为高级工具生成 digest）· pattern 选择 · 依赖图拆分 · TodoWrite
+- **Phase B — Preliminaries**：notation 块 · macros（含 `aliascnt`）· definitions · assumptions · facts
+- **Phase C — Statements and Proofs**：陈述 lemma → 每条 review → 写 proof → 每证 review · 按依赖图节点迭代
+- **Phase C.5 — Confidence Sweep**：枚举每条 derivation step · 初始化为 `red`(from-memory) · 通过 fast-path（textbook 不等式、digest 匹配、lemma-hypothesis 匹配）升级到 `yellow` 或 `green`；不能 fast-path 的 fire sub-agent 独立重证
+- **Phase D — Peer-Review Loop**：Reviewer sub-agent 写 Summary / Strengths / Weaknesses / Questions / Verdict · 作者对每条 weakness 做四分类验证（REAL-blocking / REAL-nonblocking / PHANTOM / INTENTIONAL）· minimum-change 修复或反驳 · 迭代，3 轮硬上限
 
 **Sub-agent 架构：**
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'primaryTextColor':'#000','primaryColor':'#fff','lineColor':'#555','textColor':'#000','edgeLabelBackground':'#ffffff','tertiaryTextColor':'#000','clusterTextColor':'#000','nodeTextColor':'#000'}}}%%
 flowchart LR
-    Main(["主 Agent<br/>编排 workflow"])
-    Sub1[["技术调研 sub-agents<br/>为高级工具生成 digest"]]
-    Sub2[["Sweep 验证 sub-agents<br/>独立重证 red 步骤"]]
-    Sub3[["Reviewer sub-agent<br/>对完整 PDF 做 peer review"]]
-    Main -->|"Phase A.2"| Sub1
-    Main -->|"Phase C.5 fire-and-forget"| Sub2
-    Main -->|"Phase D 每轮"| Sub3
-    Sub1 -.->|"技术 digest"| Main
-    Sub2 -.->|"验证报告"| Main
-    Sub3 -.->|"review verdicts"| Main
-
-    style Main fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
-    style Sub1 fill:#f9fbe7,stroke:#827717,color:#000
-    style Sub2 fill:#fce4ec,stroke:#c2185b,color:#000
-    style Sub3 fill:#f3e5f5,stroke:#7b1fa2,color:#000
+    Main([Main Agent])
+    Sub1[Tech-recon sub-agents]
+    Sub2[Sweep verifier sub-agents]
+    Sub3[Reviewer sub-agent]
+    Main -->|Phase A.2| Sub1
+    Main -->|Phase C.5 fire-and-forget| Sub2
+    Main -->|Phase D each iteration| Sub3
+    Sub1 -.->|technique digests| Main
+    Sub2 -.->|verification reports| Main
+    Sub3 -.->|review verdicts| Main
 ```
+
+- **主 Agent** 编排 workflow，拥有 LaTeX 源文件，决定何时 spawn 哪些 sub-agent。
+- **技术调研 sub-agents**（Phase A.2）：每个 advanced tool（如 matrix Bernstein, Yarotsky gadget, elliptical potential）一个。下载 canonical source，存 digest 到 `.proof-research/<tool>.md`。
+- **Sweep 验证 sub-agents**（Phase C.5，fire-and-forget）：每个需要独立重证的 `red` derivation step 一个。后台跑，主 agent 同时往下走。
+- **Reviewer sub-agent**（Phase D，每轮一个）：读编译后 PDF + `.tex` 源 + confidence trace，返回结构化 peer review。主 agent 然后验证每条 weakness，决定 fix / rebut / escalate。
 
 ---
 

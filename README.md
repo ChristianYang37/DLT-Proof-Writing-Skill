@@ -42,47 +42,45 @@ It teaches an AI agent (Claude Code, or any Anthropic-Agent-Skills-compatible ru
 ## 📊 Workflow
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'primaryTextColor':'#000','primaryColor':'#fff','lineColor':'#555','textColor':'#000','edgeLabelBackground':'#ffffff','tertiaryTextColor':'#000','clusterTextColor':'#000','nodeTextColor':'#000'}}}%%
 flowchart TD
-    Start(["User asks for a proof"]) --> A
-    A["Phase A — Plan<br/>Read project, Technical recon,<br/>Pattern select, Decompose, TodoWrite"] --> B
-    B["Phase B — Preliminaries<br/>Notation, Macros, Definitions,<br/>Assumptions, Facts"] --> C
-    C["Phase C — Statements and Proofs<br/>State lemma, Per-stmt review,<br/>Write proof, Per-proof review<br/>(iterate per node)"] --> CC
-    CC["Phase C.5 — Confidence Sweep<br/>Enumerate all derivation steps<br/>Init red (from-memory)<br/>Fast-path or sub-agent verify<br/>Upgrade to yellow or green"] --> D
-    D["Phase D — Peer-Review Loop<br/>Reviewer sub-agent: Summary,<br/>Strengths, Weaknesses, Verdict<br/>Author verifies each weakness<br/>Minimum-change fix or rebut<br/>Iterate, max 3 rounds"]
-    D -->|"accept-as-is or no-fixes"| Out(["Deliverable<br/>main.pdf, grading.json,<br/>confidence-trace.md,<br/>review-iter-N.md"])
-    D -->|"weaknesses remain, iter under 3"| D
-
-    style A fill:#e1f5ff,stroke:#0288d1,stroke-width:2px,color:#000
-    style B fill:#fff4e1,stroke:#f57c00,stroke-width:2px,color:#000
-    style C fill:#e8f5e9,stroke:#388e3c,stroke-width:2px,color:#000
-    style CC fill:#fce4ec,stroke:#c2185b,stroke-width:2px,color:#000
-    style D fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:#000
-    style Out fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:#000
-    style Start fill:#eeeeee,stroke:#616161,stroke-width:2px,color:#000
+    Start([User asks for a proof]) --> A
+    A[Phase A: Plan] --> B
+    B[Phase B: Preliminaries] --> C
+    C[Phase C: Statements and Proofs] --> CC
+    CC[Phase C.5: Confidence Sweep] --> D
+    D[Phase D: Peer-Review Loop]
+    D -->|accept-as-is| Out([Deliverable: PDF + traces])
+    D -->|weaknesses remain, iter under 3| D
 ```
+
+**Per-phase content** (no styling, plain text — see [`proof-writing-skill/SKILL.md`](proof-writing-skill/SKILL.md) for the full workflow):
+
+- **Phase A — Plan**: read project context · technical reconnaissance (digest advanced tools) · pattern selection · dependency-graph decomposition · TodoWrite
+- **Phase B — Preliminaries**: notation block · macros (with `aliascnt`) · definitions · assumptions · facts
+- **Phase C — Statements and Proofs**: state lemma → per-statement review → write proof → per-proof review · iterate per node in the dependency graph
+- **Phase C.5 — Confidence Sweep**: enumerate every derivation step · tag each `red` (from-memory) initially · upgrade via fast-path (textbook inequality, digest match, lemma-hypothesis match) to `yellow` or `green`, or fire a sub-agent to re-derive
+- **Phase D — Peer-Review Loop**: reviewer sub-agent writes Summary / Strengths / Weaknesses / Questions / Verdict · author verifies each weakness (REAL-blocking / REAL-nonblocking / PHANTOM / INTENTIONAL) · minimum-change fix or rebut · iterate, hard cap 3 rounds
 
 **Sub-agent architecture:**
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'primaryTextColor':'#000','primaryColor':'#fff','lineColor':'#555','textColor':'#000','edgeLabelBackground':'#ffffff','tertiaryTextColor':'#000','clusterTextColor':'#000','nodeTextColor':'#000'}}}%%
 flowchart LR
-    Main(["Main Agent<br/>orchestrates the workflow"])
-    Sub1[["Tech-recon sub-agents<br/>spawn digests for advanced tools"]]
-    Sub2[["Sweep verifier sub-agents<br/>independently re-derive red steps"]]
-    Sub3[["Reviewer sub-agent<br/>peer-review the full PDF"]]
-    Main -->|"Phase A.2"| Sub1
-    Main -->|"Phase C.5 fire-and-forget"| Sub2
-    Main -->|"Phase D each iteration"| Sub3
-    Sub1 -.->|"technique digests"| Main
-    Sub2 -.->|"verification reports"| Main
-    Sub3 -.->|"review verdicts"| Main
-
-    style Main fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
-    style Sub1 fill:#f9fbe7,stroke:#827717,color:#000
-    style Sub2 fill:#fce4ec,stroke:#c2185b,color:#000
-    style Sub3 fill:#f3e5f5,stroke:#7b1fa2,color:#000
+    Main([Main Agent])
+    Sub1[Tech-recon sub-agents]
+    Sub2[Sweep verifier sub-agents]
+    Sub3[Reviewer sub-agent]
+    Main -->|Phase A.2| Sub1
+    Main -->|Phase C.5 fire-and-forget| Sub2
+    Main -->|Phase D each iteration| Sub3
+    Sub1 -.->|technique digests| Main
+    Sub2 -.->|verification reports| Main
+    Sub3 -.->|review verdicts| Main
 ```
+
+- **Main agent** orchestrates the workflow, owns the LaTeX source, and decides which sub-agents to spawn.
+- **Tech-recon sub-agents** (Phase A.2): one per advanced tool the proof needs (e.g., matrix Bernstein, Yarotsky gadget, elliptical potential). Each pulls the canonical source and saves a digest to `.proof-research/<tool>.md`.
+- **Sweep verifier sub-agents** (Phase C.5, fire-and-forget): one per `red` derivation step that needs independent re-derivation. Run in background; main agent moves on while they verify.
+- **Reviewer sub-agent** (Phase D, one per loop iteration): reads the compiled PDF + the `.tex` source + the confidence trace, returns a structured peer review. The main agent then verifies each weakness and decides fix / rebut / escalate.
 
 ---
 
