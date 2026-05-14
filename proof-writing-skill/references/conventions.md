@@ -29,6 +29,28 @@ project/
 
 **Do NOT write an abstract or introduction.** This skill writes formal content (theorems, lemmas, proofs). The user owns the paper's framing — abstract, introduction, related work, conclusion. If those sections appear in the project, treat them as read-only — match their notation but do not edit them. If the user later asks for an abstract or intro, that is a separate task with different conventions and is out of scope here.
 
+### Theorem ↔ proof pairing (hard rule, lint R5)
+
+Every `\begin{theorem}` / `\begin{lemma}` / `\begin{proposition}` / `\begin{corollary}` / `\begin{claim}` must satisfy **exactly one** of:
+
+1. **Followed by `\begin{proof}` in the same file** — the FIRST environment after `\end{X}` must be `\begin{proof}` (or `\begin{proof}[Proof of \Cref{X}]`). Whitespace, comments, and `\label{}` outside any env are allowed between, **but no intervening environments** (no `\begin{remark}`, no other `\begin{lemma}`, etc.).
+2. **Cited via the optional bracket** — `\begin{X}[\cite{author20...}]` for external results whose proof you do not want to reproduce. The cite key must resolve in `refs.bib`.
+
+**Forbidden:** a theorem-like result with neither proof nor citation — the "well-known result" handwave.
+
+**File-structure consequence.** Put a theorem and its proof **in the same `.tex` file**. The pattern `02-main-result.tex` (theorem only) + `06-proof-of-main.tex` (proof) violates R5. Use instead:
+
+```
+sections/
+├── 01-preliminaries.tex          # definitions / assumptions / facts
+├── 02-lemma-A.tex                # \begin{lemma} + immediate \begin{proof}
+├── 03-lemma-B.tex                # same
+├── 04-main-theorem.tex           # \begin{theorem} + immediate \begin{proof}
+└── 99-auxiliary.tex              # cited externals via [\cite{...}] form
+```
+
+If a result is genuinely external (e.g., Hoeffding's lemma cited from Vershynin 2018), use form 2. If it is yours, prove it immediately. There is no third option.
+
 ## Macros — typical project header
 
 Place at top of `math_macros.tex` (or whatever the project calls its macros file). Do not add macros that already exist in the project.

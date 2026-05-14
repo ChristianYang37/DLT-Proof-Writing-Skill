@@ -46,6 +46,26 @@ You are running **one** test case from this skill's eval suite. The skill (`dlt-
 - **Write a section file BEFORE you add its `\input{}` line to `main.tex`.** If you list `\input{sections/06-foo}` but the file doesn't exist, the project is broken — a quota cutoff or interruption leaves an uncompileable state.
 - After each new section, save main.tex and check compile.
 
+### Theorem ↔ proof pairing (lint R5)
+
+Every `\begin{theorem}` / `\begin{lemma}` / `\begin{proposition}` / `\begin{corollary}` / `\begin{claim}` must satisfy exactly one of:
+
+1. **Immediate proof in same file** — the FIRST environment after `\end{X}` must be `\begin{proof}` (whitespace, comments, and `\label{}` outside an env are allowed between; **other environments are not** — no intervening `\begin{remark}` / `\begin{lemma}` / etc.).
+2. **Citation in optional bracket** — `\begin{X}[\cite{authoryear}]`, key resolves in `refs.bib`.
+
+**Practical file layout:** put theorem + proof in the SAME `.tex` file. Do NOT split into `02-main-result.tex` (theorem) + `06-proof-of-main.tex` (proof) — that violates R5. Layout:
+
+```
+sections/
+├── 01-preliminaries.tex     # definitions / assumptions / cited facts
+├── 02-lemma-A.tex           # \begin{lemma} + \begin{proof}
+├── 03-lemma-B.tex           # same
+├── 04-main-theorem.tex      # main \begin{theorem} + \begin{proof}
+└── 99-auxiliary.tex         # cited externals (\begin{X}[\cite{...}])
+```
+
+See [conventions.md](../references/conventions.md) §Theorem ↔ proof pairing. Run `scripts/lint.py` after every section write — R5 violations are errors.
+
 ### Workflow phases
 
 - Run all of A, B, C, C.5, D. The eval explicitly tests the FULL workflow. Skipping C.5 or D defeats the purpose of the test.

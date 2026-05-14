@@ -17,6 +17,9 @@ Implements the minimum rule set (10 rules):
         R2   — theorem-like envs must have a \\label
         R3   — \\begin{proof} / \\end{proof} count mismatch
         R4   — duplicate \\label{} across files
+        R5   — theorem-like env must be paired with \\begin{proof} or
+               with a \\cite{} inside the optional [...] bracket
+               (no "well-known" handwaves)
         R6   — display block (align/align*/equation/multline/gather) last line
                does not end with '.' or ','
         R12  — \\cite{key} where key is not in the .bib
@@ -364,6 +367,97 @@ def check_R4_duplicate_label(file_contents: dict[str, str]) -> list[Violation]:
     return out
 
 
+def _extract_optional_bracket(
+    lines: list[str], env_start_line: int, env_name: str
+) -> Optional[str]:
+    """Extract the [...] content immediately after \\begin{env_name}.
+
+    Scans up to 10 lines starting from `env_start_line` (1-indexed) and
+    returns the content of the first balanced `[...]` after `\\begin{X}`,
+    or None if no bracket is present.
+    """
+    end = min(len(lines), env_start_line - 1 + 10)
+    block = "\n".join(lines[env_start_line - 1: end])
+    m = re.search(rf"\\begin\{{{re.escape(env_name)}\}}", block)
+    if not m:
+        return None
+    after = block[m.end():].lstrip(" \t")
+    if not after.startswith("["):
+        return None
+    depth = 0
+    for i, ch in enumerate(after):
+        if ch == "[":
+            depth += 1
+        elif ch == "]":
+            depth -= 1
+            if depth == 0:
+                return after[1:i]
+    return None  # unbalanced — treat as no bracket
+
+
+def check_R5_thm_needs_proof_or_cite(text: str, file: str) -> list[Violation]:
+    """Every theorem-like env must be followed by \\begin{proof} OR have a
+    \\cite{} inside its optional [...] bracket.
+
+    Theorem-like = theorem, lemma, proposition, corollary, claim. The proof
+    must be the FIRST environment after \\end{X}; intervening environments
+    (e.g. \\begin{remark}) trigger the violation.
+
+    Skipped: if \\end{X} is the last theorem-like environment in the file
+    and no \\begin{...} follows it within the file (proof presumed to be in
+    a later file that the linter doesn't see).
+    """
+    out: list[Violation] = []
+    theorem_like = {"theorem", "lemma", "proposition", "corollary", "claim"}
+    envs = find_environments(text)
+    lines = text.splitlines()
+
+    for env in envs:
+        if env.name not in theorem_like:
+            continue
+
+        # (a) Check optional bracket for \cite — citation discharges the rule.
+        bracket = _extract_optional_bracket(lines, env.start_line, env.name)
+        if bracket and re.search(r"\\cite[a-z]*\*?(?:\[[^\]]*\])?\{", bracket):
+            continue
+
+        # (b) Check what follows \end{X}.
+        # Build post-\end{X} text, strip comments line-by-line.
+        post_lines = lines[env.end_line:]
+        post_clean = "\n".join(strip_line_comment(l) for l in post_lines)
+
+        first_begin = re.search(r"\\begin\{([^}]+)\}", post_clean)
+        if first_begin is None:
+            # No further environment in this file → proof likely in next file;
+            # skip the check rather than false-flag.
+            continue
+
+        next_name = first_begin.group(1)
+        if next_name in ("proof", "proof*"):
+            continue  # proof immediately follows — OK
+
+        # Otherwise: first env after \end{X} is not a proof env, and no
+        # \cite in the optional bracket → violation.
+        out.append(
+            Violation(
+                rule="R5", severity="error",
+                file=file, line=env.start_line,
+                match=f"\\begin{{{env.name}}}",
+                message=(
+                    f"{env.name} environment is not paired with a proof "
+                    f"or a citation: next environment after \\end{{{env.name}}} "
+                    f"is \\begin{{{next_name}}} (not \\begin{{proof}}) and "
+                    f"no \\cite{{}} in its optional [...] bracket. "
+                    "Either prove it locally (\\begin{proof} ... \\end{proof}) "
+                    "or cite the source of the result via "
+                    f"\\begin{{{env.name}}}[\\cite{{...}}]."
+                ),
+            )
+        )
+
+    return out
+
+
 def check_R6_display_no_punct(text: str, file: str) -> list[Violation]:
     """Last content line of a display env must end with '.' or ','."""
     out: list[Violation] = []
@@ -472,6 +566,7 @@ PER_FILE_RULES = [
     ("R1",  check_R1_label_prefix),
     ("R2",  check_R2_theorem_no_label),
     ("R3",  check_R3_proof_balance),
+    ("R5",  check_R5_thm_needs_proof_or_cite),
     ("R6",  check_R6_display_no_punct),
     ("R16", check_R16_other_case_similar),
 ]
