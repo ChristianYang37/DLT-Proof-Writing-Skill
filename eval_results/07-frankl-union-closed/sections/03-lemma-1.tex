@@ -1,0 +1,164 @@
+\section{The key technical lemma}
+\label{sec:lemma1}
+
+This section proves the single-bit conditional-entropy gap that drives
+the main result. The setup: $C$ is a random variable on a finite set $S$,
+and for each $c \in S$ we have a parameter $p_c \in [0, 1]$. Conditional on
+$C = c$, sample a Bernoulli $X$ with $\Pr[X = 1 \mid C = c] = p_c$. Let
+$(C', X')$ be an independent copy of $(C, X)$, so $X'$ is conditionally
+Bernoulli$(p_{C'})$ given $C'$ and is independent of $(C, X)$.
+
+In the application to the union-closed conjecture (\Cref{sec:theorem1}),
+$C$ will be the history $A_{<i}$ of bits revealed so far, $p_c$ will be the
+conditional probability $\Pr[A_i = 1 \mid A_{<i} = c]$, and the
+expectation hypothesis $\E[X] \le 0.01$ will correspond to $\Pr[i \in A] \le 0.01$.
+
+\begin{lemma}[Key conditional-entropy gap]\label{lem:gap}
+With the setup above, assume $\E[X] \le 0.01$. Then
+\begin{align}\label{eq:lem-gap}
+\H(X \cup X' \mid C, C') \;\ge\; 1.26 \, \H(X \mid C).
+\end{align}
+Equivalently, writing $q(c) := \Pr[C = c]$ and using that
+$X \cup X' \mid (C, C') = (c, c')$ is $\Bern(p_c + p_{c'} - p_c p_{c'})$,
+\begin{align}\label{eq:lem-gap-explicit}
+\sum_{c, c' \in S} q(c) q(c') \, \hbin(p_c + p_{c'} - p_c p_{c'})
+\;\ge\; 1.26 \, \sum_{c \in S} q(c) \, \hbin(p_c).
+\end{align}
+\end{lemma}
+
+\begin{proof}
+The proof partitions the values of $c$ into two regimes by whether $p_c$ is
+small or large, then applies \Cref{lem:hbin-low} to the both-small block and
+\Cref{lem:hbin-mixed} to the mixed (one-small, one-large) block, and finally
+discards the both-large block (whose contribution is non-negative).
+
+\paragraph{Step 1: Partition by $p_c$ and Markov.}
+Define
+\begin{align*}
+\Ccal_0 \;:=\; \{ c \in S : p_c \le 0.1 \}, \qquad
+\Ccal_1 \;:=\; S \setminus \Ccal_0 \;=\; \{ c \in S : p_c > 0.1 \}.
+\end{align*}
+Since $\E[X] = \sum_c q(c) p_c \le 0.01$, Markov's inequality gives
+\begin{align}\label{eq:markov}
+\Pr[C \in \Ccal_1] \;=\; \sum_{c : p_c > 0.1} q(c)
+\;\le\; \frac{\E[X]}{0.1} \;\le\; \frac{0.01}{0.1} \;=\; 0.1,
+\end{align}
+and therefore
+\begin{align}\label{eq:c0-mass}
+\Pr[C \in \Ccal_0] \;\ge\; 0.9.
+\end{align}
+
+We abbreviate $\Pr[\Ccal_0] := \Pr[C \in \Ccal_0]$,
+$\Pr[\Ccal_0'] := \Pr[C' \in \Ccal_0]$,
+$\Pr[\Ccal_0, \Ccal_0'] := \Pr[C \in \Ccal_0 \wedge C' \in \Ccal_0]$,
+and similarly for $\Ccal_1$. By independence of $C$ and $C'$ and the fact
+that $C'$ has the same distribution as $C$,
+$\Pr[\Ccal_0] = \Pr[\Ccal_0']$,
+$\Pr[\Ccal_0, \Ccal_0'] = \Pr[\Ccal_0]^2$,
+$\Pr[\Ccal_0, \Ccal_1'] = \Pr[\Ccal_0] \Pr[\Ccal_1]$,
+$\Pr[\Ccal_1, \Ccal_0'] = \Pr[\Ccal_1] \Pr[\Ccal_0]$,
+and $\Pr[\Ccal_1, \Ccal_1'] = \Pr[\Ccal_1]^2$.
+
+\paragraph{Step 2: Decompose both sides of \cref{eq:lem-gap-explicit}.}
+The right-hand side splits as
+\begin{align}\label{eq:rhs-decomp}
+\H(X \mid C)
+\;=\; \sum_{c \in S} q(c) \, \hbin(p_c)
+\;=\; \Pr[\Ccal_0] \, \H(X \mid C \in \Ccal_0) \;+\; \Pr[\Ccal_1] \, \H(X \mid C \in \Ccal_1),
+\end{align}
+where $\H(X \mid C \in \Ccal_j) := \sum_{c \in \Ccal_j} \frac{q(c)}{\Pr[\Ccal_j]} \hbin(p_c)$.
+The left-hand side splits by the partition of $(C, C')$ into the four
+events $\{\Ccal_0 \cap \Ccal_0',\, \Ccal_0 \cap \Ccal_1',\, \Ccal_1 \cap \Ccal_0',\, \Ccal_1 \cap \Ccal_1'\}$:
+\begin{align}
+\H(X \cup X' \mid C, C')
+&\;=\; \Pr[\Ccal_0, \Ccal_0'] \, \H(X \cup X' \mid \Ccal_0, \Ccal_0')
+\;+\; \Pr[\Ccal_0, \Ccal_1'] \, \H(X \cup X' \mid \Ccal_0, \Ccal_1') \notag\\
+&\quad +\; \Pr[\Ccal_1, \Ccal_0'] \, \H(X \cup X' \mid \Ccal_1, \Ccal_0')
+\;+\; \Pr[\Ccal_1, \Ccal_1'] \, \H(X \cup X' \mid \Ccal_1, \Ccal_1'). \label{eq:lhs-decomp}
+\end{align}
+By symmetry under swapping $(C, X) \leftrightarrow (C', X')$ (which leaves
+$X \cup X' = \max(X, X')$ invariant),
+$\Pr[\Ccal_0, \Ccal_1'] \H(X \cup X' \mid \Ccal_0, \Ccal_1')
+= \Pr[\Ccal_1, \Ccal_0'] \H(X \cup X' \mid \Ccal_1, \Ccal_0')$, so we can
+write the mixed contribution as $2 \Pr[\Ccal_0, \Ccal_1'] \, \H(X \cup X' \mid \Ccal_0, \Ccal_1')$.
+
+\paragraph{Step 3: Bound the both-small block (Claim A).}
+We claim
+\begin{align}\label{eq:both-small}
+\Pr[\Ccal_0]^2 \, \H(X \cup X' \mid \Ccal_0, \Ccal_0')
+\;\ge\; 1.26 \, \Pr[\Ccal_0] \, \H(X \mid C \in \Ccal_0).
+\end{align}
+Let $q_0(c) := q(c) / \Pr[\Ccal_0]$ for $c \in \Ccal_0$ be the conditional
+distribution of $C$ given $C \in \Ccal_0$. Then
+\begin{align}
+\Pr[\Ccal_0] \, \H(X \mid C \in \Ccal_0)
+&\;=\; \Pr[\Ccal_0] \, \E_{c \sim q_0}[\hbin(p_c)] \notag \\
+&\;=\; \Pr[\Ccal_0] \, \E_{c, c' \sim q_0} \!\left[ \tfrac{\hbin(p_c) + \hbin(p_{c'})}{2} \right] \label{eq:sym-avg}\\
+&\;\le\; \frac{\Pr[\Ccal_0]}{1.4} \, \E_{c, c' \sim q_0} \!\left[ \hbin(p_c + p_{c'} - p_c p_{c'}) \right] \label{eq:apply-lemma-low}\\
+&\;\le\; \frac{\Pr[\Ccal_0]^2}{0.9 \cdot 1.4} \, \E_{c, c' \sim q_0} \!\left[ \hbin(p_c + p_{c'} - p_c p_{c'}) \right] \label{eq:multiply-c0}\\
+&\;=\; \frac{\Pr[\Ccal_0]^2}{1.26} \, \H(X \cup X' \mid \Ccal_0, \Ccal_0'), \label{eq:identify-cup}
+\end{align}
+where (i) Eq.~\eqref{eq:sym-avg} is the symmetrization
+$\E_c[\hbin(p_c)] = \E_c[\hbin(p_c)/2] + \E_{c'}[\hbin(p_{c'})/2]
+= \E_{c,c'}[(\hbin(p_c) + \hbin(p_{c'}))/2]$ valid since $c, c' \sim q_0$ are iid;
+(ii) Eq.~\eqref{eq:apply-lemma-low} applies \Cref{lem:hbin-low} pointwise
+(since $p_c, p_{c'} \le 0.1$ for $c, c' \in \Ccal_0$) and integrates;
+(iii) Eq.~\eqref{eq:multiply-c0} uses
+$\Pr[\Ccal_0] \le \Pr[\Ccal_0]^2 / 0.9$, equivalent to
+$\Pr[\Ccal_0] \ge 0.9$, which is Eq.~\eqref{eq:c0-mass};
+(iv) Eq.~\eqref{eq:identify-cup} identifies
+$\E_{c, c' \sim q_0}[\hbin(p_c + p_{c'} - p_c p_{c'})] = \H(X \cup X' \mid \Ccal_0, \Ccal_0')$
+since $X \cup X' \mid (C, C') = (c, c')$ is $\Bern(p_c + p_{c'} - p_c p_{c'})$.
+Rearranging Eq.~\eqref{eq:identify-cup} gives Eq.~\eqref{eq:both-small}.
+
+\paragraph{Step 4: Bound the mixed block (Claim B).}
+We claim
+\begin{align}\label{eq:mixed}
+2 \, \Pr[\Ccal_0, \Ccal_1'] \, \H(X \cup X' \mid \Ccal_0, \Ccal_1')
+\;\ge\; 1.62 \, \Pr[\Ccal_1] \, \H(X \mid C \in \Ccal_1).
+\end{align}
+By the Bernoulli identity, $\H(X \cup X' \mid (C, C') = (c, c'))
+= \hbin(p_c + p_{c'} - p_c p_{c'})$, so
+\begin{align}
+2 \, \Pr[\Ccal_0, \Ccal_1'] \, \H(X \cup X' \mid \Ccal_0, \Ccal_1')
+&\;=\; 2 \sum_{c \in \Ccal_0,\, c' \in \Ccal_1} q(c) q(c') \, \hbin(p_c + p_{c'} - p_c p_{c'}) \notag\\
+&\;\ge\; 2 \sum_{c \in \Ccal_0,\, c' \in \Ccal_1} q(c) q(c') \, (1 - p_c) \, \hbin(p_{c'}) \label{eq:apply-mixed}\\
+&\;=\; 2 \left( \sum_{c' \in \Ccal_1} q(c') \, \hbin(p_{c'}) \right) \left( \sum_{c \in \Ccal_0} q(c) (1 - p_c) \right) \notag\\
+&\;=\; 2 \, \Pr[\Ccal_1] \, \H(X \mid C \in \Ccal_1) \cdot \sum_{c \in \Ccal_0} q(c) (1 - p_c). \label{eq:factor-mixed}
+\end{align}
+Now for $c \in \Ccal_0$, $p_c \le 0.1$, so $1 - p_c \ge 0.9$, and therefore
+\begin{align}\label{eq:sum-1-pc}
+\sum_{c \in \Ccal_0} q(c) (1 - p_c) \;\ge\; 0.9 \sum_{c \in \Ccal_0} q(c) \;=\; 0.9 \, \Pr[\Ccal_0]
+\;\ge\; 0.9 \cdot 0.9 \;=\; 0.81.
+\end{align}
+Substituting Eq.~\eqref{eq:sum-1-pc} into Eq.~\eqref{eq:factor-mixed},
+\begin{align*}
+2 \, \Pr[\Ccal_0, \Ccal_1'] \, \H(X \cup X' \mid \Ccal_0, \Ccal_1')
+&\;\ge\; 2 \, \Pr[\Ccal_1] \, \H(X \mid C \in \Ccal_1) \cdot 0.81 \\
+&\;=\; 1.62 \, \Pr[\Ccal_1] \, \H(X \mid C \in \Ccal_1),
+\end{align*}
+which is Eq.~\eqref{eq:mixed}. The inequality in Eq.~\eqref{eq:apply-mixed}
+applies \Cref{lem:hbin-mixed} pointwise: for $(c, c') \in \Ccal_0 \times \Ccal_1$,
+$\hbin(p_c + p_{c'} - p_c p_{c'}) \ge (1 - p_c) \hbin(p_{c'})$ with the roles
+$(p, p') \leftarrow (p_c, p_{c'})$.
+
+\paragraph{Step 5: Assemble the four blocks.}
+Using the decomposition in Eq.~\eqref{eq:lhs-decomp} together with the
+non-negativity of the both-large block $\Pr[\Ccal_1]^2 \H(X \cup X' \mid \Ccal_1, \Ccal_1') \ge 0$,
+\begin{align*}
+\H(X \cup X' \mid C, C')
+&\;\ge\; \Pr[\Ccal_0]^2 \, \H(X \cup X' \mid \Ccal_0, \Ccal_0')
+\;+\; 2 \, \Pr[\Ccal_0, \Ccal_1'] \, \H(X \cup X' \mid \Ccal_0, \Ccal_1') \\
+&\;\ge\; 1.26 \, \Pr[\Ccal_0] \, \H(X \mid C \in \Ccal_0)
+\;+\; 1.62 \, \Pr[\Ccal_1] \, \H(X \mid C \in \Ccal_1) \\
+&\;\ge\; 1.26 \, \Pr[\Ccal_0] \, \H(X \mid C \in \Ccal_0)
+\;+\; 1.26 \, \Pr[\Ccal_1] \, \H(X \mid C \in \Ccal_1) \\
+&\;=\; 1.26 \, \H(X \mid C),
+\end{align*}
+where the first inequality drops the non-negative both-large block, the
+second applies Claim A (\Cref{eq:both-small}) to the first summand and
+Claim B (\Cref{eq:mixed}) to the second, the third uses $1.62 \ge 1.26$ to
+weaken the second summand (so that we may pull out a common factor of
+$1.26$), and the final equality is Eq.~\eqref{eq:rhs-decomp}.
+This establishes Eq.~\eqref{eq:lem-gap} and completes the proof.
+\end{proof}

@@ -1,0 +1,92 @@
+\section{Notation, definitions, and basic information-theoretic facts}
+\label{sec:prelim}
+
+We collect the notation, the formal setup, and the standard
+information-theoretic facts that the rest of the proof invokes.
+
+\paragraph{Notation.}
+We work over a fixed finite universe $[n] := \{1, 2, \dots, n\}$ for some $n \ge 1$.
+Subsets of $[n]$ are identified with their indicator vectors in $\{0,1\}^n$
+via $A \leftrightarrow (A_1, \dots, A_n)$ where $A_i = \1\{i \in A\}$.
+We write $\log$ for the base-$2$ logarithm throughout, and adopt the
+convention $0 \log 0 = 0$.
+For a discrete random variable $X$ taking values in a finite set $\mathcal{X}$,
+$\H(X) := -\sum_{x \in \mathcal{X}} \Pr[X=x] \log \Pr[X=x]$ is its (Shannon) entropy,
+and $\H(X \mid Y) := \E_Y[\H(X \mid Y = y)]$ is its conditional entropy.
+Mutual information is $\Iinfo(X;Y) := \H(X) - \H(X \mid Y)$.
+For two Bernoulli random variables $X, X' \in \{0,1\}$,
+$X \cup X' := \max(X, X')$, which is also the indicator of the event that at
+least one of $X, X'$ equals $1$.
+For two subsets $A, B \subseteq [n]$, $A \cup B$ is the usual set union,
+and its indicator vector is $((A \cup B)_1, \dots, (A \cup B)_n)$ where
+$(A \cup B)_i = A_i \cup B_i = \max(A_i, B_i)$.
+Throughout, $c, C, C_1, \dots$ denote universal positive constants whose
+values may change from line to line.
+
+\paragraph{Binary entropy.}
+The \emph{binary entropy function} is
+\begin{align*}
+\hbin(p) \;:=\; -p \log p - (1-p) \log (1-p), \qquad p \in [0,1],
+\end{align*}
+with $\hbin(0) := 0 =: \hbin(1)$. We will use repeatedly that $\hbin$ is
+continuous, $\hbin(0) = \hbin(1) = 0$, $\hbin(1/2) = 1$, $\hbin$ is concave
+on $[0,1]$, and for $X \sim \Bern(p)$, $\H(X) = \hbin(p)$.
+
+\begin{definition}[Union-closed family]\label{def:union-closed}
+A family $\Fcal \subseteq 2^{[n]}$ of subsets of $[n]$ is \emph{union-closed}
+if for every $A, B \in \Fcal$, the set $A \cup B$ also belongs to $\Fcal$.
+\end{definition}
+
+\begin{remark}\label{rem:nontriviality}
+We focus on union-closed families $\Fcal$ with $|\Fcal| \ge 2$; the case
+$\Fcal = \{\varnothing\}$ is degenerate (the universe of an empty set has no
+element to be ``abundant'' in), and the case $\Fcal = \varnothing$ is vacuous.
+Frankl's original formulation~\cite{frankl1995extremal} required only
+$\Fcal \ne \{\varnothing\}$; our slightly stronger $|\Fcal| \ge 2$ avoids the
+edge case while changing nothing substantive (a union-closed family with
+$|\Fcal| = 1$ contains a single set $A$, and if $A = \varnothing$ then there is
+no element to abundance-test; if $A \ne \varnothing$ then any $i \in A$ is in
+$100\% \ge 1\%$ of the sets, so the bound holds trivially).
+\end{remark}
+
+The following four facts about Shannon entropy are standard and stated
+without proof; we cite Cover and Thomas~\cite{cover2006elements}.
+
+\begin{fact}[Chain rule, {\cite[Theorem 2.5.1]{cover2006elements}}]\label{fac:chain-rule}
+For discrete random variables $X_1, \dots, X_n$ taking values in finite sets,
+\begin{align*}
+\H(X_1, \dots, X_n) \;=\; \sum_{i=1}^{n} \H(X_i \mid X_1, \dots, X_{i-1}),
+\end{align*}
+with the convention that $\H(X_1 \mid X_{<1}) = \H(X_1)$.
+\end{fact}
+
+\begin{fact}[Data-processing for entropy, {\cite[Theorem 2.8.1]{cover2006elements}}]\label{fac:data-processing}
+Let $X, Y$ be discrete random variables and let $f$ be any (measurable)
+function defined on the range of $Y$. Then
+\begin{align*}
+\H(X \mid Y) \;\le\; \H(X \mid f(Y)).
+\end{align*}
+\end{fact}
+
+\begin{fact}[Uniform maximizes entropy, {\cite[Theorem 2.6.4]{cover2006elements}}]\label{fac:uniform-max}
+For a discrete random variable $X$ supported on a finite set $\mathcal{X}$,
+$\H(X) \le \log |\mathcal{X}|$, with equality if and only if $X$ is uniform on $\mathcal{X}$.
+\end{fact}
+
+\begin{fact}[Concavity of binary entropy]\label{fac:hbin-concave}
+The binary entropy function $\hbin : [0,1] \to [0, 1]$ is concave.
+Equivalently, for any $p, p' \in [0,1]$ and $\lambda \in [0,1]$,
+$\hbin(\lambda p + (1-\lambda) p') \ge \lambda \hbin(p) + (1-\lambda) \hbin(p')$.
+\end{fact}
+
+\begin{remark}\label{rem:hbin-concave}
+\Cref{fac:hbin-concave} is immediate from $\hbin''(p) = -\frac{1}{(\ln 2)\, p (1-p)} < 0$ for $p \in (0,1)$,
+together with the boundary values $\hbin(0) = \hbin(1) = 0$.
+\end{remark}
+
+\paragraph{Bernoulli unions.}
+We will use the following identity throughout without further comment:
+if $X \sim \Bern(p)$ and $X' \sim \Bern(p')$ are independent, then
+$X \cup X' = \max(X, X') \sim \Bern(p + p' - p p')$, since
+$\Pr[\max(X, X') = 0] = \Pr[X=0]\Pr[X'=0] = (1-p)(1-p')$.
+In particular, $\H(X \cup X') = \hbin(p + p' - p p')$.

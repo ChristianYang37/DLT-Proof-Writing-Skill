@@ -1,0 +1,78 @@
+% Macros for the Ellenberg-Gijswijt cap-set bound
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{aliascnt}
+\usepackage{url}
+\usepackage[capitalize]{cleveref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+
+% Master counter
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+
+\newaliascnt{lemma}{theorem}
+\newtheorem{lemma}[lemma]{Lemma}
+\aliascntresetthe{lemma}
+
+\newaliascnt{proposition}{theorem}
+\newtheorem{proposition}[proposition]{Proposition}
+\aliascntresetthe{proposition}
+
+\newaliascnt{corollary}{theorem}
+\newtheorem{corollary}[corollary]{Corollary}
+\aliascntresetthe{corollary}
+
+\theoremstyle{definition}
+\newaliascnt{definition}{theorem}
+\newtheorem{definition}[definition]{Definition}
+\aliascntresetthe{definition}
+
+\newaliascnt{assumption}{theorem}
+\newtheorem{assumption}[assumption]{Assumption}
+\aliascntresetthe{assumption}
+
+\newaliascnt{fact}{theorem}
+\newtheorem{fact}[fact]{Fact}
+\aliascntresetthe{fact}
+
+\theoremstyle{remark}
+\newaliascnt{remark}{theorem}
+\newtheorem{remark}[remark]{Remark}
+\aliascntresetthe{remark}
+
+\crefname{theorem}{Theorem}{Theorems}
+\crefname{lemma}{Lemma}{Lemmas}
+\crefname{proposition}{Proposition}{Propositions}
+\crefname{corollary}{Corollary}{Corollaries}
+\crefname{definition}{Definition}{Definitions}
+\crefname{assumption}{Assumption}{Assumptions}
+\crefname{fact}{Fact}{Facts}
+\crefname{remark}{Remark}{Remarks}
+\crefname{equation}{Eq.}{Eqs.}
+
+% Fields and sets
+\providecommand{\F}{}
+\renewcommand{\F}{\mathbb{F}}
+\providecommand{\R}{}
+\renewcommand{\R}{\mathbb{R}}
+\providecommand{\N}{}
+\renewcommand{\N}{\mathbb{N}}
+\providecommand{\Z}{}
+\renewcommand{\Z}{\mathbb{Z}}
+\newcommand{\1}{\mathbf{1}}
+
+% Operators
+\DeclareMathOperator{\sr}{slice\,rank}
+\DeclareMathOperator{\rk}{rank}
+\DeclareMathOperator{\spann}{span}
+\DeclareMathOperator{\supp}{supp}
+\DeclareMathOperator{\poly}{poly}
+
+% Custom
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\Fthree}{\F_3}
+
+% Vectors
+\renewcommand{\vec}[1]{\mathbf{#1}}

@@ -1,0 +1,44 @@
+\documentclass[11pt]{article}
+
+% Geometry / typography
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+
+% Math
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{aliascnt}
+\usepackage{mathtools}
+
+% Cross-references (hyperref must be loaded BEFORE cleveref)
+\usepackage{hyperref}
+\usepackage[capitalize,noabbrev]{cleveref}
+
+% Enumerate
+\usepackage{enumitem}
+
+% Bibliography
+\usepackage[numbers,square]{natbib}
+
+% Macros and theorem environments
+\input{macros}
+
+\title{Gilmer's entropy proof of the union-closed sets bound}
+\author{}
+\date{}
+
+\begin{document}
+
+% No abstract / introduction per the skill's scope.
+
+\input{sections/01-preliminaries}
+\input{sections/02-elementary-entropy}
+\input{sections/03-lemma-1}
+\input{sections/04-theorem-entropy}
+\input{sections/05-main-theorem}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}

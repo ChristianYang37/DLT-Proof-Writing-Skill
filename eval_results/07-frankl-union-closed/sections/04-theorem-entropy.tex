@@ -1,0 +1,106 @@
+\section{The information-theoretic strengthening}
+\label{sec:theorem1}
+
+The next theorem is the information-theoretic strengthening that drives the
+combinatorial conclusion in \Cref{sec:main}. Its proof reveals the bits of
+$A$ and $A \cup B$ one at a time, applies \Cref{lem:gap} to each conditional
+slice, and aggregates by the chain rule.
+
+\begin{theorem}[Information-theoretic strengthening]\label{thm:entropy-gap}
+Let $A$ and $B$ be independent samples from a distribution over subsets of
+$[n]$. Assume that for every $i \in [n]$, $\Pr[i \in A] \le 0.01$. Then
+\begin{align}\label{eq:thm-entropy-gap}
+\H(A \cup B) \;\ge\; 1.26 \, \H(A).
+\end{align}
+In particular, if $\H(A) > 0$, then $\H(A \cup B) > \H(A)$.
+\end{theorem}
+
+\begin{proof}
+The proof has two steps: (i) prove a per-coordinate version
+$\H((A \cup B)_i \mid (A \cup B)_{<i}) \ge 1.26 \, \H(A_i \mid A_{<i})$ for
+each $i \in [n]$, and (ii) sum over $i$ by the chain rule
+(\Cref{fac:chain-rule}).
+
+\paragraph{Step 1: A useful function-of-history identity.}
+Identify $A, B \subseteq [n]$ with their indicator vectors
+$(A_1, \dots, A_n), (B_1, \dots, B_n) \in \{0, 1\}^n$. Write
+$A_{<i} := (A_1, \dots, A_{i-1})$ (an empty tuple when $i = 1$) and similarly
+$B_{<i}$. Observe that
+\begin{align}\label{eq:func-of-hist}
+(A \cup B)_{<i} \;=\; \bigl( A_1 \cup B_1, \dots, A_{i-1} \cup B_{i-1} \bigr)
+\;=\; \phi(A_{<i}, B_{<i}),
+\end{align}
+where $\phi : \{0,1\}^{i-1} \times \{0,1\}^{i-1} \to \{0,1\}^{i-1}$ is the
+coordinatewise-maximum map $\phi(a, b) = (\max(a_j, b_j))_{j < i}$. So
+$(A \cup B)_{<i}$ is a (deterministic) function of $(A_{<i}, B_{<i})$.
+
+\paragraph{Step 2: Per-coordinate conditional-entropy bound.}
+Fix any $i \in [n]$. We show
+\begin{align}\label{eq:per-coord}
+\H((A \cup B)_i \mid (A \cup B)_{<i}) \;\ge\; 1.26 \, \H(A_i \mid A_{<i}).
+\end{align}
+By Eq.~\eqref{eq:func-of-hist} and \Cref{fac:data-processing}
+(data-processing for entropy, applied with $X = (A \cup B)_i$,
+$Y = (A_{<i}, B_{<i})$, and $f = \phi$),
+\begin{align}\label{eq:dpi-step}
+\H((A \cup B)_i \mid (A \cup B)_{<i})
+\;=\; \H\!\bigl((A \cup B)_i \mid \phi(A_{<i}, B_{<i})\bigr)
+\;\ge\; \H\!\bigl((A \cup B)_i \mid A_{<i}, B_{<i}\bigr).
+\end{align}
+
+We now apply \Cref{lem:gap} with the substitution
+\begin{align*}
+C \;\leftarrow\; A_{<i}, \quad
+C' \;\leftarrow\; B_{<i}, \quad
+X \;\leftarrow\; A_i, \quad
+X' \;\leftarrow\; B_i.
+\end{align*}
+We verify the hypotheses of \Cref{lem:gap} under this substitution:
+\begin{itemize}
+\item $A_{<i}$ takes values in the finite set $S := \{0,1\}^{i-1}$ (with $S$
+  a singleton when $i = 1$);
+\item conditional on $A_{<i} = a$, $A_i$ is Bernoulli with parameter
+  $p_a := \Pr[A_i = 1 \mid A_{<i} = a] \in [0, 1]$;
+\item $B_{<i}$ has the same distribution as $A_{<i}$ (since $B$ has the same
+  distribution as $A$) and is independent of $A_{<i}$ (since $A$ and $B$ are
+  independent samples);
+\item conditional on $B_{<i} = a$, $B_i$ is Bernoulli with parameter $p_a$
+  (same conditional distribution as $A_i \mid A_{<i} = a$);
+\item $B_i$ is independent of $(A_{<i}, A_i)$ (again by independence of $A$
+  and $B$);
+\item the mean hypothesis: $\E[A_i] = \Pr[i \in A] \le 0.01$ by assumption.
+\end{itemize}
+All the hypotheses of \Cref{lem:gap} are met. Furthermore, $A_i \cup B_i = (A \cup B)_i$ by definition.
+The conclusion of \Cref{lem:gap} therefore reads
+\begin{align}\label{eq:apply-gap}
+\H\!\bigl((A \cup B)_i \mid A_{<i}, B_{<i}\bigr)
+\;=\; \H(A_i \cup B_i \mid A_{<i}, B_{<i})
+\;\ge\; 1.26 \, \H(A_i \mid A_{<i}).
+\end{align}
+Combining Eq.~\eqref{eq:dpi-step} and Eq.~\eqref{eq:apply-gap} gives
+Eq.~\eqref{eq:per-coord}.
+
+\paragraph{Step 3: Aggregate via the chain rule.}
+By the chain rule (\Cref{fac:chain-rule}) applied to the indicator vectors
+of $A \cup B$ and of $A$, respectively,
+\begin{align*}
+\H(A \cup B)
+\;=\; \H\!\bigl((A \cup B)_1, \dots, (A \cup B)_n\bigr)
+\;=\; \sum_{i=1}^{n} \H\!\bigl((A \cup B)_i \mid (A \cup B)_{<i}\bigr),
+\end{align*}
+and
+\begin{align*}
+\H(A) \;=\; \sum_{i=1}^{n} \H(A_i \mid A_{<i}).
+\end{align*}
+Applying Eq.~\eqref{eq:per-coord} term-by-term,
+\begin{align*}
+\H(A \cup B) \;=\; \sum_{i=1}^{n} \H\!\bigl((A \cup B)_i \mid (A \cup B)_{<i}\bigr)
+\;\ge\; \sum_{i=1}^{n} 1.26 \, \H(A_i \mid A_{<i}) \;=\; 1.26 \, \H(A).
+\end{align*}
+This is Eq.~\eqref{eq:thm-entropy-gap}.
+
+\paragraph{Strict inequality when $\H(A) > 0$.}
+If $\H(A) > 0$, then $1.26 \, \H(A) > \H(A)$, and the chain
+$\H(A \cup B) \ge 1.26 \, \H(A) > \H(A)$ yields $\H(A \cup B) > \H(A)$
+strictly. This completes the proof.
+\end{proof}

@@ -183,7 +183,18 @@ runner-log.md]
 | 4 | LSVI-UCB regret (Linear MDP) | [📄 PDF](eval_results/04-linear-mdp-ucb/pdf/main.pdf) | accept-as-is | 15 · 🟢 10 / 🟡 4 / 🔴 1 | 2 iter | [grading](eval_results/04-linear-mdp-ucb/grading.json) · [log](eval_results/04-linear-mdp-ucb/runner-log.md) · [实验方案](eval_results/04-linear-mdp-ucb/experiments-plan.md) |
 | 5 | Sobolev minimax 下界 | [📄 PDF](eval_results/05-sobolev-lower-bound/pdf/main.pdf) | accept-as-is | 25 · 🟢 21 / 🟡 4 / 🔴 0 | **3 iter** | [grading](eval_results/05-sobolev-lower-bound/grading.json) · [log](eval_results/05-sobolev-lower-bound/runner-log.md) |
 
-**总计：** 50/50 assertions pass (100%)。完整报告见 [`eval_results/benchmark.md`](eval_results/benchmark.md)，里面记录了 Phase D loop 实际抓到的错误（eval 5 抓到 2 个 critical sign errors、eval 4 抓到 prompt 本身的数学错误等）。
+### 扩展验证 —— out-of-DLT 泛化探针 (v1.1)
+
+v1.0 后新增 2 个纯数学探针，测试 skill 的 workflow 是否能迁移到 DLT 之外：
+
+| # | Eval | 证明 PDF | Verdict | Phase C.5 | Phase D | 详情 |
+|---|---|---|---|---|---|---|
+| 6 | Ellenberg–Gijswijt cap-set 上界 | [📄 PDF](eval_results/06-cap-set/pdf/main.pdf) | accept-as-is | 20 · 🟢 18 / 🟡 2 / 🔴 0 | **3 iter** | [grading](eval_results/06-cap-set/grading.json) · [log](eval_results/06-cap-set/runner-log.md) |
+| 7 | Gilmer union-closed 下界 | [📄 PDF](eval_results/07-frankl-union-closed/pdf/main.pdf) | accept-as-is | 30 · 🟢 29 / 🟡 1 / 🔴 0 | 2 iter | [grading](eval_results/07-frankl-union-closed/grading.json) · [log](eval_results/07-frankl-union-closed/runner-log.md) |
+
+两个都通过，说明 workflow 纪律（Phase C.5 + D + citation digest + R5 pairing）**不限定于** DLT。**但 skill 不声明为通用数学证明工具**——scope 注意事项见 `eval_results/benchmark.md` §Extended evals。
+
+**全部 7 evals 合计：** 70/70 assertions pass (100%)。完整报告见 [`eval_results/benchmark.md`](eval_results/benchmark.md)，里面记录了 Phase D loop 实际抓到的错误（eval 5 抓到 2 个 critical sign errors、eval 4 抓到 prompt 本身的数学错误等）。
 
 ---
 

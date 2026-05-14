@@ -1,0 +1,74 @@
+\section{Slice rank lower bound for diagonal tensors}
+\label{sec:slice-rank-lower-bound}
+
+The following lemma is the key linear-algebraic input. It says that a tensor supported exactly on the diagonal of $V^3$ with nonzero diagonal entries has slice rank equal to $|V|$. We follow Tao's symmetric formulation \cite{Tao2016blog}.
+
+\begin{lemma}[Diagonal lower bound for slice rank]\label{lem:slice-rank-diagonal}
+Let $V$ be a finite set, let $F$ be a field, and let $T: V \times V \times V \to F$ satisfy
+\begin{enumerate}[label=(\roman*), ref=\ref*{lem:slice-rank-diagonal}(\roman*)]
+    \item\label{lem:slice-rank-diagonal:diag} $T(x, y, z) = 0$ whenever $(x, y, z)$ is not on the diagonal, i.e.\ whenever $x, y, z$ are not all equal;
+    \item\label{lem:slice-rank-diagonal:nz} $T(x, x, x) \ne 0$ for every $x \in V$.
+\end{enumerate}
+Then $\sr(T) = |V|$.
+\end{lemma}
+
+\begin{proof}
+The upper bound $\sr(T) \le |V|$ is immediate from the diagonal decomposition: for each $x_0 \in V$ define $f_{x_0}: V \to F$ by $f_{x_0}(x) = \1[x = x_0]$ and $g_{x_0}: V \times V \to F$ by $g_{x_0}(y, z) = T(x_0, y, z)$. Then $T(x, y, z) = \sum_{x_0 \in V} f_{x_0}(x) \, g_{x_0}(y, z)$, a sum of $|V|$ many $1$-slices.
+
+The lower bound $\sr(T) \ge |V|$ is the content of the lemma. The case $|V| = 0$ is trivial (both sides are $0$); we assume $|V| \ge 1$ henceforth. Suppose for contradiction that
+\begin{align}\label{eq:slice-rank-decomposition}
+T \;=\; \sum_{j=1}^{r_1} f_j^{(1)}(x) \, g_j^{(1)}(y, z) \;+\; \sum_{j=1}^{r_2} f_j^{(2)}(y) \, g_j^{(2)}(x, z) \;+\; \sum_{j=1}^{r_3} f_j^{(3)}(z) \, g_j^{(3)}(x, y),
+\end{align}
+with $r_1 + r_2 + r_3 = r < |V|$. We will derive a contradiction with hypothesis~\Cref{lem:slice-rank-diagonal:nz}.
+
+\textbf{Eliminating the $1$-slices.} Let $W_1 \subseteq F^V$ be the linear span of the functions $f_1^{(1)}, \dots, f_{r_1}^{(1)}: V \to F$; then $\dim W_1 \le r_1$. Since $W_1$ is a subspace of $F^V$ of dimension at most $r_1$, its annihilator $W_1^\perp \subseteq F^V$ (under the standard bilinear form $\langle u, v \rangle = \sum_{x \in V} u(x) v(x)$) has dimension at least $|V| - r_1$.
+
+Let $\phi: V \to F$ be any element of $W_1^\perp \setminus \{0\}$; equivalently, $\phi$ is a function on $V$ with $\sum_{x \in V} \phi(x) f_j^{(1)}(x) = 0$ for every $j \in [r_1]$. We multiply Eq.~\eqref{eq:slice-rank-decomposition} by $\phi(x)$ and sum over $x \in V$. The first block vanishes by construction:
+\begin{align*}
+\sum_{x \in V} \phi(x) \sum_{j=1}^{r_1} f_j^{(1)}(x) g_j^{(1)}(y, z)
+\;=\; \sum_{j=1}^{r_1} \Big( \sum_{x \in V} \phi(x) f_j^{(1)}(x) \Big) g_j^{(1)}(y, z)
+\;=\; 0.
+\end{align*}
+Setting $\widetilde{T}(y, z) \triangleq \sum_{x \in V} \phi(x) \, T(x, y, z)$, we therefore obtain
+\begin{align}\label{eq:Ttilde}
+\widetilde{T}(y, z)
+&\;=\; \sum_{j=1}^{r_2} \Big( \sum_{x \in V} \phi(x) g_j^{(2)}(x, z) \Big) f_j^{(2)}(y) \;+\; \sum_{j=1}^{r_3} \Big( \sum_{x \in V} \phi(x) g_j^{(3)}(x, y) \Big) f_j^{(3)}(z) \notag\\
+&\;=\; \sum_{j=1}^{r_2} \widetilde{g}_j^{(2)}(z) \, f_j^{(2)}(y) \;+\; \sum_{j=1}^{r_3} \widetilde{g}_j^{(3)}(y) \, f_j^{(3)}(z),
+\end{align}
+where $\widetilde{g}_j^{(2)}(z) \triangleq \sum_x \phi(x) g_j^{(2)}(x, z)$ and $\widetilde{g}_j^{(3)}(y) \triangleq \sum_x \phi(x) g_j^{(3)}(x, y)$. The right-hand side of Eq.~\eqref{eq:Ttilde} expresses $\widetilde{T}$ as a sum of $r_2 + r_3$ matrix-rank-$1$ terms (each a function of $y$ times a function of $z$, in some orientation). Hence
+\begin{align}\label{eq:rank-Ttilde}
+\rk(\widetilde{T}) \;\le\; r_2 + r_3,
+\end{align}
+where $\widetilde{T}$ is viewed as a $V \times V$ matrix indexed by $(y, z)$.
+
+\textbf{The diagonal structure of $\widetilde{T}$.} By hypothesis~\Cref{lem:slice-rank-diagonal:diag}, $T(x, y, z) = 0$ unless $x = y = z$, so
+\begin{align*}
+\widetilde{T}(y, z)
+\;=\; \sum_{x \in V} \phi(x) T(x, y, z)
+\;=\; \phi(y) \, T(y, y, y) \cdot \1[y = z].
+\end{align*}
+Thus $\widetilde{T}$ is a $V \times V$ diagonal matrix with diagonal entries $\phi(y) \cdot T(y, y, y)$.
+
+\textbf{Computing $\rk(\widetilde{T})$.} The matrix $\widetilde{T}$ is diagonal, so its rank equals the number of nonzero diagonal entries:
+\begin{align*}
+\rk(\widetilde{T}) \;=\; \big|\{y \in V : \phi(y) \, T(y, y, y) \ne 0\}\big| \;=\; \big|\{y \in V : \phi(y) \ne 0\}\big|,
+\end{align*}
+where the second equality uses hypothesis~\Cref{lem:slice-rank-diagonal:nz}, namely $T(y, y, y) \ne 0$ for every $y \in V$. Combining with Eq.~\eqref{eq:rank-Ttilde},
+\begin{align}\label{eq:phi-support}
+|\supp(\phi)| \;\le\; r_2 + r_3.
+\end{align}
+
+\textbf{Choosing $\phi$ to maximize support.} The inequality Eq.~\eqref{eq:phi-support} holds for \emph{every} $\phi \in W_1^\perp \setminus \{0\}$. We claim that some such $\phi$ has $|\supp(\phi)| \ge |V| - r_1$.
+
+To see this, set $W \triangleq W_1^\perp$ and $d \triangleq \dim W \ge |V| - r_1$, and choose a basis $\phi_1, \dots, \phi_d$ of $W$ in reduced row-echelon form with respect to the standard coordinate basis of $F^V$. The $d$ pivot columns lie in $d$ distinct coordinate positions $x_1^*, \dots, x_d^* \in V$, and by the REF property, $\phi_k(x_j^*) = \1[j = k]$ for $j, k \in [d]$. Set $\phi \triangleq \phi_1 + \phi_2 + \cdots + \phi_d \in W$. Then $\phi(x_k^*) = \sum_j \phi_j(x_k^*) = \phi_k(x_k^*) = 1 \ne 0$ for every $k \in [d]$. Hence $\supp(\phi) \supseteq \{x_1^*, \dots, x_d^*\}$, giving $|\supp(\phi)| \ge d \ge |V| - r_1$.
+
+\textbf{Combining.} From $|\supp(\phi)| \ge |V| - r_1$ and Eq.~\eqref{eq:phi-support},
+\begin{align*}
+|V| - r_1 \;\le\; |\supp(\phi)| \;\le\; r_2 + r_3.
+\end{align*}
+Rearranging, $|V| \le r_1 + r_2 + r_3 = r$, contradicting the assumption $r < |V|$. This completes the proof.
+\end{proof}
+
+\begin{remark}\label{rem:slice-rank-diagonal-q}
+The proof works over any field, and indeed generalizes to $k$-tensors for any $k \ge 2$ by induction on $k$ (with $k = 2$ being the standard rank lower bound for diagonal matrices). We use only the $k = 3$ case.
+\end{remark}

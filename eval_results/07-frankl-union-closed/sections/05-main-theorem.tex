@@ -1,0 +1,92 @@
+\section{The main theorem}
+\label{sec:main}
+
+We now derive the combinatorial statement of Gilmer's theorem from the
+information-theoretic strengthening of \Cref{sec:theorem1}.
+
+\begin{theorem}[Gilmer, {\cite[Theorem 2]{gilmer2022}}]\label{thm:main}
+There exists a universal constant $c > 0$ such that for every union-closed
+family $\Fcal \subseteq 2^{[n]}$ with $|\Fcal| \ge 2$, some element
+$i \in [n]$ satisfies
+\begin{align}\label{eq:main}
+\bigl| \{ A \in \Fcal : i \in A \} \bigr| \;\ge\; c \cdot |\Fcal|.
+\end{align}
+The explicit value $c = 0.01$ is admissible.
+\end{theorem}
+
+\begin{proof}
+The strategy is contrapositive: we show that if every element $i \in [n]$
+were contained in strictly fewer than a $0.01$ fraction of the sets in
+$\Fcal$, then the information-theoretic strengthening
+(\Cref{thm:entropy-gap}) applied to two iid uniform samples from $\Fcal$
+would yield $\H(A \cup B) > \H(A)$ when $\H(A) > 0$ -- contradicting the
+fact that $A \cup B \in \Fcal$ a.s.\ (so $\H(A \cup B) \le \log |\Fcal| = \H(A)$).
+
+\paragraph{Step 1: Set up the uniform coupling on $\Fcal$.}
+Let $A$ and $B$ be independent samples from the uniform distribution on
+$\Fcal$. Then $A$ and $B$ each have entropy
+\begin{align}\label{eq:HA-uniform}
+\H(A) \;=\; \H(B) \;=\; \log |\Fcal|,
+\end{align}
+by definition of the uniform distribution on a set of size $|\Fcal|$.
+
+\paragraph{Step 2: Union-closedness gives $\H(A \cup B) \le \log|\Fcal|$.}
+Because $\Fcal$ is union-closed (\Cref{def:union-closed}), $A \cup B \in \Fcal$
+almost surely. Hence $A \cup B$ is a random variable supported on the finite
+set $\Fcal$, and \Cref{fac:uniform-max} yields
+\begin{align}\label{eq:cup-bound}
+\H(A \cup B) \;\le\; \log |\Fcal| \;=\; \H(A),
+\end{align}
+where the equality uses Eq.~\eqref{eq:HA-uniform}.
+
+\paragraph{Step 3: Contrapositive setup.}
+We argue by contradiction. Suppose, toward a contradiction, that every
+$i \in [n]$ satisfies
+\begin{align}\label{eq:contra-hyp}
+\bigl| \{ A \in \Fcal : i \in A \} \bigr| \;<\; 0.01 \cdot |\Fcal|.
+\end{align}
+Since $A$ is uniform on $\Fcal$, $\Pr[i \in A] = | \{ A \in \Fcal : i \in A \} | / |\Fcal|$.
+Therefore Eq.~\eqref{eq:contra-hyp} translates to
+\begin{align}\label{eq:contra-prob}
+\Pr[i \in A] \;<\; 0.01 \qquad \text{for every } i \in [n].
+\end{align}
+In particular, $\Pr[i \in A] \le 0.01$ holds for every $i$, and the
+hypotheses of \Cref{thm:entropy-gap} are satisfied.
+
+\paragraph{Step 4: $\H(A) > 0$ from $|\Fcal| \ge 2$.}
+Since $|\Fcal| \ge 2$ and $A$ is uniform on $\Fcal$,
+\begin{align}\label{eq:HA-positive}
+\H(A) \;=\; \log |\Fcal| \;\ge\; \log 2 \;=\; 1 \;>\; 0.
+\end{align}
+
+\paragraph{Step 5: Derive the contradiction.}
+Applying \Cref{thm:entropy-gap},
+\begin{align}\label{eq:apply-thm-entropy}
+\H(A \cup B) \;\ge\; 1.26 \, \H(A).
+\end{align}
+Combining Eq.~\eqref{eq:apply-thm-entropy} with Eq.~\eqref{eq:cup-bound},
+\begin{align*}
+1.26 \, \H(A) \;\le\; \H(A \cup B) \;\le\; \H(A),
+\end{align*}
+which forces $0.26 \, \H(A) \le 0$, i.e.\ $\H(A) \le 0$. This contradicts
+Eq.~\eqref{eq:HA-positive}.
+
+\paragraph{Conclusion.}
+The supposition Eq.~\eqref{eq:contra-hyp} fails for at least one $i \in [n]$;
+that is, some $i \in [n]$ satisfies
+$|\{A \in \Fcal : i \in A\}| \ge 0.01 \cdot |\Fcal|$. Taking $c = 0.01$
+gives Eq.~\eqref{eq:main}. This completes the proof.
+\end{proof}
+
+\begin{remark}\label{rem:tightness}
+The constant $c = 0.01$ in \Cref{thm:main} is not tight. Gilmer's original
+paper~\cite{gilmer2022} already notes that the constant was not optimized
+and that the same proof technique, with a more careful analysis of the
+constants in \Cref{lem:gap}, would yield a strictly larger admissible $c$.
+Subsequent work (Sawin; Chase-Lovett; Alweiss-Huang-Sellke; all in late 2022,
+within days of Gilmer's preprint) showed that the entropy approach can be
+pushed to $c \to (3 - \sqrt{5})/2 \approx 0.38$, which is the maximum
+achievable by this technique without further input. The Frankl
+conjecture~\cite{frankl1995extremal}, which asks whether $c = 1/2$ is
+admissible, remains open.
+\end{remark}

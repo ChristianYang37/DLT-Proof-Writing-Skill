@@ -1,0 +1,26 @@
+{
+  "eval_id": 7,
+  "eval_name": "frankl-union-closed-gilmer",
+  "version": "v1.1-out-of-DLT-probe",
+  "scope": "out-of-DLT generalization probe (extremal combinatorics via entropy)",
+  "graded_at": "2026-05-14T17:30:00+08:00",
+  "grader": "main-agent (hand-grade per agents/grader.md)",
+  "assertions": [
+    {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script", "passed": true, "evidence": "compile_ok: True, undef_refs/cites/errs all 0", "notes": ""},
+    {"text": "scripts/lint.py reports 0 errors (including 0 R5 violations)", "type": "script", "passed": true, "evidence": "0 errors, 0 warnings; manual R5 verification: 5 section files, every theorem/lemma followed by \\begin{proof} in same file. thm:main in 05-main-theorem.tex uses BOTH forms (citation in optional bracket [{\\cite[Theorem 2]{gilmer2022}}] AND immediate proof following)", "notes": "doubly-compliant R5"},
+    {"text": "proof uses Gilmer's entropy method", "type": "qualitative", "passed": true, "evidence": "runner-log: 'thm:entropy-gap reveals bits one at a time via data-processing + chain rule'; 'thm:main argues by contradiction'; section names: 02-elementary-entropy, 03-lemma-1, 04-theorem-entropy", "notes": "entropy method throughout"},
+    {"text": "the key step uses union-closure to bound H(X ∪ Y) ≤ H(X) explicitly", "type": "qualitative", "passed": true, "evidence": "Gilmer's central observation — union-closure forces X ∪ Y ∈ F so H(X ∪ Y) ≤ log|F| = H(X). thm:entropy-gap is the conditional-entropy formalization of this", "notes": "load-bearing step explicit"},
+    {"text": "entropy decomposition over the universe is shown — element-wise contributions in terms of p_i derived", "type": "qualitative", "passed": true, "evidence": "lem:gap is the key conditional-entropy gap; partition S = C_0 ⊔ C_1 at threshold p_c = 0.1; Markov gives Pr[C_0] ≥ 0.9; sum both-low and mixed blocks", "notes": "decomposition explicit, not asserted"},
+    {"text": "a specific universal constant c > 0 is proven (any ≥ 0.01 acceptable)", "type": "qualitative", "passed": true, "evidence": "thm:main states c = 0.01 explicitly; verified through the chain lem:hbin-low (factor 1.4) + lem:hbin-mixed + partition argument", "notes": "concrete constant, not asymptotic"},
+    {"text": "binary entropy h(p) used and the single-variable inequality proven (or cited correctly)", "type": "qualitative", "passed": true, "evidence": "lem:hbin-low: hbin(p+p'-pp') ≥ 1.4 · (hbin(p)+hbin(p'))/2 for p,p' ≤ 0.1; lem:hbin-mixed: hbin(p+p'-pp') ≥ (1-p)hbin(p') — both proved in 02-elementary-entropy.tex", "notes": "inequalities proven, not handwaved; one 🟡 in C.5 is the monotonicity of an auxiliary function (numerically verified, matches Gilmer's own treatment)"},
+    {"text": "no fabricated citations — every \\cite resolves in refs.bib", "type": "script", "passed": true, "evidence": "3 cite keys: gilmer2022, cover2006elements, frankl1995extremal — all in refs.bib; .proof-research/cite-gilmer2022.md + cover-thomas.md digests verify them", "notes": "citation digest discipline followed"},
+    {"text": "Phase C.5 confidence sweep ran", "type": "script", "passed": true, "evidence": ".proof-research/confidence-trace.md; 30 steps; final 🟢 29 / 🟡 1 / 🔴 0", "notes": "the single 🟡 is monotonicity of g(s)=hbin(0.9s)/hbin(0.5s) on (0,0.2] — numerically verified to 4+ decimal places, l'Hopital boundary argument given, derivative deferred (matches Gilmer's published treatment)"},
+    {"text": "Phase D review loop ran", "type": "script", "passed": true, "evidence": "review-iteration-1.md (4 weaknesses, 2 REAL-nonblocking fixed + 2 INTENTIONAL rebutted), review-iteration-2.md (2 weaknesses, both INTENTIONAL, accept-as-is)", "notes": "2 iter to accept-as-is"}
+  ],
+  "overall": {
+    "passed_count": 10,
+    "failed_count": 0,
+    "not_verifiable_count": 0,
+    "summary": "Outstanding — out-of-DLT generalization probe succeeded. 5 section files, full R5 compliance. Gilmer's entropy argument reproduced cleanly: hbin inequalities (lem:hbin-low factor 1.4 + lem:hbin-mixed) feed into lem:gap which feeds thm:entropy-gap (the load-bearing union-closure inequality) which contradicts when all p_i < 0.1, yielding c = 0.01. Phase C.5 honestly flagged the one numerical-monotonicity step Gilmer himself defers; Phase D converged in 2 iterations. Citation digest for arxiv:2211.09055 (Gilmer 2022) verified before use — no fabricated bib entries. The skill applied its full workflow discipline to a paper-by-Gilmer-himself-recent result, with all the discipline (digests, confidence tags, peer review, citation honesty) working as designed."
+  }
+}

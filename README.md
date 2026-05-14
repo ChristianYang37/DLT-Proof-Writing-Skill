@@ -183,7 +183,18 @@ runner-log.md]
 | 4 | LSVI-UCB regret on Linear MDP | [📄 PDF](eval_results/04-linear-mdp-ucb/pdf/main.pdf) | accept-as-is | 15 · 🟢 10 / 🟡 4 / 🔴 1 | 2 iter | [grading](eval_results/04-linear-mdp-ucb/grading.json) · [log](eval_results/04-linear-mdp-ucb/runner-log.md) · [experiments plan](eval_results/04-linear-mdp-ucb/experiments-plan.md) |
 | 5 | Sobolev minimax lower bound | [📄 PDF](eval_results/05-sobolev-lower-bound/pdf/main.pdf) | accept-as-is | 25 · 🟢 21 / 🟡 4 / 🔴 0 | **3 iter** | [grading](eval_results/05-sobolev-lower-bound/grading.json) · [log](eval_results/05-sobolev-lower-bound/runner-log.md) |
 
-**Aggregate:** 50/50 assertions pass (100%). See [`eval_results/benchmark.md`](eval_results/benchmark.md) for the full report including what the Phase D loop actually caught (2 critical sign errors in eval 5, prompt math error in eval 4, etc.).
+### Extended evals — out-of-DLT generalization probes (v1.1)
+
+Two pure-math probes added post-v1.0 to test whether the skill's workflow discipline transfers outside DLT:
+
+| # | Eval | Proof PDF | Verdict | Phase C.5 | Phase D | Detail |
+|---|---|---|---|---|---|---|
+| 6 | Ellenberg–Gijswijt cap set bound | [📄 PDF](eval_results/06-cap-set/pdf/main.pdf) | accept-as-is | 20 · 🟢 18 / 🟡 2 / 🔴 0 | **3 iter** | [grading](eval_results/06-cap-set/grading.json) · [log](eval_results/06-cap-set/runner-log.md) |
+| 7 | Gilmer union-closed bound | [📄 PDF](eval_results/07-frankl-union-closed/pdf/main.pdf) | accept-as-is | 30 · 🟢 29 / 🟡 1 / 🔴 0 | 2 iter | [grading](eval_results/07-frankl-union-closed/grading.json) · [log](eval_results/07-frankl-union-closed/runner-log.md) |
+
+Both passing demonstrates that the workflow (Phase C.5 + D + citation digest + R5 pairing) is not domain-specific. **But the skill is not claimed as a general-purpose math-proof tool** — see `eval_results/benchmark.md` §Extended evals for the scope caveat.
+
+**Aggregate (all 7 evals):** 70/70 assertions pass (100%). See [`eval_results/benchmark.md`](eval_results/benchmark.md) for the full report including what the Phase D loop actually caught (2 critical sign errors in eval 5, prompt math error in eval 4, etc.).
 
 ---
 

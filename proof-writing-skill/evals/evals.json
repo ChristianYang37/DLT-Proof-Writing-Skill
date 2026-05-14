@@ -96,6 +96,46 @@
         {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method", "type": "script"},
         {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists with the Summary/Strengths/Weaknesses/Questions/Verdict schema", "type": "script"}
       ]
+    },
+    {
+      "id": 6,
+      "name": "cap-set-ellenberg-gijswijt",
+      "scope": "out-of-DLT generalization probe",
+      "prompt": "Prove the Ellenberg–Gijswijt cap-set upper bound: any subset $A \\subset \\mathbb{F}_3^n$ free of three-term arithmetic progressions (a 'cap set') satisfies $|A| \\le 3 M_n$, where $M_n$ is the number of monomials $\\prod_{i=1}^n x_i^{a_i}$ with $a_i \\in \\{0,1,2\\}$ and $\\sum_i a_i \\le 2n/3$. By an explicit computation, $M_n^{1/n} \\to 3\\gamma$ with $\\gamma < 0.9183$, yielding $|A| \\le C \\cdot (2.7558)^n$. Use the Croot–Lev–Pach / Ellenberg–Gijswijt slice-rank method: (1) define the slice rank of a 3-tensor; (2) consider $T(x,y,z) = \\delta_{x+y+z=0}$ restricted to $A^3$ where $A$ is the cap set; (3) prove the upper bound $\\mathrm{slice\\,rank}(T) \\le 3 M_n$ by exhibiting an explicit decomposition into slices supported on the low-degree monomial space; (4) prove the lower bound $\\mathrm{slice\\,rank}(T) \\ge |A|$ using that the no-3-AP property forces $T|_{A \\times A \\times A}$ to be a permutation of the identity up to scalars; (5) combine. Apply skill conventions: aliascnt, one-section-per-tex, Eq.~\\eqref, no \\[ \\], theorem-proof pairing (R5) — each lemma and the main theorem must have its proof immediately following in the same file.",
+      "expected_output": "Appendix-grade LaTeX file with: assumption block fixing $n, A$; lemma `lem:slice-rank-def` defining slice rank of a 3-tensor over a field, with proof of basic properties (subadditivity, slice rank of diagonal tensor); lemma `lem:upper` showing the restricted-tensor has slice rank $\\le 3M_n$ (proof via polynomial-method decomposition); lemma `lem:lower` showing slice rank $\\ge |A|$ via the no-3-AP property + diagonal-tensor lower bound; main theorem `thm:cap-set` $|A| \\le 3M_n$ with 3-line proof citing the lemmas; remark or corollary stating the $\\gamma < 0.9183$ numerical consequence. Each lemma and theorem must be paired with its proof in the same file (R5).",
+      "files": [],
+      "assertions": [
+        {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script"},
+        {"text": "scripts/lint.py reports 0 errors (including 0 R5 violations — every theorem/lemma immediately followed by its proof in the same file)", "type": "script"},
+        {"text": "proof uses the slice rank method (Croot–Lev–Pach / Ellenberg–Gijswijt), not a different route (Fourier, additive-combinatorics direct, etc.)", "type": "qualitative"},
+        {"text": "slice rank is defined as a separate \\begin{lemma} with at least basic properties (subadditivity OR diagonal-tensor lower bound) shown, not invoked as a black box", "type": "qualitative"},
+        {"text": "upper-bound lemma exhibits the polynomial-space decomposition (low-degree monomials with total degree ≤ 2n/3), not just asserts the bound", "type": "qualitative"},
+        {"text": "lower-bound lemma uses the no-3-AP property explicitly to reduce to a diagonal-tensor slice rank", "type": "qualitative"},
+        {"text": "the numerical consequence $|A| \\le C \\cdot (2.7558)^n$ (or equivalently the bound $\\gamma < 0.9183$) is stated as a remark or corollary, with the derivation from $M_n^{1/n}$ asymptotic at least sketched (citation of the optimization is acceptable if cited correctly)", "type": "qualitative"},
+        {"text": "no fabricated citations — every \\cite resolves in refs.bib (Croot–Lev–Pach 2017, Ellenberg–Gijswijt 2017 should be cited)", "type": "script"},
+        {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists", "type": "script"},
+        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md exists", "type": "script"}
+      ]
+    },
+    {
+      "id": 7,
+      "name": "frankl-union-closed-gilmer",
+      "scope": "out-of-DLT generalization probe",
+      "prompt": "Prove Gilmer's theorem (arXiv:2211.09055, 2022): there exists a universal constant $c > 0$ such that for every union-closed family $\\mathcal{F}$ of finite sets with $|\\mathcal{F}| \\ge 2$, some element $x$ of the universe satisfies $|\\{A \\in \\mathcal{F} : x \\in A\\}| \\ge c \\cdot |\\mathcal{F}|$. Prove the explicit constant $c \\ge 0.01$ via Gilmer's entropy argument: (1) let $X, Y$ be i.i.d. uniform samples from $\\mathcal{F}$; (2) since $\\mathcal{F}$ is union-closed, $X \\cup Y \\in \\mathcal{F}$, so $H(X \\cup Y) \\le \\log |\\mathcal{F}| = H(X) = H(Y)$; (3) decompose $H(X) - H(X \\cup Y)$ as a sum over the universe of element-wise contributions involving $p_i := \\Pr[i \\in X]$; (4) bound each element-wise contribution in terms of $p_i$ via a single-variable entropy inequality; (5) conclude that if every $p_i$ is bounded away from both 0 and 1, the sum is positive — contradicting step (2) — therefore some $p_i$ is $\\ge c$. Apply skill conventions: aliascnt, one-section-per-tex, Eq.~\\eqref, no \\[ \\], theorem-proof pairing (R5).",
+      "expected_output": "Appendix-grade LaTeX file with: definitions of union-closed family and basic entropy; lemma `lem:entropy-decomp` decomposing $H(X) - H(X \\cup Y)$ over the universe with element-wise terms; lemma `lem:single-var-ineq` for the key single-variable inequality (the function $f(p) = h(p^2) - 2h(p)$ where $h$ is binary entropy, or its analog); main theorem `thm:gilmer` stating Gilmer's bound with $c \\ge 0.01$ (or an explicit small constant), with proof assembling the lemmas via the union-closure step $H(X \\cup Y) \\le H(X)$. Each lemma and theorem must be paired with its proof in the same file (R5).",
+      "files": [],
+      "assertions": [
+        {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script"},
+        {"text": "scripts/lint.py reports 0 errors (including 0 R5 violations — every theorem/lemma immediately followed by its proof in the same file)", "type": "script"},
+        {"text": "proof uses Gilmer's entropy method, not direct combinatorial or probabilistic arguments unrelated to entropy", "type": "qualitative"},
+        {"text": "the key step uses union-closure to bound H(X ∪ Y) ≤ H(X) explicitly (this is the load-bearing step)", "type": "qualitative"},
+        {"text": "entropy decomposition over the universe is shown — element-wise contributions in terms of p_i := Pr[i ∈ X] are derived, not just asserted", "type": "qualitative"},
+        {"text": "a specific universal constant c > 0 is proven (any value ≥ 0.01 is acceptable; later improvements to ≈0.38 by Cambie, Yu, et al. need not be reproduced)", "type": "qualitative"},
+        {"text": "the binary entropy function h(p) (or its analog) is used in the single-variable inequality, and the inequality is proven (or cited from a textbook with an exact theorem/lemma number, not handwaved)", "type": "qualitative"},
+        {"text": "no fabricated citations — every \\cite resolves in refs.bib (Gilmer 2022 should be cited correctly with arXiv id)", "type": "script"},
+        {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists", "type": "script"},
+        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md exists", "type": "script"}
+      ]
     }
   ]
 }

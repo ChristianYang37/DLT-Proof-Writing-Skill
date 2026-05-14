@@ -1,0 +1,16 @@
+\section{Auxiliary cited results}
+\label{sec:auxiliary}
+
+For completeness we record the two external sources that frame the result of \Cref{thm:main}. Both are folded into the project bibliography; we do not reproduce their proofs.
+
+\begin{theorem}[Croot--Lev--Pach for $\Z_4^n$ {\cite{CrootLevPach2017}}]\label{thm:CLP-external}
+There exists an absolute constant $c < 4$ such that every subset $A \subseteq (\Z/4\Z)^n$ containing no three-term arithmetic progression with nonzero common difference satisfies $|A| \le C \cdot c^n$ for some absolute constant $C > 0$.
+\end{theorem}
+
+\begin{theorem}[Ellenberg--Gijswijt for $\F_q^n$, $q$ odd prime power {\cite{EllenbergGijswijt2017}}]\label{thm:EG-external}
+Let $q$ be an odd prime power. Then every subset $A \subseteq \F_q^n$ containing no three-term arithmetic progression with distinct terms satisfies $|A| \le 3 N_q(n)$, where $N_q(n)$ is the number of monomials $\prod_{i=1}^n x_i^{a_i}$ with $0 \le a_i \le q-1$ and $\sum_i a_i \le n(q-1)/3$. In particular, $N_q(n)^{1/n}$ has an explicit limit, strictly less than $q$, given by an entropy optimization in $q$ variables.
+\end{theorem}
+
+\begin{remark}\label{rem:external-vs-main}
+\Cref{thm:main} is \Cref{thm:EG-external} specialized to $q = 3$ and reformulated via the slice-rank language of \cite{Tao2016blog}. The numerical bound $(2.7558)^n$ in Eq.~\eqref{eq:main-asymp} arises from $3\gamma$ at $q = 3$, where $\gamma$ is the value of the entropy optimization over a discrete distribution on $\{0, 1, 2\}$.
+\end{remark}

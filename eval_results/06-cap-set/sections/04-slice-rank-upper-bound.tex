@@ -1,0 +1,86 @@
+\section{Slice rank upper bound: polynomial decomposition}
+\label{sec:slice-rank-upper-bound}
+
+The upper bound is the Croot--Lev--Pach polynomial step \cite{CrootLevPach2017}, transposed to $\F_3^n$ and re-expressed in the symmetric slice-rank form due to Tao \cite{Tao2016blog}. The starting point is the polynomial identity
+\begin{align}\label{eq:polynomial-identity}
+\1[w = 0] \;=\; 1 - w^2 \qquad \text{for } w \in \F_3,
+\end{align}
+which holds because $w^2 \in \{0, 1\}$ for $w \in \F_3$, with $w^2 = 0$ iff $w = 0$.
+
+\begin{lemma}[Polynomial form of $T_A$]\label{lem:T-polynomial}
+For every subset $A \subseteq \F_3^n$ and every $(x, y, z) \in A^3$,
+\begin{align*}
+T_A(x, y, z) \;=\; \prod_{i=1}^n \big( 1 - (x_i + y_i + z_i)^2 \big),
+\end{align*}
+where the right-hand side is computed in $\F_3$.
+\end{lemma}
+
+\begin{proof}
+By \Cref{def:T}, $T_A(x, y, z) = \1[x + y + z = 0]$. Since $x + y + z = 0$ in $\F_3^n$ iff $x_i + y_i + z_i = 0$ in $\F_3$ for every $i \in [n]$, and the indicator of a conjunction factors over its conjuncts,
+\begin{align*}
+\1[x + y + z = 0] \;=\; \prod_{i=1}^n \1[x_i + y_i + z_i = 0].
+\end{align*}
+Applying Eq.~\eqref{eq:polynomial-identity} with $w = x_i + y_i + z_i$ to each factor gives the claimed identity.
+\end{proof}
+
+We now expand the product and split the resulting polynomial into pieces that are each slices in one of the three orientations.
+
+\begin{lemma}[Slice rank upper bound]\label{lem:slice-rank-upper-bound}
+For every subset $A \subseteq \F_3^n$,
+\begin{align*}
+\sr(T_A) \;\le\; 3 M_n,
+\end{align*}
+where $M_n$ is as in \Cref{def:Mn}.
+\end{lemma}
+
+\begin{proof}
+The proof has three steps. We first expand the polynomial of \Cref{lem:T-polynomial} into a sum of monomials in the $3n$ variables $x_i, y_i, z_i$; second, we partition the monomials by which of the three variable groups $\{x_i\}$, $\{y_i\}$, $\{z_i\}$ carries the lowest total degree; third, we re-group each block into slices of one orientation each and count.
+
+\textbf{Step 1: monomial expansion.} Expanding the product in \Cref{lem:T-polynomial} and using $(x_i + y_i + z_i)^2 = x_i^2 + y_i^2 + z_i^2 + 2 x_i y_i + 2 x_i z_i + 2 y_i z_i$, we obtain
+\begin{align*}
+T_A(x, y, z) \;=\; \prod_{i=1}^n \big( 1 - (x_i + y_i + z_i)^2 \big) \;=\; \sum_{\alpha, \beta, \gamma} c_{\alpha, \beta, \gamma} \, x^{\alpha} y^{\beta} z^{\gamma},
+\end{align*}
+where the sum runs over multi-indices $\alpha = (\alpha_1, \dots, \alpha_n)$, $\beta = (\beta_1, \dots, \beta_n)$, $\gamma = (\gamma_1, \dots, \gamma_n) \in \{0, 1, 2\}^n$, $x^{\alpha} = \prod_i x_i^{\alpha_i}$ (similarly $y^{\beta}, z^{\gamma}$), and $c_{\alpha, \beta, \gamma} \in \F_3$ are scalar coefficients arising from the expansion. The key structural property is:
+\begin{align}\label{eq:degree-bound}
+c_{\alpha, \beta, \gamma} \ne 0 \;\implies\; |\alpha| + |\beta| + |\gamma| \;\le\; 2n,
+\end{align}
+where $|\alpha| = \sum_i \alpha_i$ etc. Indeed, the $i$-th factor $1 - (x_i + y_i + z_i)^2$, when fully expanded, contributes to each monomial a degree in $\{x_i, y_i, z_i\}$ of either $0$ (the $1$ term) or $2$ (every monomial inside $(x_i + y_i + z_i)^2$ has total degree $2$ in the three variables $x_i, y_i, z_i$ combined). Hence over the $n$ factors, the combined degree in all $3n$ variables is at most $2n$ — and exactly $2k$ if $k$ factors contributed their degree-$2$ part. Eq.~\eqref{eq:degree-bound} follows.
+
+\textbf{Step 2: partition by the lowest-degree variable group.} For each nonzero coefficient $c_{\alpha, \beta, \gamma}$, by Eq.~\eqref{eq:degree-bound} we have $|\alpha| + |\beta| + |\gamma| \le 2n$, so at least one of $|\alpha|, |\beta|, |\gamma|$ is at most $2n/3$. Choose one such variable group; ties are broken arbitrarily but consistently (e.g., favor $x$ over $y$ over $z$). Partition the multi-index triples $(\alpha, \beta, \gamma)$ into three sets:
+\begin{align*}
+S_1 &\;\triangleq\; \{(\alpha, \beta, \gamma) : c_{\alpha, \beta, \gamma} \ne 0, \ |\alpha| \le 2n/3\}, \\
+S_2 &\;\triangleq\; \{(\alpha, \beta, \gamma) : c_{\alpha, \beta, \gamma} \ne 0, \ |\alpha| > 2n/3, \ |\beta| \le 2n/3\}, \\
+S_3 &\;\triangleq\; \{(\alpha, \beta, \gamma) : c_{\alpha, \beta, \gamma} \ne 0, \ |\alpha| > 2n/3, \ |\beta| > 2n/3, \ |\gamma| \le 2n/3\}.
+\end{align*}
+By the previous observation (at least one of $|\alpha|, |\beta|, |\gamma|$ is at most $2n/3$), every nonzero-coefficient triple lies in $S_1 \cup S_2 \cup S_3$. We accordingly split
+\begin{align}\label{eq:split-three}
+T_A(x, y, z) \;=\; T^{(1)}(x, y, z) \;+\; T^{(2)}(x, y, z) \;+\; T^{(3)}(x, y, z),
+\end{align}
+where $T^{(k)}$ is the partial sum of $c_{\alpha, \beta, \gamma} x^{\alpha} y^{\beta} z^{\gamma}$ over $(\alpha, \beta, \gamma) \in S_k$.
+
+\textbf{Step 3: each $T^{(k)}$ is a sum of $M_n$ slices.} Consider $T^{(1)}$:
+\begin{align*}
+T^{(1)}(x, y, z)
+\;=\; \sum_{(\alpha, \beta, \gamma) \in S_1} c_{\alpha, \beta, \gamma} \, x^{\alpha} y^{\beta} z^{\gamma}
+\;=\; \sum_{\alpha : |\alpha| \le 2n/3} x^{\alpha} \cdot \Big( \sum_{(\beta, \gamma) : (\alpha, \beta, \gamma) \in S_1} c_{\alpha, \beta, \gamma} \, y^{\beta} z^{\gamma} \Big),
+\end{align*}
+where the outer sum runs over multi-indices $\alpha \in \{0,1,2\}^n$ with $|\alpha| \le 2n/3$, and the inner parenthesized expression depends only on $(y, z)$. Each term in the outer sum is a $1$-slice in the sense of \Cref{def:slice}: $f_\alpha(x) \triangleq x^{\alpha}$ as a function $A \to \F_3$, multiplied by $g_\alpha(y, z) \triangleq \sum_{\beta, \gamma} c_{\alpha, \beta, \gamma} y^{\beta} z^{\gamma}$ as a function $A \times A \to \F_3$. The number of multi-indices $\alpha \in \{0,1,2\}^n$ with $|\alpha| \le 2n/3$ is exactly $M_n$ (\Cref{def:Mn}). Hence
+\begin{align}\label{eq:T1-bound}
+\sr(T^{(1)}) \;\le\; M_n.
+\end{align}
+
+By the same argument with the roles of $x, y, z$ permuted: $T^{(2)}$ is a sum of $2$-slices indexed by $\beta$ with $|\beta| \le 2n/3$, and $T^{(3)}$ is a sum of $3$-slices indexed by $\gamma$ with $|\gamma| \le 2n/3$:
+\begin{align}\label{eq:T2-T3-bound}
+\sr(T^{(2)}) \;\le\; M_n, \qquad \sr(T^{(3)}) \;\le\; M_n.
+\end{align}
+
+\textbf{Combining.} Slice rank is subadditive under tensor addition: if $T = T' + T''$ with $\sr(T') \le r'$ and $\sr(T'') \le r''$, then $T$ is the sum of $r' + r''$ slices and $\sr(T) \le r' + r''$. Applying subadditivity to Eq.~\eqref{eq:split-three} with the bounds in Eq.~\eqref{eq:T1-bound} and Eq.~\eqref{eq:T2-T3-bound},
+\begin{align*}
+\sr(T_A) \;\le\; \sr(T^{(1)}) + \sr(T^{(2)}) + \sr(T^{(3)}) \;\le\; 3 M_n,
+\end{align*}
+as desired.
+\end{proof}
+
+\begin{remark}\label{rem:degree-threshold}
+The threshold $2n/3$ in the partition is forced: if the cap is at $d$, then for the partition to cover all monomials of total degree $\le 2n$, we need $3d \ge 2n$, i.e.\ $d \ge 2n/3$. The choice $d = 2n/3$ is tight; pushing it lower would invalidate the covering, pushing it higher would weaken the count $M_n$. This is the heart of why the $2n/3$ threshold (and the resulting base $3\gamma < 2.7558$) arises.
+\end{remark}

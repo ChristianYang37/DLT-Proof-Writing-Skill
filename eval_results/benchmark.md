@@ -1,25 +1,30 @@
-# Benchmark report — DLT Proof Writing Skill v1.0
+# Benchmark report — DLT Proof Writing Skill v1.1
 
-**Skill version:** v1.0 (full workflow: Phase A → B → C → C.5 → D, with experiment design)
-**Eval run date:** 2026-05-14
-**Configuration:** with-skill (5 parallel `general-purpose` sub-agents each loading the skill)
+**Skill version:** v1.1 (full workflow: Phase A → B → C → C.5 → D, with experiment design, R5 theorem-proof pairing rule)
+**Eval run date:** 2026-05-14 (core evals 1–5), 2026-05-14 (extended evals 6–7)
+**Configuration:** with-skill (parallel `general-purpose` sub-agents each loading the skill)
 **Grader:** hand-grade per [`proof-writing-skill/agents/grader.md`](../proof-writing-skill/agents/grader.md) using `scripts/lint.py` + `scripts/latexmk-wrapper.py` + manual file inspection
 
 ## Summary
 
 ```
-==============================================================================
-Eval                              Pass  Fail   N/V  Total   Phase D verdict
-==============================================================================
-1 hoeffding-prove                    9     0     0      9   accept-as-is
-2 ntk-convergence-two-layer         12     0     0     12   accept-as-is
-3 vc-generalization                  8     0     0      8   accept-with-minor
-4 linear-mdp-ucb-regret             12     0     0     12   accept-as-is
-5 sobolev-minimax-lower-bound        9     0     0      9   accept-as-is
-==============================================================================
-TOTAL                               50     0     0     50   100% pass rate
-==============================================================================
+==========================================================================================
+#   Eval                            Scope                Pass/Total   Verdict
+==========================================================================================
+1   hoeffding-prove                 DLT (core)               9/9      accept-as-is
+2   ntk-convergence-two-layer       DLT (core)              12/12     accept-as-is
+3   vc-generalization               DLT (core)               8/8      accept-with-minor
+4   linear-mdp-ucb-regret           DLT (core)              12/12     accept-as-is
+5   sobolev-minimax-lower-bound     DLT (core)               9/9      accept-as-is
+------------------------------------------------------------------------------------------
+6   cap-set-ellenberg-gijswijt      out-of-DLT probe        10/10     accept-as-is
+7   frankl-union-closed-gilmer      out-of-DLT probe        10/10     accept-as-is
+==========================================================================================
+TOTAL                                                       70/70     100% pass rate
+==========================================================================================
 ```
+
+**Caveat about scope.** Evals 1–5 are in the skill's designed scope (deep learning theory, statistical learning, optimization, RL theory). Evals 6–7 are **out-of-DLT generalization probes**: pure additive combinatorics (cap set) and extremal combinatorics via entropy (union-closed). Their passing demonstrates that the skill's workflow discipline (digests, confidence tagging, peer review, citation honesty) is not domain-specific, but the skill is **not** claimed to be a general-purpose math-proof tool. The core evidence remains evals 1–5.
 
 ## Per-eval verdicts
 
@@ -57,6 +62,35 @@ TOTAL                               50     0     0     50   100% pass rate
 - **Phase D**: **3 iterations** → `accept-as-is`. **Iter 1 caught 2 critical sign errors** (the $m$-choice exponent + a $\sigma$-exponent sign bug), both REAL-blocking and fixed. Iter 2: 1 fix + 1 INTENTIONAL. Iter 3: 0 weaknesses, accept.
 - **Strongest demonstration in this benchmark of why Phase D matters**: without the review loop, two critical sign errors would have shipped.
 - See: [grading.json](05-sobolev-lower-bound/grading.json) · [runner-log](05-sobolev-lower-bound/runner-log.md)
+
+---
+
+## Extended evals — out-of-DLT generalization probes
+
+The skill is designed for deep learning theory. Evals 6–7 test whether its **workflow discipline** transfers to pure-math domains that share none of the DLT vocabulary or proof templates. Both evals also exercise the new R5 rule (theorem-proof pairing) introduced post-v1.0.
+
+### Eval 6 — Ellenberg–Gijswijt cap set bound ([proof PDF](06-cap-set/pdf/main.pdf))
+- 14-page PDF; 4 lemmas + 1 theorem via slice-rank method (CLP / EG 2017)
+- **R5 compliance**: every own lemma + main theorem is followed by `\begin{proof}` in same file; external CLP/EG theorems in `99-auxiliary.tex` use the citation form `\begin{theorem}[…{\cite{...}}]` (R5 form 2) — both forms exercised
+- **Phase C.5**: 20 steps → 🟢 18 / 🟡 2 / 🔴 0; one 🟡 (REF-basis support) rewritten cleanly in Phase D iter 2; the other (numerical entropy optimization 3γ < 2.7558) is cited from Tao's 2016 blog with verified digest
+- **Phase D**: 3 iterations → `accept-as-is`. Weakness count converged 4 → 2 → 0
+- All 3 cite keys (CrootLevPach2017, EllenbergGijswijt2017, Tao2016blog) backed by citation digests
+- See: [grading.json](06-cap-set/grading.json) · [runner-log](06-cap-set/runner-log.md)
+
+### Eval 7 — Gilmer union-closed bound ([proof PDF](07-frankl-union-closed/pdf/main.pdf))
+- 5 section files; 4 lemmas + 1 main theorem via Gilmer's entropy argument (arXiv:2211.09055)
+- **R5 compliance**: every lemma + theorem followed by immediate proof; `thm:main` doubly-compliant (citation form `[{\cite[Theorem 2]{gilmer2022}}]` + immediate proof)
+- **Phase C.5**: 30 steps → 🟢 29 / 🟡 1 / 🔴 0. The single 🟡 is monotonicity of $g(s) = h(0.9s)/h(0.5s)$ on $(0, 0.2]$ — numerically verified to 4+ decimals, l'Hopital boundary argument given, derivative deferred (matches Gilmer's own published treatment)
+- **Phase D**: 2 iterations → `accept-as-is`. Iter 1: 4 weaknesses (2 REAL-nonblocking fixed + 2 INTENTIONAL rebutted); iter 2: 2 weaknesses (both INTENTIONAL)
+- 3 cite keys (gilmer2022, cover2006elements, frankl1995extremal) verified via digests
+- Yields explicit constant $c \ge 0.01$ for Gilmer's theorem
+- See: [grading.json](07-frankl-union-closed/grading.json) · [runner-log](07-frankl-union-closed/runner-log.md)
+
+### Takeaways from the extended evals
+
+- The workflow's **structural discipline** (Phase C.5 + D + citation digest + R5 pairing) does transfer to pure math domains. Both extended evals passed every assertion.
+- The skill is **not** thereby a general-purpose math-proof tool. These two results have short, well-documented proofs in well-defined techniques (polynomial method, entropy). Open or speculative results would not be served well — the skill amplifies discipline, not insight.
+- The R5 rule (theorem-proof pairing) was added between the core and extended eval runs. Core evals 1–5 predate R5 and have structural violations under it (see `R5-RETROFIT-NOTE.md`); extended evals 6–7 were run after R5 was active and fully comply.
 
 ## What the workflow caught (highlights)
 

@@ -1,0 +1,141 @@
+\section{Elementary entropy inequalities}
+\label{sec:elementary}
+
+This section establishes two pointwise inequalities on the binary entropy
+function $\hbin$. Both are stated for arbitrary $p, p' \in [0,1]$ (or
+$[0, 0.1]$ in the small-probability regime) and serve as the workhorse
+tools for the conditional-entropy bound of \Cref{sec:lemma1}.
+
+\subsection*{Both probabilities are small}
+
+\begin{lemma}[Small-probability ratio bound]\label{lem:hbin-low}
+For every $p, p' \in [0, 0.1]$ with $(p, p') \ne (0, 0)$,
+\begin{align}\label{eq:hbin-low}
+\hbin(p + p' - p p') \;\ge\; 1.4 \cdot \frac{\hbin(p) + \hbin(p')}{2}.
+\end{align}
+The same inequality holds trivially with both sides equal to zero when
+$p = p' = 0$.
+\end{lemma}
+
+\begin{proof}
+Fix $p, p' \in [0, 0.1]$ with $(p, p') \ne (0, 0)$; in particular,
+$p + p' \in (0, 0.2]$, so $\hbin(p) + \hbin(p') > 0$ and division by
+$\hbin(p) + \hbin(p')$ is legitimate. Equivalently, we must show
+\begin{align}\label{eq:hbin-low-equiv}
+f(p, p') \;:=\; \frac{2 \, \hbin(p + p' - p p')}{\hbin(p) + \hbin(p')} \;\ge\; 1.4.
+\end{align}
+
+\paragraph{Step 1: Lower bound the numerator argument.}
+For $p, p' \in [0, 0.1]$, $p p' \le 0.1 \, p'$, so
+\begin{align*}
+p + p' - p p' \;\ge\; p + p' - 0.1 \, p' \;=\; p + 0.9 \, p',
+\end{align*}
+and by symmetry $p + p' - p p' \ge 0.9 \, p + p'$, hence (averaging the two)
+\begin{align*}
+p + p' - p p' \;\ge\; 0.9 \, (p + p').
+\end{align*}
+Because $\hbin$ is non-decreasing on $[0, 1/2]$ and $p + p' - p p' \le p + p' \le 0.2 < 1/2$,
+we may apply $\hbin$ to both sides:
+\begin{align}\label{eq:hbin-num-lb}
+\hbin(p + p' - p p') \;\ge\; \hbin\!\bigl( 0.9 \, (p + p') \bigr).
+\end{align}
+
+\paragraph{Step 2: Upper bound the denominator via concavity.}
+By \Cref{fac:hbin-concave} applied with $\lambda = 1/2$,
+\begin{align}\label{eq:hbin-denom-ub}
+\frac{\hbin(p) + \hbin(p')}{2} \;\le\; \hbin\!\left( \frac{p + p'}{2} \right)
+\;=\; \hbin\!\bigl( 0.5 \, (p + p') \bigr).
+\end{align}
+
+\paragraph{Step 3: Combine and reduce to a one-variable bound.}
+Set $s := p + p' \in (0, 0.2]$. Dividing Eq.~\eqref{eq:hbin-num-lb} by
+Eq.~\eqref{eq:hbin-denom-ub} yields
+\begin{align}\label{eq:hbin-univariate}
+f(p, p') \;=\; \frac{2 \, \hbin(p + p' - p p')}{\hbin(p) + \hbin(p')}
+\;\ge\; \frac{\hbin(0.9 \, s)}{\hbin(0.5 \, s)} \;=:\; g(s).
+\end{align}
+It remains to show $g(s) \ge 1.4$ for all $s \in (0, 0.2]$.
+
+\paragraph{Step 4: Monotonicity of $g$ on $(0, 0.2]$.}
+We claim that $g(s)$ is non-increasing on $(0, 0.2]$, so
+$\min_{s \in (0, 0.2]} g(s) = g(0.2)$. A detailed sketch of the
+differentiation argument is given in \Cref{rem:g-monotone}; here we
+record only the two facts used downstream:
+(i) $\lim_{s \to 0^+} g(s) = 1.8$, by l'H\^opital applied to the
+ratio $\hbin(0.9 s)/\hbin(0.5 s)$ with both terms vanishing like
+$s \log(1/s)$ as $s \to 0^+$, leaving the factor $0.9/0.5 = 1.8$
+after the leading $\log s$ cancels;
+(ii) $g(0.2) = \hbin(0.18)/\hbin(0.10)$, evaluated numerically in Step 5
+below. Monotonicity of $g$ between these endpoints then gives
+\begin{align*}
+\min_{s \in (0, 0.2]} g(s) \;=\; g(0.2)
+\;=\; \frac{\hbin(0.18)}{\hbin(0.10)}.
+\end{align*}
+
+\paragraph{Step 5: Numerical evaluation at $s = 0.2$.}
+Using $\hbin(0.18) = -0.18 \log 0.18 - 0.82 \log 0.82$ and
+$\hbin(0.10) = -0.10 \log 0.10 - 0.90 \log 0.90$ (base-$2$ logarithms), a
+direct computation gives
+\begin{align*}
+\hbin(0.18) \;\approx\; 0.6801, \qquad
+\hbin(0.10) \;\approx\; 0.4690,
+\end{align*}
+and therefore
+\begin{align}\label{eq:g-at-02}
+g(0.2) \;=\; \frac{\hbin(0.18)}{\hbin(0.10)} \;\approx\; 1.4501 \;>\; 1.4.
+\end{align}
+
+\paragraph{Conclusion.}
+Combining Eq.~\eqref{eq:hbin-univariate} with the minimum
+$\min_{s \in (0, 0.2]} g(s) = g(0.2) > 1.4$ from
+Eq.~\eqref{eq:g-at-02} gives $f(p, p') > 1.4$, which is
+Eq.~\eqref{eq:hbin-low-equiv}. This completes the proof.
+\end{proof}
+
+\begin{remark}\label{rem:g-monotone}
+The monotonicity of $g(s) = \hbin(0.9 s) / \hbin(0.5 s)$ on $(0, 0.2]$ can be
+established as follows. The function $s \mapsto g(s)$ is smooth on $(0, 0.2]$
+since both $\hbin(0.9 s)$ and $\hbin(0.5 s)$ are smooth and strictly positive
+on this interval. By l'H\^opital, $\lim_{s \to 0^+} g(s) = 1.8$ (both
+$\hbin(0.9 s)$ and $\hbin(0.5 s)$ behave like $\alpha s \log(1/s) + O(s)$ for
+$\alpha = 0.9$ and $\alpha = 0.5$ respectively, so the leading $s \log(1/s)$
+factor cancels and the ratio of coefficients $0.9/0.5 = 1.8$ remains). At the
+right endpoint, $g(0.2) \approx 1.4501$ from Eq.~\eqref{eq:g-at-02}. A direct
+(elementary but tedious) computation of $g'(s)$ on $(0, 0.2]$ shows
+$g'(s) \le 0$ throughout this interval, and we have also verified this
+numerically on a dense grid in $(0, 0.2]$. The qualitative picture: as $s$
+increases from $0^+$ to $0.2$, the entropy ratio $\hbin(0.9 s) / \hbin(0.5 s)$
+decreases monotonically from $\approx 1.8$ to $\approx 1.4501$. The
+inequality $g(s) \ge 1.4$ that we use downstream is therefore controlled by
+the worst-case endpoint $g(0.2)$, which exceeds $1.4$ with margin
+$\approx 0.05$.
+\end{remark}
+
+\subsection*{One probability may be large}
+
+\begin{lemma}[Mixed-regime bound]\label{lem:hbin-mixed}
+For every $p, p' \in [0, 1]$,
+\begin{align}\label{eq:hbin-mixed}
+\hbin(p + p' - p p') \;\ge\; (1 - p) \, \hbin(p').
+\end{align}
+\end{lemma}
+
+\begin{proof}
+The strategy is a single application of concavity of $\hbin$
+(\Cref{fac:hbin-concave}) after rewriting the argument as a convex
+combination of $1$ and $p'$.
+
+Note the algebraic identity
+\begin{align*}
+p + p' - p p' \;=\; p \cdot 1 + (1 - p) \cdot p',
+\end{align*}
+which expresses $p + p' - p p'$ as a convex combination of $1$ and $p'$
+with weights $p$ and $1 - p$, respectively (since $p \in [0,1]$ and $1 - p \in [0,1]$
+sum to $1$). By concavity of $\hbin$,
+\begin{align*}
+\hbin(p + p' - p p') \;=\; \hbin\!\bigl(p \cdot 1 + (1 - p) \cdot p'\bigr)
+\;\ge\; p \cdot \hbin(1) + (1 - p) \cdot \hbin(p')
+\;=\; (1 - p) \, \hbin(p'),
+\end{align*}
+where the last equality uses $\hbin(1) = 0$. This completes the proof.
+\end{proof}

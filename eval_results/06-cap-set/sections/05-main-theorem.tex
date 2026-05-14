@@ -1,0 +1,37 @@
+\section{The main theorem}
+\label{sec:main-theorem}
+
+\begin{theorem}[Ellenberg--Gijswijt cap-set bound]\label{thm:main}
+Let $n \ge 1$ and let $A \subseteq \F_3^n$ be a cap set (\Cref{def:cap-set}). Then
+\begin{align}\label{eq:main-bound}
+|A| \;\le\; 3 M_n,
+\end{align}
+where $M_n$ is the number of monomials defined in \Cref{def:Mn}. Consequently, by \Cref{fac:Mn-asymp}, there exists an absolute constant $C > 0$ such that
+\begin{align}\label{eq:main-asymp}
+|A| \;\le\; C \cdot (2.7558)^n \qquad \text{for every cap set } A \subseteq \F_3^n.
+\end{align}
+\end{theorem}
+
+\begin{proof}
+The proof is a two-line composition of the slice-rank bounds proved above.
+
+By \Cref{lem:cap-set-diagonal} (lower bound), since $A$ is a cap set, the tensor $T_A$ of \Cref{def:T} has slice rank exactly $|A|$:
+\begin{align}\label{eq:lower}
+\sr(T_A) \;=\; |A|.
+\end{align}
+
+By \Cref{lem:slice-rank-upper-bound} (upper bound), regardless of whether $A$ is a cap set,
+\begin{align}\label{eq:upper}
+\sr(T_A) \;\le\; 3 M_n.
+\end{align}
+
+Combining Eq.~\eqref{eq:lower} and Eq.~\eqref{eq:upper},
+\begin{align*}
+|A| \;=\; \sr(T_A) \;\le\; 3 M_n,
+\end{align*}
+which is Eq.~\eqref{eq:main-bound}. The asymptotic Eq.~\eqref{eq:main-asymp} follows by substituting the bound $M_n \le C' (2.7558)^n$ from \Cref{fac:Mn-asymp} and setting $C \triangleq 3 C'$. This completes the proof.
+\end{proof}
+
+\begin{remark}\label{rem:main-tightness}
+The exponential rate $3\gamma < 2.7558$ in Eq.~\eqref{eq:main-asymp} is the headline numerical content of \cite{EllenbergGijswijt2017}. Both \cite{CrootLevPach2017} and \cite{EllenbergGijswijt2017} match in spirit but differ in the modulus: CLP treats $\Z_4^n$ (cyclic group of order $4$), while EG treats $\F_q^n$ for $q$ odd prime power; the case $q = 3$ here is the original cap-set problem. The lower bound on cap sets (a long line of constructions starting from Edel) leaves a substantial gap below $(2.7558)^n$; closing the gap remains open as of the cited works.
+\end{remark}

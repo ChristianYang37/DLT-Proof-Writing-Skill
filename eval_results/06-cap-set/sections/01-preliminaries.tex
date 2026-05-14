@@ -1,0 +1,79 @@
+\section{Preliminaries}
+\label{sec:prelim}
+
+We work over the field $\F_3 = \Z/3\Z$ and the vector space $\F_3^n$ of dimension $n$. Elements of $\F_3^n$ are written $x = (x_1, \dots, x_n)$ with $x_i \in \{0, 1, 2\}$; addition is coordinatewise modulo $3$.
+
+Throughout, $C, c, C_1, C_2, \dots$ denote positive absolute constants, independent of $n$, whose values may change from line to line.
+
+\subsection{Cap sets}
+
+\begin{definition}[Cap set]\label{def:cap-set}
+A subset $A \subseteq \F_3^n$ is called a \emph{cap set} (or \emph{$3$-AP-free}) if it contains no three-term arithmetic progression with distinct terms; equivalently, the only solutions $(x, y, z) \in A \times A \times A$ to $x + y + z = 0$ are the trivial ones $x = y = z$.
+\end{definition}
+
+\begin{remark}\label{rem:cap-set-equivalence}
+The equivalence in \Cref{def:cap-set} is specific to $\F_3$: in characteristic $3$, the relation $x + y + z = 0$ rewrites as $z = -x - y = 2x + 2y$, and three-term arithmetic progressions $(x, x + d, x + 2d)$ satisfy $x + (x + d) + (x + 2d) = 3x + 3d = 0$ exactly. A degenerate solution $x = y = z$ corresponds to the constant progression $d = 0$.
+\end{remark}
+
+\subsection{The monomial space and the count $M_n$}
+
+The reduced polynomial ring is
+\begin{align*}
+R_n \;\triangleq\; \F_3[x_1, \dots, x_n] / \langle x_1^3 - x_1, \dots, x_n^3 - x_n \rangle.
+\end{align*}
+Since $x^3 = x$ in $\F_3$ pointwise for $x \in \F_3$, every function $f: \F_3^n \to \F_3$ is represented by a unique element of $R_n$, namely its expansion in the basis of squarefree-in-exponent monomials. A monomial in $R_n$ takes the form $\prod_{i=1}^n x_i^{a_i}$ with $a_i \in \{0, 1, 2\}$.
+
+\begin{definition}[Low-degree monomial space]\label{def:Mn}
+For each $n \in \N$, define
+\begin{align*}
+M_n \;\triangleq\; \big| \big\{ (a_1, \dots, a_n) \in \{0, 1, 2\}^n \,:\, \textstyle\sum_{i=1}^n a_i \le 2n/3 \big\} \big|,
+\end{align*}
+the number of monomials $\prod_{i} x_i^{a_i}$ in $R_n$ of total degree at most $2n/3$. We write
+\begin{align*}
+\mathcal{M}_n^{\le 2n/3} \;\triangleq\; \spann_{\F_3}\Big\{ \prod_{i=1}^n x_i^{a_i} \,:\, a_i \in \{0,1,2\},\ \sum_i a_i \le 2n/3 \Big\} \;\subseteq\; R_n.
+\end{align*}
+Thus $\dim_{\F_3} \mathcal{M}_n^{\le 2n/3} = M_n$.
+\end{definition}
+
+\begin{fact}[Asymptotic count]\label{fac:Mn-asymp}
+$M_n^{1/n} \to 3 \gamma$ as $n \to \infty$, where $\gamma$ is the unique root in $(0, 1)$ of an explicit entropy-optimization problem; numerically, $3\gamma < 2.7558$. Consequently, there exists an absolute constant $C > 0$ with
+\begin{align*}
+M_n \;\le\; C \cdot (2.7558)^n \qquad \text{for all } n \ge 1.
+\end{align*}
+The proof is an elementary large-deviation / generating-function calculation; see \cite{EllenbergGijswijt2017} for the derivation.
+\end{fact}
+
+\begin{remark}\label{rem:Mn-asymp}
+The optimization underlying \Cref{fac:Mn-asymp} reads $3\gamma = \min_{0 < \alpha < 1} (1 + \alpha + \alpha^2) / \alpha^{2/3}$; the minimum is attained at $\alpha^*$ solving $2 \alpha^2 + \alpha - 1 = 0$ to lowest order, giving the cited numerical value. We do not reproduce the calculation; it is independent of the polynomial-method argument below and is treated as a black-box arithmetic fact.
+\end{remark}
+
+\subsection{Slice rank}
+
+The slice rank, introduced by Tao \cite{Tao2016blog} as a symmetric refinement of the Croot--Lev--Pach \cite{CrootLevPach2017} rank argument, is the key complexity measure.
+
+\begin{definition}[Slice]\label{def:slice}
+Let $V_1, V_2, V_3$ be finite sets and let $F$ be a field. A function $T: V_1 \times V_2 \times V_3 \to F$ is called a \emph{slice} if at least one of the following holds:
+\begin{itemize}[leftmargin=2em, itemsep=0.2em]
+    \item there exist $f: V_1 \to F$ and $g: V_2 \times V_3 \to F$ with $T(x_1, x_2, x_3) = f(x_1) \, g(x_2, x_3)$ (a \emph{$1$-slice});
+    \item there exist $f: V_2 \to F$ and $g: V_1 \times V_3 \to F$ with $T(x_1, x_2, x_3) = f(x_2) \, g(x_1, x_3)$ (a \emph{$2$-slice});
+    \item there exist $f: V_3 \to F$ and $g: V_1 \times V_2 \to F$ with $T(x_1, x_2, x_3) = f(x_3) \, g(x_1, x_2)$ (a \emph{$3$-slice}).
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Slice rank]\label{def:slice-rank}
+For $T: V_1 \times V_2 \times V_3 \to F$, the \emph{slice rank} $\sr(T)$ is the smallest non-negative integer $r$ such that $T = \sum_{j=1}^r T_j$ with each $T_j$ a slice (\Cref{def:slice}); each summand may be a slice in any of the three orientations. Equivalently, $\sr(T) = 0$ iff $T \equiv 0$.
+\end{definition}
+
+\begin{remark}\label{rem:slice-rank-vs-tensor-rank}
+Slice rank is bounded above by tensor rank (a rank-$1$ tensor $f(x_1) g(x_2) h(x_3)$ is a $1$-slice with bivariate $g(x_2) h(x_3)$), but the two are generally distinct. Only slice rank admits the diagonal lower bound of \Cref{lem:slice-rank-diagonal} below.
+\end{remark}
+
+\subsection{The tensor of interest}
+
+\begin{definition}[The cap-set tensor]\label{def:T}
+Let $A \subseteq \F_3^n$. Define $T_A : A \times A \times A \to \F_3$ by
+\begin{align*}
+T_A(x, y, z) \;\triangleq\; \1[x + y + z = 0],
+\end{align*}
+where the indicator is interpreted as an element of $\F_3$ (so $T_A(x,y,z) = 1$ if $x + y + z = 0$ in $\F_3^n$, and $T_A(x,y,z) = 0$ otherwise).
+\end{definition}

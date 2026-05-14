@@ -1,0 +1,25 @@
+\section{The no-3-AP condition forces the diagonal}
+\label{sec:cap-set-diagonal}
+
+We now connect the cap-set hypothesis to the diagonal structure required by \Cref{lem:slice-rank-diagonal}.
+
+\begin{lemma}[Cap-set forces diagonal support]\label{lem:cap-set-diagonal}
+Let $A \subseteq \F_3^n$ be a cap set (\Cref{def:cap-set}), and let $T_A: A \times A \times A \to \F_3$ be as in \Cref{def:T}. Then $T_A$ satisfies the hypotheses of \Cref{lem:slice-rank-diagonal} with $V = A$. In particular,
+\begin{align*}
+\sr(T_A) \;=\; |A|.
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+We verify the two hypotheses of \Cref{lem:slice-rank-diagonal} in turn, then invoke that lemma.
+
+\textbf{Hypothesis~\ref{lem:slice-rank-diagonal:nz} (nonzero diagonal).} For any $x \in A \subseteq \F_3^n$,
+\begin{align*}
+T_A(x, x, x) \;=\; \1[x + x + x = 0] \;=\; \1[3x = 0] \;=\; \1[0 = 0] \;=\; 1 \;\ne\; 0 \quad \text{in } \F_3,
+\end{align*}
+where the first step is the definition of $T_A$ (\Cref{def:T}), the second step is $x + x + x = 3x$ as elements of $\F_3^n$, the third step is the identity $3x = 0$ in $\F_3$ (since $3 \equiv 0 \pmod 3$), and the last step is the value of the indicator at a true predicate. Thus $T_A(x, x, x) = 1$ for every $x \in A$.
+
+\textbf{Hypothesis~\ref{lem:slice-rank-diagonal:diag} (off-diagonal vanishing).} Let $(x, y, z) \in A^3$ be a triple with $T_A(x, y, z) \ne 0$. By the definition of $T_A$ in \Cref{def:T}, this means $x + y + z = 0$ in $\F_3^n$. Since $A$ is a cap set (\Cref{def:cap-set}), the only triples $(x, y, z) \in A^3$ with $x + y + z = 0$ are the trivial ones with $x = y = z$. Therefore $T_A(x, y, z) \ne 0$ implies $x = y = z$; contrapositively, if $(x, y, z)$ is off the diagonal, $T_A(x, y, z) = 0$. This is hypothesis~\Cref{lem:slice-rank-diagonal:diag}.
+
+\textbf{Conclusion.} Both hypotheses of \Cref{lem:slice-rank-diagonal} hold with $V = A$ and $T = T_A$, so $\sr(T_A) = |A|$, as desired.
+\end{proof}

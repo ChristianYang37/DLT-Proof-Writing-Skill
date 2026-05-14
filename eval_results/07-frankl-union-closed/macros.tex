@@ -1,0 +1,79 @@
+% ============================================================
+% macros.tex — notation, operators, theorem environments
+% ============================================================
+
+% --- Packages assumed loaded in main.tex ---
+% amsmath, amssymb, amsthm, aliascnt, cleveref, enumitem, hyperref
+
+% --- Math operators / shortcuts ---
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\renewcommand{\Pr}{\mathbb{P}}
+\newcommand{\1}{\mathbf{1}}
+\DeclareMathOperator{\Bern}{Bern}
+
+% --- Calligraphic family shorthand ---
+\newcommand{\Fcal}{\mathcal{F}}
+\newcommand{\Ccal}{\mathcal{C}}
+
+% --- Entropy / mutual information ---
+% H and I already exist as italic macros if not overridden; we define
+% upright-roman versions to match Cover-Thomas conventions.
+\renewcommand{\H}{\mathrm{H}}        % \H is normally a Hungarian umlaut accent
+\newcommand{\Iinfo}{\mathrm{I}}
+\newcommand{\KL}[2]{D\!\left(#1 \,\|\, #2\right)}
+
+% Binary entropy
+\newcommand{\hbin}{h}                % h(p) for the binary entropy function
+
+% Union of Bernoullis (max)
+% Use \sqcup-like infix \cupB only inside math mode to keep distinct from \cup.
+% We stick with the standard \cup for set/Bernoulli union throughout.
+
+% --- Theorem environments (aliascnt template per conventions) ---
+% Master plain-style counter.
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+
+\newaliascnt{lemma}{theorem}
+\newtheorem{lemma}[lemma]{Lemma}
+\aliascntresetthe{lemma}
+
+\newaliascnt{proposition}{theorem}
+\newtheorem{proposition}[proposition]{Proposition}
+\aliascntresetthe{proposition}
+
+\newaliascnt{corollary}{theorem}
+\newtheorem{corollary}[corollary]{Corollary}
+\aliascntresetthe{corollary}
+
+% Definition-style.
+\theoremstyle{definition}
+\newaliascnt{definition}{theorem}
+\newtheorem{definition}[definition]{Definition}
+\aliascntresetthe{definition}
+
+\newaliascnt{assumption}{theorem}
+\newtheorem{assumption}[assumption]{Assumption}
+\aliascntresetthe{assumption}
+
+\newaliascnt{fact}{theorem}
+\newtheorem{fact}[fact]{Fact}
+\aliascntresetthe{fact}
+
+% Remark-style.
+\theoremstyle{remark}
+\newaliascnt{remark}{theorem}
+\newtheorem{remark}[remark]{Remark}
+\aliascntresetthe{remark}
+
+% Cleveref name registrations.
+\crefname{theorem}{Theorem}{Theorems}
+\crefname{lemma}{Lemma}{Lemmas}
+\crefname{proposition}{Proposition}{Propositions}
+\crefname{corollary}{Corollary}{Corollaries}
+\crefname{definition}{Definition}{Definitions}
+\crefname{assumption}{Assumption}{Assumptions}
+\crefname{fact}{Fact}{Facts}
+\crefname{remark}{Remark}{Remarks}
+\crefname{equation}{Eq.}{Eqs.}
