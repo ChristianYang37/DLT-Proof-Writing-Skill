@@ -1,12 +1,14 @@
 # DLT 证明写作 Skill
 
-> 用于在 **深度学习理论 (Deep Learning Theory)**、**统计学习**、**优化理论**、**强化学习理论** 领域起草严谨、模块化 LaTeX 证明的 Agent Skill。完整 workflow 下 5 个代表性证明全部通过验证（50/50 assertion 100% pass）。
+> 用于在 **深度学习理论 (Deep Learning Theory)**、**统计学习**、**优化理论**、**强化学习理论** 领域起草严谨、模块化 LaTeX 证明的 Agent Skill。**5 个 DLT 核心证明 + 2 个 out-of-DLT 泛化探针**全部通过验证；**70/70 assertion 100% pass** 在完整 workflow 下。
 
 **🌐 语言：** [English](README.md) · **中文**
+**📦 版本：** v1.1（新增 R5 theorem-proof pairing 规则 + 2 个泛化探针）
 
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-blue.svg)](LICENSE.md)
 [![Skill: Claude Agent](https://img.shields.io/badge/Skill-Claude%20Agent-orange.svg)](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
-[![Eval: 5/5 accept](https://img.shields.io/badge/Eval-5%2F5%20accept-brightgreen.svg)](eval_results/benchmark.md)
+[![Eval: 7/7 accept](https://img.shields.io/badge/Eval-7%2F7%20accept-brightgreen.svg)](eval_results/benchmark.md)
+[![Assertions: 70/70](https://img.shields.io/badge/Assertions-70%2F70-brightgreen.svg)](eval_results/benchmark.md)
 
 ---
 
@@ -33,6 +35,7 @@
 4. **跑有界 peer-review 循环** —— reviewer sub-agent 写形式化的 Summary / Strengths / Weaknesses / Questions / Verdict 评审；作者 agent 对每条 weakness 做四分类验证（REAL-blocking / REAL-nonblocking / PHANTOM / INTENTIONAL）；按最小修改原则 fix；迭代到 accept-as-is 或 3 轮硬上限。
 5. **输出干净的 LaTeX** —— 一节一个 `.tex` 文件、`aliascnt`-safe 定理环境、`Eq.~\eqref{}` 约定、不用 `\[ ... \]`。**不写 abstract / introduction / related work / conclusion**——那是作者的 framing 工作，不归 skill 管。
 6. **按需产出实验方案** —— 如果 prompt 明确要求，会生成单独的 `experiments-plan.md`（**只设计、不编造结果**），达到 ICML / NeurIPS / ICLR 实验门槛（≥5 seeds、baselines、ablations、pre-registered 成功标准）。**Results 节强制留空**。
+7. **禁止 "well-known result" 草率引用（lint 规则 R5，v1.1 新增）** —— 每个 `\begin{theorem}` / `\begin{lemma}` / `\begin{proposition}` / `\begin{corollary}` / `\begin{claim}` 必须在**同一个 `.tex` 文件**内配对：紧跟 `\begin{proof}`，**或者**在 `\begin{}[...]` 的 `[...]` 内含 `\cite{}`。没有第三种选择。跑 `proof-writing-skill/scripts/lint.py` 自动检测违规。
 
 ---
 
@@ -90,13 +93,16 @@ DLT-Proof-Writing-Skill/
 ├── CONTRIBUTING.md                   # PR 政策（当前关闭）
 ├── .claude-plugin/
 │   └── marketplace.json              # `/plugin install` 用的 plugin manifest
-├── eval_results/                     # 验证产出
-│   ├── benchmark.md                  # 总报告
-│   ├── 01-hoeffding/                 # Hoeffding 不等式
-│   ├── 02-ntk-convergence/           # NTK 两层网络收敛
-│   ├── 03-vc-generalization/         # VC 泛化界
-│   ├── 04-linear-mdp-ucb/            # LSVI-UCB regret
-│   └── 05-sobolev-lower-bound/       # Sobolev minimax 下界
+├── eval_results/                     # 验证产出 (v1.1)
+│   ├── benchmark.md                  # 总报告——全 7 evals, 70/70 pass
+│   ├── R5-RETROFIT-NOTE.md           # 核心 evals 早于 R5 的解释
+│   ├── 01-hoeffding/                 # Hoeffding 不等式                 [核心]
+│   ├── 02-ntk-convergence/           # NTK 两层网络收敛                 [核心]
+│   ├── 03-vc-generalization/         # VC 泛化界                       [核心]
+│   ├── 04-linear-mdp-ucb/            # LSVI-UCB regret                 [核心]
+│   ├── 05-sobolev-lower-bound/       # Sobolev minimax 下界            [核心]
+│   ├── 06-cap-set/                   # Ellenberg–Gijswijt cap set      [out-of-DLT]
+│   └── 07-frankl-union-closed/       # Gilmer union-closed             [out-of-DLT]
 └── proof-writing-skill/              # skill 本体
     ├── SKILL.md                      # 主入口——workflow + pointer
     ├── references/                   # 按 phase 按需加载
@@ -114,9 +120,9 @@ DLT-Proof-Writing-Skill/
     │   └── grader.md                 # eval 打分
     ├── scripts/
     │   ├── latexmk-wrapper.py        # 编译 + 结构化 JSON 输出
-    │   └── lint.py                   # 10 条规则 LaTeX linter
+    │   └── lint.py                   # 11 条规则 LaTeX linter（含 v1.1 新增 R5）
     └── evals/
-        └── evals.json                # 5 条验证 prompt + assertions
+        └── evals.json                # 7 条验证 prompt + assertions
 ```
 
 ---
@@ -171,9 +177,11 @@ runner-log.md]
 
 ---
 
-## ✅ 验证结果（v1.0）
+## ✅ 验证结果（v1.1）
 
-5 个代表性证明覆盖本 skill 主要 proof 类型。按 `proof-writing-skill/evals/evals.json` 的 assertion 集合人工打分。
+### 核心 DLT evals —— 5 个代表性证明，覆盖 skill 设计的目标领域
+
+按 `proof-writing-skill/evals/evals.json` 的 assertion 集合人工打分。
 
 | # | Eval | 证明 PDF | Verdict | Phase C.5 | Phase D | 详情 |
 |---|---|---|---|---|---|---|
@@ -183,18 +191,28 @@ runner-log.md]
 | 4 | LSVI-UCB regret (Linear MDP) | [📄 PDF](eval_results/04-linear-mdp-ucb/pdf/main.pdf) | accept-as-is | 15 · 🟢 10 / 🟡 4 / 🔴 1 | 2 iter | [grading](eval_results/04-linear-mdp-ucb/grading.json) · [log](eval_results/04-linear-mdp-ucb/runner-log.md) · [实验方案](eval_results/04-linear-mdp-ucb/experiments-plan.md) |
 | 5 | Sobolev minimax 下界 | [📄 PDF](eval_results/05-sobolev-lower-bound/pdf/main.pdf) | accept-as-is | 25 · 🟢 21 / 🟡 4 / 🔴 0 | **3 iter** | [grading](eval_results/05-sobolev-lower-bound/grading.json) · [log](eval_results/05-sobolev-lower-bound/runner-log.md) |
 
-### 扩展验证 —— out-of-DLT 泛化探针 (v1.1)
+**关于 R5 回顾性应用：** v1.0 时 lint 规则集还没有 R5（theorem-proof 配对）。把后加入的 R5 回溯应用到这 5 个 evals，每个都触发一处结构性违规（theorem 陈述和 proof 拆在两个 `.tex` 文件而非同文件共置）。证明本身完整且正确——只是文件布局违反 R5。详见 [`eval_results/R5-RETROFIT-NOTE.md`](eval_results/R5-RETROFIT-NOTE.md)，含 v1.1 推荐布局。
 
-v1.0 后新增 2 个纯数学探针，测试 skill 的 workflow 是否能迁移到 DLT 之外：
+### 扩展验证 —— out-of-DLT 泛化探针
+
+v1.1 新增 2 个纯数学探针，测试 skill 的 workflow 是否能迁移到设计 DLT scope 之外。它们**不**代表 skill 声称的能力——见下文 scope 警告。
 
 | # | Eval | 证明 PDF | Verdict | Phase C.5 | Phase D | 详情 |
 |---|---|---|---|---|---|---|
-| 6 | Ellenberg–Gijswijt cap-set 上界 | [📄 PDF](eval_results/06-cap-set/pdf/main.pdf) | accept-as-is | 20 · 🟢 18 / 🟡 2 / 🔴 0 | **3 iter** | [grading](eval_results/06-cap-set/grading.json) · [log](eval_results/06-cap-set/runner-log.md) |
-| 7 | Gilmer union-closed 下界 | [📄 PDF](eval_results/07-frankl-union-closed/pdf/main.pdf) | accept-as-is | 30 · 🟢 29 / 🟡 1 / 🔴 0 | 2 iter | [grading](eval_results/07-frankl-union-closed/grading.json) · [log](eval_results/07-frankl-union-closed/runner-log.md) |
+| 6 | Ellenberg–Gijswijt cap-set 上界（加性组合学） | [📄 PDF](eval_results/06-cap-set/pdf/main.pdf) | accept-as-is | 20 · 🟢 18 / 🟡 2 / 🔴 0 | **3 iter** | [grading](eval_results/06-cap-set/grading.json) · [log](eval_results/06-cap-set/runner-log.md) |
+| 7 | Gilmer union-closed 下界（极值组合 via 熵） | [📄 PDF](eval_results/07-frankl-union-closed/pdf/main.pdf) | accept-as-is | 30 · 🟢 29 / 🟡 1 / 🔴 0 | 2 iter | [grading](eval_results/07-frankl-union-closed/grading.json) · [log](eval_results/07-frankl-union-closed/runner-log.md) |
 
-两个都通过，说明 workflow 纪律（Phase C.5 + D + citation digest + R5 pairing）**不限定于** DLT。**但 skill 不声明为通用数学证明工具**——scope 注意事项见 `eval_results/benchmark.md` §Extended evals。
+两个都通过，说明 workflow 纪律（Phase C.5 + D + citation digest + R5 pairing）**不限定于** DLT。R5 的两种形式都被实际演示：自己证的 lemma + theorem 用 immediate-proof 形式，CLP/EG/Gilmer 等外部定理用 `\begin{X}[\cite{...}]` 形式（eval 6 的 `99-auxiliary.tex` 和 eval 7 的 `thm:main` 都用了第二种）。
 
-**全部 7 evals 合计：** 70/70 assertions pass (100%)。完整报告见 [`eval_results/benchmark.md`](eval_results/benchmark.md)，里面记录了 Phase D loop 实际抓到的错误（eval 5 抓到 2 个 critical sign errors、eval 4 抓到 prompt 本身的数学错误等）。
+**Scope 警告。** Eval 6/7 通过仅说明 workflow 可干净迁移到**有 5–14 页 self-contained 证明 + 成熟技术**（slice rank、polynomial method、entropy）的纯数学问题。**不**意味着 skill 能解决开放问题、猜想或推测性 claim。Skill 放大纪律，不创造洞察——完整 scope 说明见 [`eval_results/benchmark.md`](eval_results/benchmark.md) §Extended evals 与 [`CONTRIBUTING.md`](CONTRIBUTING.md)。
+
+### 全部 7 evals 合计
+
+**70/70 assertions pass (100%)**。完整报告见 [`eval_results/benchmark.md`](eval_results/benchmark.md)，含：
+- eval 5 (Sobolev) Phase D iter 1 抓到的 2 个 critical sign errors
+- eval 4 (LSVI-UCB) prompt 本身的数学错误（`√(HT)` 应为 `√(H³T)`）
+- v1.0 eval 2 的 fabricated-cite 失败模式（这正是 R5 规则诞生的动机）
+- 核心 evals 关于 R5 回溯应用的 retrofit 注记
 
 ---
 
