@@ -43,14 +43,14 @@
 
 ```mermaid
 flowchart TD
-    Start([用户请求一个证明]) --> A
-    A[<b>Phase A — Plan</b><br/>读项目 · 技术调研 ·<br/>选择 pattern · 拆分 · TodoWrite] --> B
-    B[<b>Phase B — Preliminaries</b><br/>Notation · Macros · Definitions ·<br/>Assumptions · Facts] --> C
-    C[<b>Phase C — Statements & Proofs</b><br/>陈述 lemma → 每条 review →<br/>写 proof → 每证 review<br/>· 按节点迭代] --> CC
-    CC[<b>Phase C.5 — Confidence Sweep</b><br/>枚举所有 derivation 步骤<br/>初始化为 🔴 from-memory<br/>fast-path 或 sub-agent 验证<br/>升级到 🟡 或 🟢] --> D
-    D[<b>Phase D — Peer-Review Loop</b><br/>Reviewer sub-agent: Summary / Strengths /<br/>Weaknesses / Questions / Verdict<br/>↓ 作者验证每个 weakness<br/>↓ Minimum-change 修复或反驳<br/>↓ 迭代，3 轮硬上限]
-    D -->|accept-as-is 或 no-fixes| Out([交付物<br/>main.pdf + grading.json +<br/>confidence-trace.md + review-iter-N.md])
-    D -->|仍有 weakness 且 < 3 轮| D
+    Start(["用户请求一个证明"]) --> A
+    A["Phase A — Plan<br/>读项目, 技术调研,<br/>选择 pattern, 拆分, TodoWrite"] --> B
+    B["Phase B — Preliminaries<br/>Notation, Macros, Definitions,<br/>Assumptions, Facts"] --> C
+    C["Phase C — Statements and Proofs<br/>陈述 lemma, 每条 review,<br/>写 proof, 每证 review<br/>(按节点迭代)"] --> CC
+    CC["Phase C.5 — Confidence Sweep<br/>枚举所有 derivation 步骤<br/>初始化为 🔴 from-memory<br/>fast-path 或 sub-agent 验证<br/>升级到 🟡 或 🟢"] --> D
+    D["Phase D — Peer-Review Loop<br/>Reviewer sub-agent: Summary,<br/>Strengths, Weaknesses, Verdict<br/>作者验证每个 weakness<br/>Minimum-change 修复或反驳<br/>迭代，3 轮硬上限"]
+    D -->|"accept-as-is 或 no-fixes"| Out(["交付物<br/>main.pdf, grading.json,<br/>confidence-trace.md,<br/>review-iter-N.md"])
+    D -->|"仍有 weakness 且 iter 小于 3"| D
 
     style A fill:#e1f5ff,stroke:#0288d1,stroke-width:2px,color:#000
     style B fill:#fff4e1,stroke:#f57c00,stroke-width:2px,color:#000
@@ -65,16 +65,16 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    Main([主 Agent<br/>编排 workflow])
-    Sub1[[技术调研 sub-agents<br/>为高级工具生成 digest]]
-    Sub2[[Sweep 验证 sub-agents<br/>独立重证 🔴 步骤]]
-    Sub3[[Reviewer sub-agent<br/>对完整 PDF 做 peer review]]
-    Main -->|Phase A.2| Sub1
-    Main -->|Phase C.5 fire-and-forget| Sub2
-    Main -->|Phase D 每轮| Sub3
-    Sub1 -.->|技术 digest| Main
-    Sub2 -.->|验证报告| Main
-    Sub3 -.->|review verdicts| Main
+    Main(["主 Agent<br/>编排 workflow"])
+    Sub1[["技术调研 sub-agents<br/>为高级工具生成 digest"]]
+    Sub2[["Sweep 验证 sub-agents<br/>独立重证 🔴 步骤"]]
+    Sub3[["Reviewer sub-agent<br/>对完整 PDF 做 peer review"]]
+    Main -->|"Phase A.2"| Sub1
+    Main -->|"Phase C.5 fire-and-forget"| Sub2
+    Main -->|"Phase D 每轮"| Sub3
+    Sub1 -.->|"技术 digest"| Main
+    Sub2 -.->|"验证报告"| Main
+    Sub3 -.->|"review verdicts"| Main
 
     style Main fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
     style Sub1 fill:#f9fbe7,stroke:#827717,color:#000

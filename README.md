@@ -43,14 +43,14 @@ It teaches an AI agent (Claude Code, or any Anthropic-Agent-Skills-compatible ru
 
 ```mermaid
 flowchart TD
-    Start([User asks for a proof]) --> A
-    A[<b>Phase A — Plan</b><br/>Read project · Technical recon ·<br/>Pattern select · Decompose · TodoWrite] --> B
-    B[<b>Phase B — Preliminaries</b><br/>Notation · Macros · Definitions ·<br/>Assumptions · Facts] --> C
-    C[<b>Phase C — Statements & Proofs</b><br/>State lemma → Per-stmt review →<br/>Write proof → Per-proof review<br/>· iterate per node] --> CC
-    CC[<b>Phase C.5 — Confidence Sweep</b><br/>Enumerate all derivation steps<br/>Init 🔴 from-memory<br/>Fast-path or sub-agent verify<br/>Upgrade to 🟡 or 🟢] --> D
-    D[<b>Phase D — Peer-Review Loop</b><br/>Reviewer sub-agent: Summary / Strengths /<br/>Weaknesses / Questions / Verdict<br/>↓ Author verifies each weakness<br/>↓ Minimum-change fix or rebut<br/>↓ Iterate, max 3 rounds]
-    D -->|accept-as-is or no-fixes| Out([Deliverable<br/>main.pdf + grading.json +<br/>confidence-trace.md + review-iter-N.md])
-    D -->|weaknesses remain & < 3 iter| D
+    Start(["User asks for a proof"]) --> A
+    A["Phase A — Plan<br/>Read project, Technical recon,<br/>Pattern select, Decompose, TodoWrite"] --> B
+    B["Phase B — Preliminaries<br/>Notation, Macros, Definitions,<br/>Assumptions, Facts"] --> C
+    C["Phase C — Statements and Proofs<br/>State lemma, Per-stmt review,<br/>Write proof, Per-proof review<br/>(iterate per node)"] --> CC
+    CC["Phase C.5 — Confidence Sweep<br/>Enumerate all derivation steps<br/>Init 🔴 from-memory<br/>Fast-path or sub-agent verify<br/>Upgrade to 🟡 or 🟢"] --> D
+    D["Phase D — Peer-Review Loop<br/>Reviewer sub-agent: Summary,<br/>Strengths, Weaknesses, Verdict<br/>Author verifies each weakness<br/>Minimum-change fix or rebut<br/>Iterate, max 3 rounds"]
+    D -->|"accept-as-is or no-fixes"| Out(["Deliverable<br/>main.pdf, grading.json,<br/>confidence-trace.md,<br/>review-iter-N.md"])
+    D -->|"weaknesses remain, iter under 3"| D
 
     style A fill:#e1f5ff,stroke:#0288d1,stroke-width:2px,color:#000
     style B fill:#fff4e1,stroke:#f57c00,stroke-width:2px,color:#000
@@ -65,16 +65,16 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    Main([Main Agent<br/>orchestrates the workflow])
-    Sub1[[Tech-recon sub-agents<br/>spawn digests for advanced tools]]
-    Sub2[[Sweep verifier sub-agents<br/>independently re-derive 🔴 steps]]
-    Sub3[[Reviewer sub-agent<br/>peer-review the full PDF]]
-    Main -->|Phase A.2| Sub1
-    Main -->|Phase C.5 fire-and-forget| Sub2
-    Main -->|Phase D each iteration| Sub3
-    Sub1 -.->|technique digests| Main
-    Sub2 -.->|verification reports| Main
-    Sub3 -.->|review verdicts| Main
+    Main(["Main Agent<br/>orchestrates the workflow"])
+    Sub1[["Tech-recon sub-agents<br/>spawn digests for advanced tools"]]
+    Sub2[["Sweep verifier sub-agents<br/>independently re-derive 🔴 steps"]]
+    Sub3[["Reviewer sub-agent<br/>peer-review the full PDF"]]
+    Main -->|"Phase A.2"| Sub1
+    Main -->|"Phase C.5 fire-and-forget"| Sub2
+    Main -->|"Phase D each iteration"| Sub3
+    Sub1 -.->|"technique digests"| Main
+    Sub2 -.->|"verification reports"| Main
+    Sub3 -.->|"review verdicts"| Main
 
     style Main fill:#e3f2fd,stroke:#1976d2,stroke-width:2px,color:#000
     style Sub1 fill:#f9fbe7,stroke:#827717,color:#000
