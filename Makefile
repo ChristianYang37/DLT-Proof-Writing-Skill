@@ -47,7 +47,7 @@ uninstall:
 	fi
 
 lint-self:
-	@find "$(SRC)/eval_results" -name "*.tex" -print0 2>/dev/null | \
+	@find "$(CURDIR)/eval_results" -name "*.tex" -print0 2>/dev/null | \
 	  xargs -0 -r python3 "$(SRC)/scripts/lint.py" || true
 
 test-evals:
