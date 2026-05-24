@@ -42,6 +42,7 @@
 ## 📊 工作流图
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'transparent','primaryTextColor':'#7e858d','primaryBorderColor':'#7e858d','lineColor':'#7e858d','secondaryColor':'transparent','tertiaryColor':'transparent'}}}%%
 flowchart TD
     Start([用户请求一个证明]) --> A
     A[Phase A: Plan] --> B
@@ -64,6 +65,7 @@ flowchart TD
 **Sub-agent 架构：**
 
 ```mermaid
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'transparent','primaryTextColor':'#7e858d','primaryBorderColor':'#7e858d','lineColor':'#7e858d','secondaryColor':'transparent','tertiaryColor':'transparent'}}}%%
 flowchart LR
     Main([Main Agent])
     Sub1[Tech-recon sub-agents]
@@ -119,8 +121,12 @@ DLT-Proof-Writing-Skill/
     │   ├── runner.md                 # eval 跑测
     │   └── grader.md                 # eval 打分
     ├── scripts/
-    │   ├── latexmk-wrapper.py        # 编译 + 结构化 JSON 输出
-    │   └── lint.py                   # 11 条规则 LaTeX linter（含 v1.1 新增 R5）
+    │   ├── latexmk-wrapper.py        # 编译 + 结构化 JSON 输出（Phase D gate (a)）
+    │   ├── lint.py                   # 静态 lint 规则 R0a–R18（Phase D gate (b)）
+    │   ├── check_confidence_tags.py  # confidence-sweep 覆盖率（Phase D gate (c)）
+    │   ├── check_scope.py            # 校验 .proof-research/scope.md（Phase A.0a）
+    │   └── hook_output_guard.py      # PreToolUse hook —— 阻止编译产物写到 .output/ 之外
+    ├── settings.recommended.json     # 复制到项目 .claude/settings.json 启用上面的 hook
     └── evals/
         └── evals.json                # 7 条验证 prompt + assertions
 ```
@@ -173,6 +179,114 @@ Questions/Verdict；作者验证每条 weakness；minimum-change 修复；
 [交付 main.pdf + sections/*.tex + macros.tex + refs.bib +
 .proof-research/confidence-trace.md + review-iteration-{1,2}.md +
 runner-log.md]
+```
+
+---
+
+## 🧩 可复用 Prompt 模版
+
+一个可即用的 XML 标签式证明任务模版。**只有 `<problem>` 是必填**——其它槽位都可留白；留白时 agent 必须在 Phase A 给出具体提案给你确认，才能开始草拟证明。`<skill_invocation>` 和 `<blank_handling_protocol>` 两段把 agent 绑定到完整 skill workflow 上，并禁止"静默填空"。
+
+设计要点：Anthropic 训练的 Claude 对 XML 标签段落识别比纯文本一致性高 20–40%；占位符用两种视觉区分（`[[ FILL IN — REQUIRED ]]` vs. `[[ leave blank to delegate ]]`），避免 agent 模仿格式而不做实事。
+
+```markdown
+<skill_invocation>
+Invoke the `dlt-proof-writing` skill and follow its workflow in full:
+Phase A (Plan) → Phase B (Preliminaries) → Phase C (Statements & Proofs)
+→ Phase C.5 (Confidence Sweep) → Phase D (End-to-End Review).
+
+Treat the three non-negotiables in SKILL.md as binding:
+(1) all compile artifacts under `<project-root>/.output/`;
+(2) Phase-D gates (a) latexmk-wrapper, (b) lint.py, (c) check_confidence_tags.py
+    MUST all exit 0 before the review loop;
+(3) every `\cite{key}` and every non-trivial technique has a `.proof-research/` digest.
+
+Do NOT shortcut any phase based on apparent simplicity — let `check_scope.py` decide.
+The honesty protocol governs every step: if any of the objective triggers in
+SKILL.md §Honesty protocol fires, write `\todo{verify: ...}` AND surface to me.
+</skill_invocation>
+
+<problem>
+<!-- REQUIRED. The formal setting and statement to be proved.
+     Be explicit about: norm, probability space, asymptotic regime,
+     whether constants must be tight or `\poly`-slack is acceptable,
+     what counts as a "win" (equality / inequality / high-prob / rate). -->
+[[ FILL IN — REQUIRED ]]
+</problem>
+
+<approach>
+<!-- OPTIONAL. Your intuition / strategic plan. Examples:
+     "reduce to matrix Bernstein after a chaining argument",
+     "two-stage: optimization landscape lemma then SGD escape time".
+     If left blank, the agent MUST derive an approach in Phase A.3
+     (pattern selection from references/pattern-menu.md) and surface
+     it for my approval BEFORE drafting any proof body. -->
+[[ leave blank to delegate ]]
+</approach>
+
+<proof_structure>
+<!-- OPTIONAL. The dependency graph you envision: which lemmas, what each
+     does, in what order. If left blank, the agent MUST produce the
+     decomposition in Phase A.4–A.5, write `.proof-research/dependency-graph.md`,
+     and surface the graph for my approval before any statement is drafted.
+     Apply Occam's razor: every lemma must have non-empty Downstream consumers. -->
+[[ leave blank to delegate ]]
+</proof_structure>
+
+<target_theorems>
+<!-- OPTIONAL. The final theorem(s) you want produced, with desired
+     tightness / rate / probability level. Example:
+     "Theorem 1 (main): with prob >= 1-delta, ||theta_T - theta*||_2 <= C*d*sqrt(log(1/delta)/T)".
+     If left blank, the agent infers from <problem>, proposes a two-tier
+     informal/formal statement, and gets my approval before drafting the proof. -->
+[[ leave blank to delegate ]]
+</target_theorems>
+
+<context>
+<!-- OPTIONAL but high-leverage. If blank, agent does Phase A.0 reconnaissance
+     and reports findings before declaring Phase A complete. -->
+- Project root:
+- refs.bib path:
+- macros file (e.g. math_macros.tex):
+- Existing chapters this proof must compose with:
+- Citation key style (e.g. authoryear / lastname-first-letters):
+</context>
+
+<constraints>
+<!-- OPTIONAL. Hard constraints beyond skill defaults:
+     - pre-approved citations vs. ones the agent must research from scratch
+     - constants tightness target
+     - off-limits reductions (e.g. "do NOT reduce to ETH")
+     - which conventions to inherit from existing project files
+     NOTE: scope CANNOT be lowered to skip Phase C.5/D — `check_scope.py` enforces this. -->
+[[ leave blank for skill defaults ]]
+</constraints>
+
+<blank_handling_protocol>
+For every section above I left as `[[ leave blank to delegate ]]`:
+1. Do NOT silently fill it in and proceed.
+2. During Phase A, produce a concrete proposal for that section.
+3. Surface ALL proposals together as a single numbered decision list to me
+   BEFORE drafting any preliminaries or proof body.
+4. If I do not respond within one turn, choose the most conservative option,
+   mark the relevant step `\todo{user-decision: <option chosen, alternative>}`,
+   and continue. Re-surface it in the Phase D final report.
+5. Never treat a blank as license to silently choose the easier path
+   (e.g. a weaker target theorem). The conservative default is the
+   STRONGER / TIGHTER option, not the more convenient one.
+</blank_handling_protocol>
+
+<output_expectations>
+Final message MUST include:
+1. The verbatim Final-completion checklist from SKILL.md, with each `[ ]`
+   replaced by `[✅]` / `[❌]` + one-line evidence (file:line, command output,
+   `n/a — reason`, or `\todo{}` location).
+2. A summary: what was proved, decomposition used, patterns applied,
+   residual `\todo{}` items needing my judgment.
+3. If any `<blank_handling_protocol>` proposals were made, restate
+   which option was finally adopted for each.
+A bare "all done" is not an acceptable completion message.
+</output_expectations>
 ```
 
 ---
