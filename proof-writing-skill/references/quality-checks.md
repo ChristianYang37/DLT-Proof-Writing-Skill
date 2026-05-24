@@ -58,41 +58,36 @@ NN-convergence and statistical-rate proofs frequently fail silently because a co
 
 - **Width / sample / step-size requirements compose multiplicatively.** If Lemma A requires `$m \ge n^4/\lambda_0^2$`, Lemma B requires `$m \ge n^5 \log m$`, Lemma C requires `$m \ge d^3/\delta$`, the theorem must require the *maximum* — write `$m \ge \max\{ n^4/\lambda_0^2,\, n^5 \log m,\, d^3/\delta \}$` or merge into a single dominating `\poly` expression. Do not silently drop subsidiary requirements.
 
-- **Union-bound budget.** If you prove $k$ high-probability events each at failure $\delta/k$, the theorem statement must use $\delta$ (not $\delta/k$). When in doubt, write out the union bound explicitly: *"By a union bound over \Cref{lem:A,lem:B,lem:C}, all three events hold with probability at least $1 - 3 \cdot \delta/3 = 1 - \delta$."*
+- **Union-bound budget.** If you prove $k$ high-probability events each at failure $\delta/k$, the theorem statement must use $\delta$ (not $\delta/k$). When in doubt, write out the union bound explicitly: *"By a union bound over \Cref{lem:A,lem:B,lem:C}, all three events hold with probability at least $1 - 3 \cdot \delta/3 = 1 - \delta$."* **Lint R17 enforces this**: a theorem statement containing `1-\delta` whose proof body lacks any union-bound paragraph triggers a hard error. Suppress with `% lint: ignore R17 — <reason>` only when the bound is established in a separate file.
+
+> **Lint R15 enforces the bare-constant discipline.** If no file in the project declares the universal-constant convention (the *"Throughout, $c, C, C_1, \ldots$ denote universal positive constants ..."* sentence), any bare `$C$` / `$c$` / `$C_n$` triggers R15. Either add the declaration to the notation block, annotate the constant with explicit dependency (e.g. `$C_{\lambda_0, L, d}$`), or suppress per-line via `% lint: ignore R15 — <reason>`. Do not bypass the rule without a written reason — bare constants drifting into problem-dependent meaning is the #1 silent bug in NN-convergence proofs.
 
 ---
 
 ## LaTeX compilation gate
 
-A proof that does not compile is not a proof — it is a draft. Before declaring any phase complete:
+A proof that does not compile is not a proof — it is a draft. The compile is enforced through **Phase D gate (a)** in SKILL.md, which is now the only sanctioned compile path:
 
-1. **Run the project's build, with output redirected to `<project-root>/.output/`.** Keep build artifacts (`.aux`, `.log`, `.bbl`, `.blg`, `.out`, `.pdf`) out of the project root so the source tree stays clean and gitignorable. Prefer:
+```bash
+python <skill>/scripts/latexmk-wrapper.py main.tex --outdir <project-root>/.output
+```
 
-   ```bash
-   mkdir -p .output
-   latexmk -pdf -outdir=.output main.tex
-   ```
+The wrapper:
 
-   If `latexmk` is unavailable, fall back to `pdflatex -output-directory=.output main.tex` twice (so `\ref` resolves), then `bibtex .output/main` if there is a `.bib`, then `pdflatex -output-directory=.output main.tex` twice more. The rendered PDF will be at `.output/main.pdf`.
+1. **Runs `latexmk` (preferred) or falls back to `pdflatex`**, with output redirected to `.output/`. Build artifacts (`.aux`, `.log`, `.bbl`, `.blg`, `.out`, `.pdf`) stay out of the project root — they belong in `.output/` and `.gitignore` (the gitignore step is handled by SKILL.md Phase A.0).
 
-   If the project has its own Makefile or `build.sh`, use that. Add `.output/` to `.gitignore` if it isn't already.
+2. **Parses the log into structured JSON** with fields `compile_ok`, `undef_refs`, `undef_cites`, `mult_labels`, `undef_macros`, `errors`, `overfull_hbox_pts`, `overfull_violations` (boxes exceeding `--overfull-threshold`, default 50pt). All of the following flip `compile_ok` to `false`:
+   - `Undefined control sequence` — macro used before it is defined.
+   - `Reference ... undefined` — `\ref`/`\eqref`/`\Cref` points at a nonexistent label (caught here AND statically by R5).
+   - `Citation ... undefined` — `\cite` key not in `.bib` (caught here AND by R12 / R13).
+   - `Multiply defined labels` — two `\label{}` with the same slug (caught here AND by R4).
+   - `Overfull/Underfull \hbox` exceeding 50pt — fix display sizing.
 
-2. **Read the log.** Treat all of the following as failures, not warnings:
-   - `Undefined control sequence` — a macro is used before it is defined.
-   - `Reference ... undefined` — a `\ref`/`\eqref`/`\Cref` points at a nonexistent label.
-   - `Citation ... undefined` — a `\cite` key is not in the `.bib`. **This may indicate a fabricated citation — verify immediately.**
-   - `Multiply defined labels` — two `\label{}` with the same slug. Pick unique slugs.
-   - `Overfull/Underfull \hbox` over ~50pt — fix display sizing, not just typesetting.
+3. **Returns exit code 1** when `compile_ok=false`. The non-zero exit IS the signal — react to it. Phase D gate (a) requires exit 0.
 
-3. **Open the rendered PDF (`.output/main.pdf`) and spot-check cross-references.** This catches a class of bugs that compile cleanly but render wrong. In particular:
-   - **Type-name correctness.** For each kind of label, verify the rendered prose: `\Cref{lem:foo}` must say "Lemma X.Y", `\Cref{ass:foo}` must say "Assumption X.Y", `\Cref{def:foo}` must say "Definition X.Y", `\Cref{fac:foo}` must say "Fact X.Y". **If everything renders as "Theorem X.Y" regardless of label type, the preamble is using shared `\newtheorem{X}[theorem]{X}` counters without `aliascnt`** — fix per [conventions.md](conventions.md) §Theorem-environment preamble. This is a silent-at-compile-time, loud-at-review-time bug; the log gives no warning.
-   - **Equation references.** `\eqref{eq:foo}` must render as "(X.Y)" with parentheses.
-   - **Multi-reference rendering.** `\Cref{lem:a,lem:b,lem:c}` must render as "Lemmas X, Y and Z" (or whatever the cleveref configuration prescribes), not as three separate "Lemma X" copies.
-   - **Capitalization at sentence start.** Use `\Cref` (capital C) at sentence start, `\cref` (lowercase) mid-sentence — verify the rendered case matches sentence position.
+The previous version of this gate told you to *"open the rendered PDF and spot-check cross-reference rendering"* to catch the silent aliascnt counter-share bug (everything renders as "Theorem X.Y" regardless of label type). That step is no longer required: **lint R0c statically checks the macros preamble** and errors if `\newtheorem{lemma}[theorem]{...}` lacks a matching `\newaliascnt{lemma}{theorem}`. R0c is stronger than visual spot-checking because it catches the bug at the source rather than via inspection. Run `lint.py` and ensure R0c passes.
 
-4. **If the build is broken**, fix it before continuing. Do not move on with a non-compiling file; downstream edits compound the breakage.
-
-5. **If you cannot run the build** (sandbox, no LaTeX installed), say so to the user explicitly and ask them to run it; do not pretend the file compiles. Also flag any cross-reference rendering you cannot verify without the PDF.
+**If you cannot run the build** (sandbox, no LaTeX installed), `latexmk-wrapper.py` returns JSON with `log_missing: true` and exits 1 — surface this to the user explicitly and ask them to run the build locally. Do not pretend the file compiles.
 
 ---
 

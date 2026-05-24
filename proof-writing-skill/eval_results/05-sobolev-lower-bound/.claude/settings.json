@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/skills/dlt-proof-writing/scripts/hook_output_guard.py"
+          }
+        ]
+      }
+    ]
+  }
+}

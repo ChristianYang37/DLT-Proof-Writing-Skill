@@ -4,7 +4,7 @@ Read this file at Phase A.0 (project context discovery), and again whenever you 
 
 ## Project file structure
 
-Proofs are written **one section per `.tex` file**, `\input`-ed into `main.tex`. Never write multiple proofs inline in `main.tex`; never inline a proof inside the file that imports it. The pattern:
+Proofs are written **one section per `.tex` file**, `\input`-ed into `main.tex`. Never write multiple proofs inline in `main.tex`; never inline a proof inside the file that imports it. **Lint R18 enforces this**: any `\begin{theorem|lemma|proposition|corollary|claim|definition|assumption|fact|remark|proof|abstract}` env inside a file containing `\documentclass` is a hard error. The pattern:
 
 ```
 project/

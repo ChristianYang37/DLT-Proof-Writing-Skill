@@ -1,0 +1,17 @@
+{
+  "_comment": "Recommended Claude Code settings for projects using the dlt-proof-writing skill. Copy (or merge) this file into your proof project's .claude/settings.json to enable the PreToolUse hook that blocks LaTeX compile artifacts from being written outside .output/. The skill scripts at ~/.claude/skills/dlt-proof-writing/scripts/ must be installed (via `make install` from the skill repo).",
+
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/skills/dlt-proof-writing/scripts/hook_output_guard.py"
+          }
+        ]
+      }
+    ]
+  }
+}
