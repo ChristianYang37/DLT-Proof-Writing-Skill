@@ -2,7 +2,7 @@
   "name": "dlt-proof-writing-marketplace",
   "version": "1.0.0",
   "description": "DLT (Deep Learning Theory) Proof Writing Skill — an Agent Skill for rigorous, modular LaTeX proof drafting in deep learning theory, statistical learning, optimization, and RL theory.",
-  "author": "Christian Yang",
+  "author": "Chiwun Yang",
   "homepage": "https://github.com/ChristianYang37/DLT-Proof-Writing-Skill",
   "license": "CC-BY-NC-4.0",
   "skills": [

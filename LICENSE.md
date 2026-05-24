@@ -33,7 +33,7 @@ If you use this skill in academic work, please cite as:
 
 ```bibtex
 @misc{dlt-proof-writing-skill,
-  author       = {Yang, Christian},
+  author       = {Yang, Chiwun},
   title        = {{DLT} {P}roof {W}riting {S}kill: an {A}gent {S}kill for rigorous deep-learning-theory proof drafting in {L}a{T}e{X}},
   year         = {2026},
   howpublished = {GitHub: \url{https://github.com/ChristianYang37/DLT-Proof-Writing-Skill}},
@@ -43,4 +43,4 @@ If you use this skill in academic work, please cite as:
 
 ---
 
-Copyright (c) 2026 Christian Yang
+Copyright (c) 2026 Chiwun Yang
