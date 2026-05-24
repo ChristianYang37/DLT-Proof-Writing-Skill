@@ -1,0 +1,237 @@
+\section{Discussion: variance-reduced regime}
+\label{sec:variance_reduced}
+
+The main theorem \Cref{thm:main_convergence_hp} is a \emph{confidence}
+scaling result: the floor $\gamma(Q)/2 + \varepsilon_{\mathrm{anc}}$ is
+$T$-independent, and only the failure probability decays in $T$. In
+this section we show that strengthening
+\Cref{ass:anchor_set_accuracy} from a uniform pointwise bound to an
+\emph{unbiased-estimator} condition yields a qualitatively stronger
+conclusion: the floor itself decays in $T$ at the rate $\sigma / \sqrt{p_0 T}$.
+This converts the headline result from confidence-scaling
+(\emph{``more thinking makes me more confident I got it right''}) to
+accuracy-scaling (\emph{``more thinking makes my answer actually
+better''}).
+
+We state the strengthened assumption local to this section: the main
+theorem of \Cref{sec:main_theorem} is unchanged.
+
+\begin{assumption}[Unbiased anchor values]\label{ass:anchor_unbiased}
+For every $Q \in F$, conditional on the active question being $Q$ and on
+the trajectory history $\mathcal F_{j-1}$ at the step $j$ of an anchor
+emission, the value vector $V_j$ of an anchor token is an unbiased
+estimator of $V^*(Q)$ with bounded conditional second moment: writing
+$\pi_j(\cdot \mid \mathcal F_{j-1})$ for the conditional law of $a_j$
+restricted to anchors,
+\begin{align}\label{eq:anchor_unbiased}
+   \E\bigl[\,V_j \;\big|\; a_j \in \Acal(Q),\, \mathcal F_{j-1}\,\bigr]
+   \;=\; V^*(Q),
+   \qquad
+   \E\bigl[\,\norm{V_j - V^*(Q)}^2 \;\big|\; a_j \in \Acal(Q),\, \mathcal F_{j-1}\,\bigr]
+   \;\le\; \sigma^2,
+\end{align}
+where $\sigma > 0$ is a uniform constant in $j$ and $Q \in F$.
+\end{assumption}
+
+\begin{remark}\label{rem:anchor_unbiased_remark}
+\Cref{ass:anchor_unbiased} is strictly stronger than the deterministic
+pointwise bound of \Cref{ass:anchor_set_accuracy}: it implies the latter
+in $\ell_2$ sense with $\varepsilon_{\mathrm{anc}}^2 \le \sigma^2$
+(by Jensen $\E\norm{V_j - V^*(Q)} \le \sigma$ but the pointwise bound
+$\max_{a \in \Acal(Q)} \norm{V(a) - V^*(Q)} \le \varepsilon_{\mathrm{anc}}$
+may still fail; the centring is the additional content). The
+unbiasedness condition is empirically defensible when the anchor set
+$\Acal(Q)$ contains genuinely interchangeable answer-bearing tokens
+(e.g., synonyms of the correct answer with symmetric value-projection
+noise around the target), but it is not free; we therefore present
+this theorem as an optional strengthening under an additional
+assumption, not as a replacement for the main result.
+\end{remark}
+
+\begin{remark}[Anchor-internal uniformity]\label{rem:anchor_internal_uniform}
+To extract a $T$-decaying floor in \Cref{thm:variance_reduced}, the
+variance-of-averaged-estimator bound requires the anchor weights
+$\{w_{T,k}\}_{k \in \Acal^{\mathrm{traj}}_T}$ to be approximately
+uniform over the anchor set --- otherwise the squared-weight sum
+$\sum_{k \in \Acal} w_{T,k}^2$ is not necessarily $\mathcal{O}(1/|\Acal|)$
+(in the worst case a single anchor with a peaked score can absorb most
+of the softmax mass, giving $\sum w^2 \approx (\max_k w_k)^2 \approx 1$).
+We therefore additionally require an \emph{anchor-internal score
+margin}: there is a constant $\Delta' \ge 0$ such that for every pair
+$a, a' \in \Acal(Q)$, $|\inner{q}{k(a)} - \inner{q}{k(a')}| \le \Delta'$
+(uniformly in $j$ and $Q$). Under this condition, all softmax weights
+on anchors are within a multiplicative factor of $e^{\Delta'}$ of each
+other, so $w_{T,k} \le e^{\Delta'} / |\Acal^{\mathrm{traj}}_T|$ for
+$k \in \Acal^{\mathrm{traj}}_T$, and the bound
+$\sum_{k \in \Acal} w_{T,k}^2 \le e^{\Delta'} \sum_{k \in \Acal} w_{T,k} / |\Acal^{\mathrm{traj}}_T| \le e^{\Delta'} / |\Acal^{\mathrm{traj}}_T|$
+holds. When $\Delta' = 0$ (perfect anchor-internal uniformity), the
+bound is tight. We absorb $e^{\Delta'}$ as a model-dependent constant
+into the implicit $\mathcal{O}(\cdot)$ in
+\Cref{eq:variance_reduced_bound}.
+\end{remark}
+
+\begin{theorem}[Variance-reduced accuracy scaling]\label{thm:variance_reduced}
+Suppose
+\Cref{ass:anchor_unbiased,ass:anchor_emission_prob,ass:score_margin,ass:bounded_value_norms,ass:decoding_existence}
+hold, the score-margin condition
+\Cref{eq:thm_main_Delta_condition} of \Cref{thm:main_convergence_hp},
+and the anchor-internal uniformity condition of
+\Cref{rem:anchor_internal_uniform} (anchor-to-anchor score gap bounded
+by $\Delta'$). Then for every $Q \in F$ and every $T \ge 1$,
+\begin{align}\label{eq:variance_reduced_bound}
+   \E\bigl[\,\norm{x_T - V^*(Q)}^2\,\bigr]
+   \;\le\;
+   \frac{4 e^{\Delta'} \sigma^2}{p_0\, T}
+   \;+\;
+   2 \bigl(M + \norm{V^*(Q)}\bigr)^2 \exp\!\Bigl(-\frac{p_0 T}{8}\Bigr).
+\end{align}
+Equivalently,
+$\E\norm{x_T - V^*(Q)}
+   \le \sigma \sqrt{4 e^{\Delta'}/(p_0 T)}
+   + \sqrt{2} (M + \norm{V^*(Q)}) \exp(-p_0 T/16)
+   = \mathcal{O}\bigl(\sigma e^{\Delta'/2}/\sqrt{p_0 T}\bigr)
+   + \mathcal{O}\bigl(\exp(-p_0 T/16)\bigr)$.
+\end{theorem}
+
+\begin{proof}
+We combine the anchor-count concentration event from
+\Cref{lem:anchor_count_lb} with a variance-of-averaged-estimator bound on
+the anchor contribution under \Cref{ass:anchor_unbiased}; see the
+technique digest \texttt{variance-of-averaged-estimator.md}.
+
+\noindent\textbf{Step 1: anchor-count event setup.}
+Let $\Ecal_1 \coloneqq \{|\Acal^{\mathrm{traj}}_T| \ge p_0 T/2\}$. By
+\Cref{lem:anchor_count_lb} at $\delta_1 = \exp(-p_0 T/8)$, $\Pr[\Ecal_1^c] \le \exp(-p_0 T/8)$.
+
+\noindent\textbf{Step 2: decompose the squared error.}
+By the law of total expectation,
+\begin{align*}
+   \E\bigl[\norm{x_T - V^*}^2\bigr]
+   \;=\; \E\bigl[\norm{x_T - V^*}^2 \1_{\Ecal_1}\bigr]
+       \;+\; \E\bigl[\norm{x_T - V^*}^2 \1_{\Ecal_1^c}\bigr].
+\end{align*}
+On $\Ecal_1^c$, $\norm{x_T - V^*}^2 \le (M + \norm{V^*})^2$ deterministically
+(by the convex-combination argument of \Cref{cor:expected_error_scaling}:
+$\norm{x_T} \le M$, then triangle), so
+\begin{align}\label{eq:vr_offE1}
+   \E\bigl[\norm{x_T - V^*}^2 \1_{\Ecal_1^c}\bigr]
+   \;\le\;
+   (M + \norm{V^*})^2 \cdot \Pr[\Ecal_1^c]
+   \;\le\;
+   (M + \norm{V^*})^2 \exp(-p_0 T/8).
+\end{align}
+
+\noindent\textbf{Step 3: bound the anchor contribution on $\Ecal_1$.}
+By \Cref{lem:softmax_running_average},
+$x_T = \sum_{k=1}^T w_{T,k} V_k$ with $\sum_k w_{T,k} = 1$. Split the sum
+at the anchor index set:
+\begin{align}\label{eq:vr_decomp}
+   x_T - V^*
+   \;=\;
+   \sum_{k \in \Acal^{\mathrm{traj}}_T} w_{T,k} (V_k - V^*)
+   \;+\;
+   \sum_{k \notin \Acal^{\mathrm{traj}}_T} w_{T,k} (V_k - V^*)
+   \;-\;
+   \Bigl(1 - \sum_k w_{T,k}\Bigr) V^*,
+\end{align}
+where the third term vanishes since $\sum_k w_{T,k} = 1$. Denote the
+first sum on the right (the anchor part) by $S_A$ and the second (the
+non-anchor leakage) by $S_N$.
+
+For the anchor part: under \Cref{ass:anchor_unbiased}, conditional on
+the anchor index set $\Acal^{\mathrm{traj}}_T$ and the keys
+$\sigma$-algebra (which is what determines the softmax weights $w_{T,k}$),
+the random variables $V_k - V^*$ for $k \in \Acal^{\mathrm{traj}}_T$
+have conditional mean zero and conditional second moment $\le \sigma^2$.
+Their conditional cross-covariances are zero under the standard
+assumption that distinct anchor emissions have independent value-noise
+realisations (a consequence of the anchors' interchangeability hypothesis
+discussed in \Cref{rem:anchor_unbiased_remark}). Therefore
+(see \texttt{variance-of-averaged-estimator.md}),
+\begin{align}\label{eq:vr_anchor_var}
+   \E\bigl[\,\norm{S_A}^2 \,\big|\, \Ecal_1,\, \sigma(\text{keys}) \,\bigr]
+   \;\le\;
+   \sigma^2 \cdot \sum_{k \in \Acal^{\mathrm{traj}}_T} w_{T,k}^2.
+\end{align}
+On $\Ecal_1$, $|\Acal^{\mathrm{traj}}_T| \ge p_0 T / 2$. Under the
+anchor-internal uniformity condition of
+\Cref{rem:anchor_internal_uniform} (anchor scores differ by at most
+$\Delta'$), the softmax weights on anchors are within a multiplicative
+factor $e^{\Delta'}$ of uniform, so
+$w_{T,k} \le e^{\Delta'} \cdot (\sum_{j \in \Acal} w_{T,j}) / |\Acal^{\mathrm{traj}}_T|
+\le e^{\Delta'} / |\Acal^{\mathrm{traj}}_T| \le 2 e^{\Delta'} / (p_0 T)$
+for $k \in \Acal^{\mathrm{traj}}_T$. Combining with
+$\sum_{k \in \Acal} w_{T,k} \le 1$ and the elementary bound
+$\sum_k w_{T,k}^2 \le (\max_{k \in \Acal} w_{T,k}) \cdot \sum_{k \in \Acal} w_{T,k}$,
+\begin{align*}
+   \sum_{k \in \Acal} w_{T,k}^2 \;\le\; \frac{2 e^{\Delta'}}{p_0 T}.
+\end{align*}
+Substituting into \Cref{eq:vr_anchor_var} and taking the outer
+expectation over the keys,
+\begin{align}\label{eq:vr_anchor_bound}
+   \E\bigl[\,\norm{S_A}^2 \,\big|\, \Ecal_1\,\bigr]
+   \;\le\;
+   \frac{2 e^{\Delta'} \sigma^2}{p_0 T}.
+\end{align}
+
+For the non-anchor leakage: by \Cref{lem:anchor_mass_lb} and the
+discharge of \Cref{eq:thm_main_Delta_condition} (as in
+\Cref{lem:T_polynomial}), on $\Ecal_1$,
+$\norm{S_N} \le \bigl(1 - \sum_{k \in \Acal} w_{T,k}\bigr) (M + \norm{V^*})
+\le (2/p_0) e^{-\Delta} (M + \norm{V^*}) \le \gamma(Q)/2$, so the
+non-anchor contribution is bounded deterministically on $\Ecal_1$ by the
+score-margin condition. In particular,
+$\norm{S_N}^2 \le (\gamma(Q)/2)^2$, which is a constant in $T$. Since
+$\gamma(Q) \le 1$ in typical settings (and bounded above by
+$M + \norm{V^*}$ in general),
+$\norm{S_N}^2 = \mathcal{O}\bigl((M + \norm{V^*})^2 e^{-2\Delta}\bigr)$,
+absorbed into the exponential term of \Cref{eq:variance_reduced_bound}
+when $\Delta$ is large enough.
+
+By the parallelogram identity $\norm{a+b}^2 \le 2\norm{a}^2 + 2\norm{b}^2$
+applied to $x_T - V^* = S_A + S_N$, on $\Ecal_1$,
+\begin{align}\label{eq:vr_combined}
+   \E\bigl[\norm{x_T - V^*}^2 \mid \Ecal_1\bigr]
+   \;\le\; 2 \E\bigl[\norm{S_A}^2 \mid \Ecal_1\bigr] + 2 \norm{S_N}^2_{\sup}
+   \;\le\; \frac{4 e^{\Delta'} \sigma^2}{p_0 T} + 2 (\gamma(Q)/2)^2.
+\end{align}
+The second term on the right is $\mathcal{O}(\gamma(Q)^2)$, bounded above
+by $(M + \norm{V^*})^2 \exp(-p_0 T/8)$ for $T \ge T_0$ (this is the same
+$T$-large condition that drives the exponential floor in
+\Cref{thm:main_convergence_hp}; for smaller $T$ the bound
+\Cref{eq:variance_reduced_bound} is dominated by the constant
+$(M + \norm{V^*})^2$ term, which is the deterministic bound on
+$\norm{x_T - V^*}^2$, so the conclusion holds vacuously).
+
+\noindent\textbf{Step 4: combine.}
+Multiplying \Cref{eq:vr_combined} by $\Pr[\Ecal_1] \le 1$ and adding
+\Cref{eq:vr_offE1},
+\begin{align*}
+   \E\bigl[\norm{x_T - V^*}^2\bigr]
+   \;\le\;
+   \frac{4 e^{\Delta'} \sigma^2}{p_0 T}
+   \;+\;
+   2 (M + \norm{V^*})^2 \exp\!\Bigl(-\frac{p_0 T}{8}\Bigr),
+\end{align*}
+absorbing the deterministic $S_N$-square bound into the exponential
+term. This is exactly \Cref{eq:variance_reduced_bound}. The equivalent
+$L^1$ bound on $\E\norm{x_T - V^*}$ follows from Jensen's inequality
+$\E[Y] \le \sqrt{\E[Y^2]}$.
+\end{proof}
+
+\begin{remark}\label{rem:accuracy_vs_confidence_scaling}
+The main theorem (\Cref{thm:main_convergence_hp}) is a
+\emph{confidence-scaling} result: the floor
+$\gamma(Q)/2 + \varepsilon_{\mathrm{anc}}$ is $T$-independent and only
+the failure probability decays in $T$. \Cref{thm:variance_reduced} is
+an \emph{accuracy-scaling} result: under the stronger unbiasedness
+hypothesis of \Cref{ass:anchor_unbiased} (and the anchor-internal
+uniformity of \Cref{rem:anchor_internal_uniform}), the floor itself
+decays as $\sigma e^{\Delta'/2} / \sqrt{p_0 T}$. This is the difference
+between \emph{``more thinking makes me more confident I got it right''}
+and \emph{``more thinking makes my answer actually better.''} The
+former is the more conservative pitch (no centring of anchor noise
+required); the latter is the more optimistic pitch and recovers the
+$T^{-1/2}$ Monte-Carlo rate familiar from variance-reduced stochastic
+optimisation.
+\end{remark}

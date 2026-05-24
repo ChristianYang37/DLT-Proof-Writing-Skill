@@ -1,0 +1,60 @@
+\section{Anchor-set decomposition of the weighted average}
+\label{sec:anchor_decomposition}
+
+Throughout this section we fix an arbitrary $Q \in F$ and write $V^* = V^*(Q)$
+for brevity. The following lemma is a triangle-inequality decomposition that
+splits the error $\norm{x_j - V^*}$ into an anchor part and a non-anchor
+leakage part, parameterized by any subset $\mathcal A \subseteq \{1, \dots, j\}$.
+We will instantiate $\mathcal A$ in subsequent sections with the
+trajectory-defined anchor index set
+\begin{align}\label{eq:anchor_index_set}
+   \mathcal A^{\mathrm{traj}}_j \;\coloneqq\;
+      \big\{ \, k \in \{1, \dots, j\} \,:\, a_k \in \Acal(Q) \, \big\},
+\end{align}
+i.e.\ the set of trajectory positions at which the emitted token belongs
+to the anchor set $\Acal(Q)$ of \Cref{ass:anchor_set_accuracy}.
+
+\begin{lemma}[Anchor decomposition]\label{lem:anchor_decomposition}
+Let $j \ge 1$, let $w_{j,k} \ge 0$ with $\sum_{k=1}^{j} w_{j,k} = 1$, and
+let $V_1, \dots, V_j, V^* \in \R^d$. For any subset
+$\mathcal A \subseteq \{1, \dots, j\}$,
+\begin{align}\label{eq:anchor_decomp_bound}
+   \norm[\bigg]{\sum_{k=1}^{j} w_{j,k}\, V_k \;-\; V^*}
+   \;\le\;
+   \sum_{k \in \mathcal A} w_{j,k}\, \norm{V_k - V^*}
+   \;+\;
+   \Big( 1 - \sum_{k \in \mathcal A} w_{j,k} \Big) \cdot D_j,
+\end{align}
+where $D_j \coloneqq \max_{k \in \{1, \dots, j\}} \norm{V_k - V^*}$.
+\end{lemma}
+
+\begin{proof}
+The proof is a one-display algebraic identity followed by the triangle
+inequality and convex-combination bound.
+
+Because the weights $(w_{j,k})_{k=1}^{j}$ form a probability distribution
+(i.e.\ $\sum_{k} w_{j,k} = 1$), we have
+$V^* = \sum_{k=1}^{j} w_{j,k} V^*$, so
+\begin{align*}
+   \sum_{k=1}^{j} w_{j,k}\, V_k \;-\; V^*
+   \;=\; \sum_{k=1}^{j} w_{j,k} \, (V_k - V^*).
+\end{align*}
+Splitting the index set at $\mathcal A$ and applying the triangle
+inequality,
+\begin{align*}
+   \norm[\bigg]{\sum_{k=1}^{j} w_{j,k}\, V_k - V^*}
+   \;\le\; & ~ \sum_{k \in \mathcal A} w_{j,k}\, \norm{V_k - V^*}
+              \;+\; \sum_{k \notin \mathcal A} w_{j,k}\, \norm{V_k - V^*} \\
+   \;\le\; & ~ \sum_{k \in \mathcal A} w_{j,k}\, \norm{V_k - V^*}
+              \;+\; D_j \cdot \sum_{k \notin \mathcal A} w_{j,k} \\
+   \;=\; & ~ \sum_{k \in \mathcal A} w_{j,k}\, \norm{V_k - V^*}
+              \;+\; \Big(1 - \sum_{k \in \mathcal A} w_{j,k}\Big) \cdot D_j,
+\end{align*}
+where the first step follows from the triangle inequality applied
+term-by-term to the convex combination, the second step follows from
+$\norm{V_k - V^*} \le D_j$ for every $k \in \{1, \dots, j\}$ (the
+defining property of $D_j$), and the last step follows from
+$\sum_{k=1}^{j} w_{j,k} = 1$ rearranged as
+$\sum_{k \notin \mathcal A} w_{j,k} = 1 - \sum_{k \in \mathcal A} w_{j,k}$.
+This gives the assertion.
+\end{proof}

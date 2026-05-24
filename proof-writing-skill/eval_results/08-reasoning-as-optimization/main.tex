@@ -1,0 +1,58 @@
+\documentclass[11pt]{article}
+
+% Geometry / typography
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+
+% Math
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{aliascnt}
+\usepackage{mathtools}
+
+% Colour (for the \todo marker)
+\usepackage{xcolor}
+
+% Cross-references (hyperref must be loaded BEFORE cleveref)
+\usepackage{hyperref}
+\usepackage[capitalize,noabbrev]{cleveref}
+
+% Enumerate
+\usepackage{enumitem}
+
+% Bibliography
+\usepackage[numbers,square]{natbib}
+
+% Macros and theorem environments
+\input{macros}
+
+\title{Anchored attention converges in polynomial time:\\
+       a convergence theorem for a single layer/head of a reasoning model}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+% No abstract / introduction per the skill's scope.
+
+\input{sections/01-preliminaries}
+\input{sections/02-assumptions}
+\input{sections/03-lemma-softmax-running-average}
+\input{sections/04-lemma-anchor-decomposition}
+\input{sections/05-lemma-anchor-accuracy}
+\input{sections/06-lemma-anchor-count}
+\input{sections/07-lemma-anchor-mass}
+\input{sections/08-lemma-T-polynomial}
+\input{sections/09-lemma-decoding}
+\input{sections/10-main-theorem}
+\input{sections/11-lower-bound}
+\input{sections/12-variance-reduced}
+\input{sections/99-sgd-aside}
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+
+\end{document}

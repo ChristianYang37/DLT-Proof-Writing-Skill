@@ -1,0 +1,51 @@
+\section{The softmax recurrence as a running weighted average}
+\label{sec:softmax_running_average}
+
+\begin{lemma}[Softmax recurrence as running average]\label{lem:softmax_running_average}
+Let $x_j$, $w_{j,k}$, and $s_j$ be defined as in
+\Cref{def:softmax_attention}. With the convention $x_0 \coloneqq 0$ and
+$s_0 \coloneqq 0$, the sequence $(x_j)_{j\ge 0}$ satisfies, for every
+$j \ge 1$, both the recurrence
+\begin{align}\label{eq:recurrence}
+   x_j \;=\; \frac{s_{j-1}}{s_j}\, x_{j-1} \;+\; \frac{e^{\inner{q}{k_j}}}{s_j}\, V_j,
+\end{align}
+and the convex-combination identity
+\begin{align}\label{eq:running_average}
+   x_j \;=\; \sum_{k=1}^{j} w_{j,k}\, V_k,
+   \qquad
+   w_{j,k} \;\ge\; 0,
+   \qquad
+   \sum_{k=1}^{j} w_{j,k} \;=\; 1.
+\end{align}
+\end{lemma}
+
+\begin{proof}
+The proof is a one-line algebraic identity followed by induction on $j$.
+
+\noindent\textbf{Step 1: recurrence.}
+By the definition $s_j = \sum_{i=1}^{j} e^{\inner{q}{k_i}}$, we have
+$s_j = s_{j-1} + e^{\inner{q}{k_j}}$ for every $j \ge 1$. Multiplying
+\Cref{eq:cumulative_softmax} by $s_j$ gives
+\begin{align*}
+   s_j\, x_j
+   \;=\; \sum_{k=1}^{j} e^{\inner{q}{k_k}}\, V_k
+   \;=\; \sum_{k=1}^{j-1} e^{\inner{q}{k_k}}\, V_k \;+\; e^{\inner{q}{k_j}}\, V_j
+   \;=\; s_{j-1}\, x_{j-1} \;+\; e^{\inner{q}{k_j}}\, V_j,
+\end{align*}
+where the last equality used $s_{j-1} x_{j-1} = \sum_{k=1}^{j-1} e^{\inner{q}{k_k}} V_k$
+from \Cref{eq:cumulative_softmax} at index $j-1$ (and the conventions
+$x_0 = 0$, $s_0 = 0$ from the lemma statement). Dividing both sides by
+$s_j > 0$ yields \Cref{eq:recurrence}.
+
+\noindent\textbf{Step 2: convex weights.}
+The weights $w_{j,k} = e^{\inner{q}{k_k}}/s_j$ are non-negative since
+exponentials are positive and $s_j > 0$. Their row sum is
+\begin{align*}
+   \sum_{k=1}^{j} w_{j,k}
+   \;=\; \frac{1}{s_j} \sum_{k=1}^{j} e^{\inner{q}{k_k}}
+   \;=\; \frac{s_j}{s_j}
+   \;=\; 1,
+\end{align*}
+which establishes \Cref{eq:running_average} directly from
+\Cref{eq:cumulative_softmax}. This completes the proof.
+\end{proof}

@@ -1,0 +1,34 @@
+\section{From attention output to correct answer}
+\label{sec:decoding}
+
+\begin{lemma}[Decoding correctness]\label{lem:decoding_correctness}
+Fix $Q \in F$ and let $V^* = V^*(Q)$, $\gamma = \gamma(Q)$ be as in
+\Cref{ass:anchor_set_accuracy,ass:decoding_existence}. Under
+\Cref{ass:anchor_set_accuracy,ass:decoding_existence}, for every
+$x \in \R^d$ with
+\begin{align}\label{eq:decoding_close_hypothesis}
+   \norm{x - V^*} \;\le\; \tfrac{\gamma}{2} + \varepsilon_{\mathrm{anc}},
+\end{align}
+we have $\norm{x - V^*} \le \gamma$ and consequently
+$\dec(x) \in \Correct(Q)$.
+\end{lemma}
+
+\begin{proof}
+The proof is a direct chain of two arithmetic steps.
+
+By the hypothesis $\gamma > 2 \varepsilon_{\mathrm{anc}}$
+of \Cref{ass:anchor_set_accuracy},
+$\varepsilon_{\mathrm{anc}} \le \gamma/2$.
+Substituting into \Cref{eq:decoding_close_hypothesis},
+\begin{align*}
+   \norm{x - V^*}
+   \;\le\;
+   \tfrac{\gamma}{2} + \varepsilon_{\mathrm{anc}}
+   \;\le\;
+   \tfrac{\gamma}{2} + \tfrac{\gamma}{2}
+   \;=\;
+   \gamma.
+\end{align*}
+Applying \Cref{ass:decoding_existence} with this $x$, the implication
+\Cref{eq:decoding_margin} yields $\dec(x) \in \Correct(Q)$, as desired.
+\end{proof}

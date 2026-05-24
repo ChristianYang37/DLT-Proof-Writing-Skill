@@ -1,0 +1,36 @@
+\section{Anchor accuracy bound}
+\label{sec:anchor_accuracy}
+
+\begin{lemma}[Anchor accuracy]\label{lem:anchor_accuracy_bound}
+Fix $Q \in F$ and let $V^* = V^*(Q)$. Under \Cref{ass:anchor_set_accuracy},
+on the event $\{a_k \in \Acal(Q)\}$ we have $\norm{V_k - V^*} \le \varepsilon_{\mathrm{anc}}$.
+Consequently, for every $j \ge 1$ and every realisation of the trajectory,
+\begin{align}\label{eq:anchor_accuracy_bound_eq}
+   \max_{k \in \mathcal A^{\mathrm{traj}}_j} \norm{V_k - V^*}
+   \;\le\; \varepsilon_{\mathrm{anc}}.
+\end{align}
+\end{lemma}
+
+\begin{proof}
+The proof is a one-line restatement of \Cref{ass:anchor_set_accuracy}.
+By definition of $V_k$, when the trajectory emits token
+$a_k \in \Acal(Q)$ at step $k$, the value vector $V_k$ produced by layer
+$i$, head $h$ at the corresponding key position coincides with the
+layer-$i$, head-$h$ value-projection $V(a_k)$ of that token.
+\Cref{ass:anchor_set_accuracy} (specifically
+\Cref{eq:anchor_value_close}) asserts that
+$\norm{V(a_k) - V^*(Q)} \le \varepsilon_{\mathrm{anc}}$ for every
+$a_k \in \Acal(Q)$, so $\norm{V_k - V^*} \le \varepsilon_{\mathrm{anc}}$.
+Taking the maximum over $k \in \mathcal A^{\mathrm{traj}}_j$
+(the set of trajectory positions where this event holds, per
+\Cref{eq:anchor_index_set}) yields \Cref{eq:anchor_accuracy_bound_eq},
+as desired.
+\end{proof}
+
+\begin{remark}\label{rem:anchor_accuracy_bound_remark}
+The bound in \Cref{lem:anchor_accuracy_bound} is deterministic given the
+trajectory: it holds for every realisation, not just with high
+probability. The randomness in the argument only enters later, through
+the size of $\mathcal A^{\mathrm{traj}}_j$ in \Cref{lem:anchor_count_lb}
+and through the softmax-mass lower bound in \Cref{lem:anchor_mass_lb}.
+\end{remark}

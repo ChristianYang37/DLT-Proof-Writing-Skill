@@ -1,0 +1,139 @@
+\section{Assumptions}
+\label{sec:assumptions}
+
+The convergence theorem rests on five assumptions: a value-accuracy
+condition on the question-conditional anchor set
+(\Cref{ass:anchor_set_accuracy}), a positive-emission probability for
+anchors (\Cref{ass:anchor_emission_prob}), a score margin between anchor
+and non-anchor keys (\Cref{ass:score_margin}), uniform boundedness of
+value vectors (\Cref{ass:bounded_value_norms}), and existence of a
+decoding margin around the question-conditional target
+(\Cref{ass:decoding_existence}). Each assumption is accompanied by one
+remark commenting on its mildness, testability, and how it could be
+weakened.
+
+\begin{assumption}[Anchor-set value accuracy]\label{ass:anchor_set_accuracy}
+There exist constants $\varepsilon_{\mathrm{anc}} \ge 0$ and
+$\gamma_{\min} > 0$ such that, for every question $Q \in F$, there is a
+non-empty question-conditional anchor set
+$\Acal(Q) \subseteq \mathcal V$ (a subset of the tokenizer vocabulary,
+depending on $Q$ but \emph{not} on the reasoning trajectory) and a
+vector $V^*(Q) \in \R^d$ with
+\begin{align}\label{eq:anchor_value_close}
+   \max_{a \in \Acal(Q)} \norm{V(a) - V^*(Q)} \;\le\; \varepsilon_{\mathrm{anc}}.
+\end{align}
+Here $V(a) \in \R^d$ is the layer-$i$, head-$h$ value-projection vector
+of the token $a$ when $a$ is decoded as the current reasoning token under
+$Q$.\footnote{$V(\cdot)$ depends on the trajectory through positional
+embeddings and prior context. We assume this dependence is mild enough
+that $\norm{V(a) - V^*(Q)}\le \varepsilon_{\mathrm{anc}}$ holds whenever
+$a \in \Acal(Q)$, uniformly across the trajectories the reasoning policy
+can emit. See \Cref{rem:anchor_set_accuracy_remark}.}
+We further assume $\gamma(Q) > 2 \varepsilon_{\mathrm{anc}}$ for every
+$Q \in F$, where $\gamma(Q)$ is the decoding margin of
+\Cref{ass:decoding_existence}; we write
+$\gamma_{\min} \coloneqq \min_{Q \in F} \gamma(Q) > 0$.
+\end{assumption}
+
+\begin{remark}\label{rem:anchor_set_accuracy_remark}
+\Cref{ass:anchor_set_accuracy} is the central sellable assumption.
+It says: for each question, the model has learned a set of vocabulary
+tokens whose layer-$i$/head-$h$ value projections cluster within
+$\varepsilon_{\mathrm{anc}}$ of a single target $V^*(Q)$. The set
+$\Acal(Q)$ is not required to be unique, exhaustive, or constructively
+specifiable; the proof only needs that some such set exists and that
+$\varepsilon_{\mathrm{anc}}$ is bounded uniformly across $F$. Examples
+of natural anchor sets: synonyms of the correct answer, tokens that
+appear in the chain-of-thought of a verified solution, or simply
+$\Acal(Q) = $ the set of tokens whose embedding decodes to a string in
+$\Correct(Q)$.
+The assumption is testable from inference-time observations alone:
+sample value vectors $V(a)$ at the relevant layer/head for $a \in \Acal(Q)$
+across a held-out set of trajectories, and verify that they cluster.
+\end{remark}
+
+\begin{assumption}[Conditional anchor-emission probability]\label{ass:anchor_emission_prob}
+There exists a constant $p_0 \in (0, 1]$ such that, for every $Q \in F$
+and every reasoning step $j \ge 1$,
+\begin{align}\label{eq:anchor_emit_prob}
+   \Pr\!\big[\, a_j \in \Acal(Q) \,\big|\, \mathcal F_{j-1} \,\big]
+   \;\ge\; p_0,
+\end{align}
+almost surely on the event that $Q$ is the active question.
+That is, conditional on the history $\mathcal F_{j-1}$ of the trajectory,
+the reasoning policy emits an anchor token at step $j$ with probability at
+least $p_0$, uniformly in $j$ and $Q$.
+\end{assumption}
+
+\begin{remark}\label{rem:anchor_emission_prob_remark}
+\Cref{ass:anchor_emission_prob} is satisfied if the reasoning policy
+re-mentions answer-relevant tokens with positive frequency at every step,
+which is empirically the dominant mode of chain-of-thought reasoning in
+modern thinking models~\cite{wei2022cot, openai2024o1, deepseek2025r1,
+qwen2025thinking}. The lower bound $p_0$ can be small (e.g.\ $p_0 = 0.05$
+in practice) and need not be tight; the polynomial-horizon bound
+\Cref{thm:main_convergence_hp} depends on $1/p_0$ polynomially.
+\end{remark}
+
+\begin{assumption}[Score margin]\label{ass:score_margin}
+There exists a constant $\Delta > 0$ such that, for every step $j \ge 1$
+and every pair of tokens $(a, a')$ with $a \in \Acal(Q)$ and
+$a' \notin \Acal(Q)$, the softmax pre-activation scores at the
+$\langle/\mathrm{think}\rangle$ position satisfy
+\begin{align}\label{eq:score_margin}
+   \inner{q}{k(a)} \;-\; \inner{q}{k(a')} \;\ge\; \Delta,
+\end{align}
+where $k(a) \in \R^{d_k}$ is the layer-$i$, head-$h$ key vector that the
+model produces when $a$ is the token at the current reasoning position.
+The margin $\Delta$ is uniform in $j$ and in $Q \in F$.
+\end{assumption}
+
+\begin{remark}\label{rem:score_margin_remark}
+\Cref{ass:score_margin} says the attention mechanism systematically
+upweights anchor positions over non-anchor positions. This is a
+``trained-model'' condition: it must hold for the fixed weights of layer
+$i$, head $h$. Empirically, attention heads in reasoning models do exhibit
+strong inductive biases toward answer-relevant tokens (this is the
+standard observation behind ``attention pattern analysis''); the margin
+$\Delta$ can be estimated from the post-softmax weight distribution on
+held-out trajectories. The dependence of the convergence horizon on
+$\Delta$ is polynomial in $e^{-\Delta}$.
+\end{remark}
+
+\begin{assumption}[Bounded value norms]\label{ass:bounded_value_norms}
+There exists a constant $M > 0$ such that the layer-$i$, head-$h$ value
+projection satisfies $\norm{V(a)} \le M$ for every token $a \in \mathcal V$.
+Consequently $\norm{V_j} \le M$ for every reasoning step $j$.
+\end{assumption}
+
+\begin{remark}\label{rem:bounded_value_norms_remark}
+\Cref{ass:bounded_value_norms} is mild: the model parameters and the
+token embeddings are bounded; LayerNorm and finite-precision
+implementations guarantee $\norm{V(a)}$ stays in a finite range. The
+constant $M$ can be computed exactly for a given model by enumerating
+$\mathcal V$. The convergence bound depends on $M$ polynomially.
+\end{remark}
+
+\begin{assumption}[Decoding margin (existence)]\label{ass:decoding_existence}
+For every $Q \in F$, there exist a vector $V^*(Q) \in \R^d$ (the same
+$V^*(Q)$ as in \Cref{ass:anchor_set_accuracy}) and a constant
+$\gamma(Q) > 0$ such that, for every $x \in \R^d$,
+\begin{align}\label{eq:decoding_margin}
+   \norm{x - V^*(Q)} \;\le\; \gamma(Q)
+   \quad \Longrightarrow \quad
+   \dec(x) \in \Correct(Q).
+\end{align}
+\end{assumption}
+
+\begin{remark}\label{rem:decoding_existence_remark}
+\Cref{ass:decoding_existence} is an \emph{existence} statement, not a
+constructive one. It says only that \emph{some} ball around the
+question-conditional target $V^*(Q)$ exists whose decoded output lies in
+the correct-answer set $\Correct(Q)$. The size $\gamma(Q)$ of the ball is
+question-dependent and may be small in absolute terms — what matters is
+that it is strictly positive, and (per \Cref{ass:anchor_set_accuracy})
+that it exceeds $2 \varepsilon_{\mathrm{anc}}$ uniformly. The assumption
+does not require knowing $\gamma(Q)$ at inference time or constructing
+the ball explicitly; it is purely an existence statement about the
+geometry of the decoding map.
+\end{remark}

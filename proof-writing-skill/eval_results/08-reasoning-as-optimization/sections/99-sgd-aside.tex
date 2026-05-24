@@ -1,0 +1,39 @@
+\section{Aside: the recurrence as SGD with weight decay (rhetorical)}
+\label{sec:sgd_aside}
+
+The following remark is provided as a rhetorical bridge to the
+``reasoning $=$ optimization'' framing. It is \emph{not load-bearing} for
+\Cref{thm:main_convergence_hp}: the proof above uses the
+weighted-running-average form of \Cref{def:softmax_attention}, not the
+SGD-update form. We include the aside to defuse a likely reader question.
+
+\begin{remark}[SGD-with-weight-decay framing]\label{rem:sgd_aside_remark}
+The recurrence \Cref{eq:recurrence} of \Cref{lem:softmax_running_average},
+\begin{align*}
+   x_j \;=\; (1 - \lambda_j)\, x_{j-1} \;+\; g_j,
+   \qquad
+   \lambda_j \;\coloneqq\; 1 - \frac{s_{j-1}}{s_j}
+   \;\in\; (0, 1),
+   \qquad
+   g_j \;\coloneqq\; \frac{e^{\inner{q}{k_j}}}{s_j}\, V_j,
+\end{align*}
+has the same functional form as one step of stochastic gradient descent
+with $\ell_2$-weight-decay coefficient $\lambda_j$ and gradient $g_j$,
+because $s_j > s_{j-1} > 0$ implies $\lambda_j \in (0, 1)$.
+
+This identity is algebraic, not theoretical: the LLM's $g_j$ is not the
+stochastic gradient of any pre-specified objective $F$ at $x_{j-1}$ ---
+it is the per-step softmax-weighted value vector. Inheriting the
+\emph{form} of the SGD update does not inherit any \emph{theorem} about
+SGD's convergence. In particular, the convergence theorem
+\Cref{thm:main_convergence_hp} does not invoke smoothness of $F$,
+bounded gradient variance, summability of $\lambda_j^2$, or any of the
+standard hypotheses behind SGD-style convergence proofs.
+The load-bearing route is via anchored attention and Azuma--Hoeffding
+applied to the anchor count, as written in
+\Cref{sec:anchor_count,sec:anchor_mass,sec:T_polynomial}.
+
+We therefore treat ``reasoning is SGD with weight decay'' as a
+\emph{reframing} that makes the recurrence \Cref{eq:recurrence} easier to
+remember, not as a result about an implicit potential.
+\end{remark}

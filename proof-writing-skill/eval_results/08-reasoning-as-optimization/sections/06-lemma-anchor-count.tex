@@ -1,0 +1,102 @@
+\section{High-probability lower bound on the anchor count}
+\label{sec:anchor_count}
+
+We now turn from the deterministic algebra of
+\Cref{lem:softmax_running_average,lem:anchor_decomposition,lem:anchor_accuracy_bound}
+to the first probabilistic step: the number of anchor emissions among the
+first $T$ reasoning steps is at least $p_0 T / 2$ with high probability.
+The argument is a multiplicative Chernoff (equivalently, Bernstein--Freedman)
+bound for sums of $\mathcal F_{j-1}$-conditional Bernoulli variables; this
+gives a sharper exponent than the bounded-difference Azuma--Hoeffding
+bound because the conditional variance of an anchor-emission indicator is
+at most $p_j$ rather than the deterministic bound $1$.
+
+\begin{lemma}[Anchor count concentration]\label{lem:anchor_count_lb}
+Fix $Q \in F$. Under \Cref{ass:anchor_emission_prob}, for every $T \ge 1$
+and every $\delta_1 \in (0, 1)$, the event
+\begin{align}\label{eq:anchor_count_event}
+   \Ecal_1(T, \delta_1) \;\coloneqq\;
+      \Big\{ \, \big| \mathcal A^{\mathrm{traj}}_T \big| \;\ge\; \tfrac{p_0 T}{2} \, \Big\},
+\end{align}
+satisfies $\Pr[\Ecal_1(T, \delta_1)] \ge 1 - \delta_1$, provided
+\begin{align}\label{eq:T_lower_bound_for_anchor_count}
+   T \;\ge\; \frac{8}{p_0} \,\log\!\frac{1}{\delta_1}.
+\end{align}
+\end{lemma}
+
+\begin{proof}
+The proof uses the multiplicative-Chernoff / Bernstein--Freedman bound
+(\cite[Theorem 1.6]{freedman1975tail};
+see also the technique digest \texttt{chernoff-bernoulli.md}) applied to
+the centred-indicator sequence of the anchor-emission event. The key
+saving over Azuma--Hoeffding (the bounded-difference bound used in an
+earlier draft) is that an indicator $X_j \in \{0, 1\}$ with
+$\E[X_j \mid \mathcal F_{j-1}] = p_j$ has conditional variance
+$p_j(1 - p_j) \le p_j$, which is sharper than the deterministic
+bounded-difference proxy $c_j^2 = 1$ by a factor of $1/p_j \ge 1/p_0$
+in the exponent.
+
+\noindent\textbf{Step 1: martingale construction.}
+For each $j \in \{1, \dots, T\}$, define
+\begin{align*}
+   X_j \;\coloneqq\; \1\!\big\{a_j \in \Acal(Q)\big\}
+   \qquad\text{and}\qquad
+   p_j \;\coloneqq\; \Pr[X_j = 1 \mid \mathcal F_{j-1}].
+\end{align*}
+By \Cref{ass:anchor_emission_prob}, $p_j \ge p_0$ almost surely for every
+$j$. Let $D_j \coloneqq X_j - p_j$. Then $\E[D_j \mid \mathcal F_{j-1}] = 0$
+and $|D_j| \le 1$ (since $X_j \in \{0, 1\}$ and $p_j \in [0, 1]$); in
+addition, the conditional variance satisfies
+$\mathrm{Var}(D_j \mid \mathcal F_{j-1}) = p_j(1 - p_j) \le p_j$. So
+$M_t \coloneqq \sum_{j=1}^{t} D_j$ is an $(\mathcal F_t)$-martingale with
+$M_0 = 0$.
+
+\noindent\textbf{Step 2: multiplicative-Chernoff bound for conditional
+Bernoullis.}
+Write $\mu \coloneqq \sum_{j=1}^{T} p_j \ge p_0 T$ a.s., where the
+inequality is from \Cref{ass:anchor_emission_prob}. The
+multiplicative-Chernoff inequality for $\mathcal F_{j-1}$-conditional
+Bernoulli variables --- a special case of Freedman's martingale Bernstein
+bound \cite[Theorem 1.6]{freedman1975tail}; the moment-generating-function
+proof is by exact computation
+$\E[e^{-\lambda X_j} \mid \mathcal F_{j-1}] = 1 - p_j(1 - e^{-\lambda})
+\le \exp(-p_j(1 - e^{-\lambda}))$
+followed by taking products over $j$ and the standard optimisation
+$\lambda = \log 2$, see \texttt{chernoff-bernoulli.md} --- gives
+\begin{align}\label{eq:chernoff_bernoulli_bound}
+   \Pr\!\Big[\sum_{j=1}^{T} X_j \;\le\; \tfrac{\mu}{2}\Big]
+   \;\le\;
+   \exp\!\Big(-\tfrac{\mu}{8}\Big)
+   \;\le\;
+   \exp\!\Big(-\tfrac{p_0 T}{8}\Big),
+\end{align}
+where the last inequality uses $\mu \ge p_0 T$.
+
+\noindent\textbf{Step 3: translate to the anchor-count event.}
+Substituting
+$\sum_{j=1}^{T} X_j = \big|\mathcal A^{\mathrm{traj}}_T\big|$ and using
+$\mu \ge p_0 T$, the event $\{\sum_j X_j \le \mu/2\}$ contains
+$\{\sum_j X_j < p_0 T / 2\}$. Therefore
+$\Pr[|\mathcal A^{\mathrm{traj}}_T| < p_0 T / 2] \le \exp(-p_0 T / 8)$.
+
+\noindent\textbf{Step 4: invert the rate.}
+For the right-hand side to be at most $\delta_1$, it suffices that
+$p_0 T / 8 \ge \log(1/\delta_1)$, i.e.\
+$T \ge 8 \log(1/\delta_1) / p_0$. This is
+\Cref{eq:T_lower_bound_for_anchor_count}, and this completes the proof.
+\end{proof}
+
+\begin{remark}\label{rem:anchor_count_lb_remark}
+An earlier draft of this proof used Azuma--Hoeffding (one-sided
+bounded-difference) and obtained the weaker rate
+$\exp(-p_0^2 T / 8)$ with horizon $T \ge 8 \log(1/\delta_1)/p_0^2$. The
+sharper rate $\exp(-p_0 T / 8)$ stated here improves the exponent by a
+factor of $1/p_0$, which is the canonical Bernstein-vs-Hoeffding sharpening
+for sums of Bernoullis (cf.\ \cite[Theorem 2.3]{vershynin2018}). The
+improvement is empirically substantive: at the empirically realistic
+$p_0 \in [0.05, 0.2]$ the test-time horizon needed to reach a given
+failure probability shrinks by a factor of $5$--$20$. The argument
+goes through with the same martingale construction; only the
+concentration step changes from a bounded-difference bound to a
+conditional-variance bound.
+\end{remark}

@@ -1,0 +1,146 @@
+\section{A matching lower bound}
+\label{sec:lower_bound}
+
+The upper bound of \Cref{thm:main_convergence_hp} states that the
+failure probability is at most $2 \exp(-p_0 T / 8)$ --- exponential in
+$p_0 T$. We now show this rate is optimal up to constants in the
+exponent: there is an instance satisfying all five assumptions of
+\Cref{thm:main_convergence_hp} for which the failure probability is at
+least $(1 - p_0)^T \ge \exp(-c\, p_0 T)$ for an explicit constant $c$.
+The upper and lower bounds therefore differ only by a multiplicative
+constant in the exponent.
+
+\begin{theorem}[Matching lower bound on the failure rate]\label{thm:lower_bound}
+For every $p_0 \in (0, 1/2]$ there exist a question $Q^* \in F^*$ (in a
+single-question field $F^* = \{Q^*\}$), a layer-$i$, head-$h$ assignment
+of keys $\{k(a)\}$ and values $\{V(a)\}$, a decoding map $\dec$, and a
+correct-answer set $\Correct(Q^*)$ such that
+\Cref{ass:anchor_set_accuracy,ass:anchor_emission_prob,ass:score_margin,ass:bounded_value_norms,ass:decoding_existence}
+all hold with anchor-emission probability $p_0$, and for every $T \ge 1$
+the probability of incorrect decoding satisfies
+\begin{align}\label{eq:lower_bound_rate}
+   \Pr\bigl[\, \dec(x_T) \notin \Correct(Q^*) \,\bigr]
+   \;\ge\;
+   (1 - p_0)^T
+   \;\ge\;
+   \exp\!\bigl(-T \log(1/(1-p_0))\bigr).
+\end{align}
+In particular, for small $p_0$,
+$\log(1/(1-p_0)) = p_0 + \mathcal{O}(p_0^2)$, so
+\Cref{eq:lower_bound_rate} gives
+$\Pr[\text{failure}] \ge \exp(-(1 + o(1))\, p_0 T)$. The upper bound of
+\Cref{thm:main_convergence_hp} is $2\exp(-p_0 T/8)$, so the upper and
+lower bounds match in exponential rate up to a constant factor at most
+$16$ (and at most $8$ asymptotically as $p_0 \to 0$) in the exponent.
+\end{theorem}
+
+\begin{proof}
+The proof is a direct construction. We exhibit an instance whose
+non-anchor failure mode is unavoidable, then bound the probability of
+this mode below.
+
+\noindent\textbf{Step 1: the hard instance.}
+Take a vocabulary $\mathcal V = \{a, a'\}$ with two tokens: an
+``anchor'' $a$ and a ``non-anchor'' $a'$. Fix the question field
+$F^* = \{Q^*\}$ and the anchor set $\Acal(Q^*) \coloneqq \{a\}$. Pick a
+target vector $V^*(Q^*) \in \R^d$ with
+$\norm{V^*(Q^*)} = 1$ and assign value vectors
+\begin{align*}
+   V(a) \;\coloneqq\; V^*(Q^*),
+   \qquad
+   V(a') \;\coloneqq\; V^*(Q^*) + 2 v_{\perp},
+\end{align*}
+where $v_\perp \in \R^d$ is a fixed unit vector orthogonal to
+$V^*(Q^*)$. Choose any positive constant $\gamma(Q^*) \in (0, 1)$ as the
+decoding margin, and set $\varepsilon_{\mathrm{anc}} \coloneqq 0$ (so
+$\gamma(Q^*) > 2 \varepsilon_{\mathrm{anc}} = 0$ holds trivially). Define
+the decoding map $\dec$ to be any deterministic map satisfying
+\begin{align*}
+   \norm{x - V^*(Q^*)} \le \gamma(Q^*) &\;\Longrightarrow\; \dec(x) \in \Correct(Q^*), \\
+   \norm{x - V^*(Q^*)} > \gamma(Q^*) &\;\Longrightarrow\; \dec(x) \notin \Correct(Q^*),
+\end{align*}
+i.e.\ the decoding ball is exactly $\{x : \norm{x - V^*(Q^*)} \le \gamma(Q^*)\}$.
+Such a $\dec$ exists: take e.g.\ a binary decoder that outputs ``correct''
+inside the ball and ``incorrect'' outside.
+Set the bounded-value constant
+$M \coloneqq \max(\norm{V(a)}, \norm{V(a')}) = \norm{V^*(Q^*) + 2 v_\perp} \le 3$.
+Finally, assign keys $k(a), k(a')$ and query $q$ so that
+$\inner{q}{k(a)} - \inner{q}{k(a')} = \Delta$, with $\Delta$ a fixed
+constant chosen to satisfy
+\Cref{eq:thm_main_Delta_condition} (taking $\Delta = \log(12/(p_0 \gamma(Q^*)))$
+suffices: $4(M + \norm{V^*}) = 4 \cdot (3 + 1) = 16$, and
+$\log(16/(p_0 \gamma_{\min})) \le \log(16/(p_0 \gamma(Q^*)))$, which is
+finite for any $p_0 \in (0, 1/2]$ and $\gamma(Q^*) > 0$).
+
+Set the reasoning policy at every step to emit token $a$ with conditional
+probability exactly $p_0$ and token $a'$ with conditional probability
+$1 - p_0$, independently of history:
+$\Pr[a_j = a \mid \mathcal F_{j-1}] = p_0$,
+$\Pr[a_j = a' \mid \mathcal F_{j-1}] = 1 - p_0$. So
+$\{a_j\}_{j \ge 1}$ is i.i.d.\ Bernoulli$(p_0)$.
+
+\noindent\textbf{Step 2: all five assumptions hold.}
+\Cref{ass:anchor_set_accuracy}: $\Acal(Q^*) = \{a\}$, and
+$\norm{V(a) - V^*(Q^*)} = 0 \le 0 = \varepsilon_{\mathrm{anc}}$;
+$\gamma(Q^*) > 0 = 2 \varepsilon_{\mathrm{anc}}$.
+\Cref{ass:anchor_emission_prob}: $\Pr[a_j \in \Acal(Q^*) \mid \mathcal F_{j-1}] = p_0$,
+saturating the bound exactly.
+\Cref{ass:score_margin}: by construction
+$\inner{q}{k(a)} - \inner{q}{k(a')} = \Delta$, uniform in $j$ and across
+the single question.
+\Cref{ass:bounded_value_norms}: $\norm{V(a)} = 1$ and
+$\norm{V(a')} \le 3$, so $\norm{V(\cdot)} \le M = 3$.
+\Cref{ass:decoding_existence}: by construction the decoding map respects
+the ball of radius $\gamma(Q^*)$ around $V^*(Q^*)$.
+
+\noindent\textbf{Step 3: lower bound on the failure event.}
+Consider the event $\mathcal E^* \coloneqq \{|\mathcal A^{\mathrm{traj}}_T| = 0\}$
+that no anchor is emitted in $T$ steps. Since the emissions are i.i.d.\
+Bernoulli$(p_0)$,
+\begin{align*}
+   \Pr[\mathcal E^*] \;=\; \Pr[\text{all } T \text{ steps emit } a'] \;=\; (1 - p_0)^T.
+\end{align*}
+On $\mathcal E^*$, every reasoning step emits the non-anchor $a'$, so
+$V_j = V(a') = V^*(Q^*) + 2 v_\perp$ for all $j = 1, \dots, T$. By
+\Cref{lem:softmax_running_average},
+\begin{align*}
+   x_T \;=\; \sum_{k=1}^{T} w_{T,k} V_k
+        \;=\; \Bigl(\sum_{k=1}^T w_{T,k}\Bigr) (V^*(Q^*) + 2 v_\perp)
+        \;=\; V^*(Q^*) + 2 v_\perp,
+\end{align*}
+using $\sum_{k} w_{T,k} = 1$. Therefore
+$\norm{x_T - V^*(Q^*)} = \norm{2 v_\perp} = 2 > \gamma(Q^*)$ (since
+$\gamma(Q^*) < 1 < 2$), so the decoding hypothesis fails and by the
+construction of $\dec$, $\dec(x_T) \notin \Correct(Q^*)$.
+
+\noindent\textbf{Step 4: combine.}
+Combining Steps 1--3,
+\begin{align*}
+   \Pr[\dec(x_T) \notin \Correct(Q^*)]
+   \;\ge\; \Pr[\mathcal E^*]
+   \;=\; (1 - p_0)^T.
+\end{align*}
+The second inequality of \Cref{eq:lower_bound_rate} is the identity
+$(1 - p_0)^T = \exp(T \log(1 - p_0)) = \exp(-T \log(1/(1 - p_0)))$, and
+the asymptotic claim follows from the Taylor expansion
+$\log(1/(1-p_0)) = p_0 + p_0^2/2 + p_0^3/3 + \cdots = p_0 + \mathcal{O}(p_0^2)$
+for $p_0 \in (0, 1/2]$, which gives $\log(1/(1-p_0)) \in [p_0, 2 p_0]$ on
+this range. This completes the proof.
+\end{proof}
+
+\begin{remark}\label{rem:lower_bound_tightness}
+Comparing \Cref{thm:main_convergence_hp} and \Cref{thm:lower_bound}, the
+upper bound on the failure probability is $2 \exp(-p_0 T / 8)$ and the
+lower bound is at least $\exp(-(1 + o(1)) p_0 T)$ for small $p_0$. The
+two bounds agree on the exponential rate (the dependence on $T$ and
+$p_0$ is $\exp(-\Theta(p_0 T))$ on both sides) and differ only by a
+multiplicative constant in the exponent: the gap is at most a factor
+of $16$ uniformly over $p_0 \in (0, 1/2]$, and at most $8$ asymptotically
+as $p_0 \to 0$ (since $\log(1/(1-p_0)) \to p_0$). This shows that the
+test-time scaling rate of \Cref{thm:main_convergence_hp} is tight up
+to a constant factor in the exponent for the class of instances
+satisfying the five assumptions; the rate cannot be improved without
+strengthening the hypotheses (e.g., moving to the unbiased-anchor
+regime of \Cref{sec:variance_reduced} or exploiting structure beyond
+the conditional anchor-emission probability).
+\end{remark}
