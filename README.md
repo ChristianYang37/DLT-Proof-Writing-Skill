@@ -104,7 +104,8 @@ DLT-Proof-Writing-Skill/
 │   ├── 04-linear-mdp-ucb/            # LSVI-UCB regret                  [core]
 │   ├── 05-sobolev-lower-bound/       # Sobolev minimax lower bound      [core]
 │   ├── 06-cap-set/                   # Ellenberg–Gijswijt cap set       [out-of-DLT]
-│   └── 07-frankl-union-closed/       # Gilmer union-closed              [out-of-DLT]
+│   ├── 07-frankl-union-closed/       # Gilmer union-closed              [out-of-DLT]
+│   └── 08-reasoning-as-optimization/ # test-time scaling for thinking LLMs [blog demo]
 └── proof-writing-skill/              # the skill itself
     ├── SKILL.md                      # main entry — workflow + pointers
     ├── references/                   # loaded on demand by phase
@@ -320,13 +321,23 @@ Both passing demonstrates that the workflow (Phase C.5 + D + citation digest + R
 
 **Scope caveat.** Passing 6 and 7 means the workflow ports cleanly to pure-math results that have **short, self-contained proofs (5–14 pages) using mature techniques** (polynomial method, entropy). It does **NOT** mean the skill solves open problems, conjectures, or speculative claims. The skill amplifies discipline, not insight — see [`eval_results/benchmark.md`](eval_results/benchmark.md) §Extended evals for the full caveat and [`CONTRIBUTING.md`](CONTRIBUTING.md) for the realistic operating envelope.
 
-### Aggregate (all 7 evals)
+### Aggregate (all 7 calibration evals)
 
 **70/70 assertions pass (100%).** See [`eval_results/benchmark.md`](eval_results/benchmark.md) for the full report, including:
 - 2 critical sign errors caught in eval 5 (Sobolev) Phase D iter 1
 - A math error in eval 4's prompt itself (the `√(HT)` vs `√(H³T)` rate)
 - The eval 2 cite-fabrication failure mode from v1.0 that motivated R5
 - The R5 retrofit note for the 5 core evals
+
+### Blog companion: eval 08 — `reasoning-as-optimization`
+
+A separately-maintained 8th eval that doubles as the source proof for a marketing post on test-time scaling laws for thinking LLMs. **It is not part of the 7/7 calibration benchmark.** It is shipped as a worked example of what the skill produces end-to-end on a publication-shaped question.
+
+| Eval | Proof PDF | Phase D | Detail |
+|---|---|---|---|
+| 8 | Reasoning as Optimization (test-time scaling, anchored attention) | gates exit 0; 4 review iterations | 17 pages · 3 theorems + 2 corollaries + 7 lemmas · matching upper / lower bound · entropy-decay corollary · variance-reduced accuracy-scaling theorem · [eval source](eval_results/08-reasoning-as-optimization/) |
+
+The output of the skill on this eval — the assumptions, the dependency graph, the citation digests, the technique digests, the confidence trace, the four review iterations — is auditable in the eval directory. The compiled PDF is rebuilt by `latexmk-wrapper.py` and gitignored.
 
 ---
 

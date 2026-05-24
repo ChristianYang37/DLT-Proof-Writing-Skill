@@ -127,3 +127,16 @@ cp -r proof-writing-skill ~/.claude/skills/dlt-proof-writing
 
 # 4. Aggregate into a per-eval grading.json + this benchmark.md
 ```
+
+## Eval 08 — `reasoning-as-optimization` (blog companion, not part of the 7/7)
+
+A separately-maintained 8th eval that doubles as the source proof for the marketing post on test-time scaling laws for thinking LLMs. **It is not counted in the 70/70 calibration figure** — it is a *worked example* of what the skill produces end-to-end on a publication-shaped question, not a calibration test.
+
+- **Topic**: test-time scaling for the latent attention output at the `</think>` position of an o1- / R1-style thinking LLM.
+- **Scope** (per `check_scope.py`): Appendix.
+- **Output**: 17-page compiled PDF carrying 3 theorems, 2 corollaries, 7 lemmas. The headline theorem gives a failure-probability rate $\exp(-p_0 T/8)$, tight up to a constant in the exponent against a matching lower bound. An entropy-decay corollary connects to [Choi et al. 2025](https://arxiv.org/abs/2509.26522). A separate variance-reduced theorem under an unbiasedness hypothesis lifts the result from *confidence* scaling to *accuracy* scaling.
+- **Phase D**: all three gates exit 0 (compile, lint, confidence-tags). 4 review iterations on disk. 0 residual `\todo{}` markers.
+- **Auditable artifacts in `08-reasoning-as-optimization/`**: 5 assumptions in `sections/02`, lemmas in `sections/03-09`, main theorem + corollary + entropy corollary in `sections/10`, lower bound in `sections/11`, variance-reduced theorem in `sections/12`, SGD-aside in `sections/99`. The `.proof-research/` directory has 11 cite/technique digests, the confidence trace, and review iterations 1–4.
+- **No `grading.json`**: this eval was built as a publication-shaped demonstration, not as a calibration assertion set. It has no fixed assertion grade; its quality is judged by Phase D gate-passing and review-loop convergence.
+
+The compiled PDF lives in `08-reasoning-as-optimization/.output/main.pdf` (gitignored) and is also distributed alongside the blog post.
