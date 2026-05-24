@@ -294,9 +294,9 @@ A bare "all done" is not an acceptable completion message.
 
 ## ✅ Eval results (v1.1)
 
-### Core DLT evals — 5 representative proofs across the skill's designed scope
+### Core DLT evals
 
-Hand-graded against the assertion sets in `proof-writing-skill/evals/evals.json`.
+Five hand-graded calibration proofs (evals 1–5) plus the worked-example proof shipped with the [companion blog post on test-time scaling](#) (eval 8). Hand-grading uses the assertion sets in `proof-writing-skill/evals/evals.json`; eval 8 is judged by Phase D gate-passing and review-loop convergence rather than fixed assertions, so it does not contribute to the 70/70 figure below.
 
 | # | Eval | Proof PDF | Verdict | Phase C.5 | Phase D | Detail |
 |---|---|---|---|---|---|---|
@@ -305,6 +305,7 @@ Hand-graded against the assertion sets in `proof-writing-skill/evals/evals.json`
 | 3 | VC generalization bound | [📄 PDF](eval_results/03-vc-generalization/pdf/main.pdf) | accept-with-minor | 35 · 🟢 28 / 🟡 7 / 🔴 0 | 2 iter | [grading](eval_results/03-vc-generalization/grading.json) · [log](eval_results/03-vc-generalization/runner-log.md) |
 | 4 | LSVI-UCB regret on Linear MDP | [📄 PDF](eval_results/04-linear-mdp-ucb/pdf/main.pdf) | accept-as-is | 15 · 🟢 10 / 🟡 4 / 🔴 1 | 2 iter | [grading](eval_results/04-linear-mdp-ucb/grading.json) · [log](eval_results/04-linear-mdp-ucb/runner-log.md) · [experiments plan](eval_results/04-linear-mdp-ucb/experiments-plan.md) |
 | 5 | Sobolev minimax lower bound | [📄 PDF](eval_results/05-sobolev-lower-bound/pdf/main.pdf) | accept-as-is | 25 · 🟢 21 / 🟡 4 / 🔴 0 | **3 iter** | [grading](eval_results/05-sobolev-lower-bound/grading.json) · [log](eval_results/05-sobolev-lower-bound/runner-log.md) |
+| 8 | Reasoning as Optimization (test-time scaling) | [📄 PDF](eval_results/08-reasoning-as-optimization/pdf/main.pdf) | accept-with-minor | 52 · 🟢 40 / 🟡 14 / 🔴 0 resolved | **4 iter** | [eval source](eval_results/08-reasoning-as-optimization/) |
 
 **Note (R5 retrofit):** the v1.0 lint rule set did not yet include R5 (theorem-proof pairing). When the post-v1.0 R5 rule is applied retroactively to these 5 evals, each shows one structural violation (theorem statement and its proof split across two `.tex` files instead of co-located). The proofs are themselves complete and correct; only the file layout violates R5. See [`eval_results/R5-RETROFIT-NOTE.md`](eval_results/R5-RETROFIT-NOTE.md) for details and the recommended v1.1 layout.
 
@@ -321,23 +322,13 @@ Both passing demonstrates that the workflow (Phase C.5 + D + citation digest + R
 
 **Scope caveat.** Passing 6 and 7 means the workflow ports cleanly to pure-math results that have **short, self-contained proofs (5–14 pages) using mature techniques** (polynomial method, entropy). It does **NOT** mean the skill solves open problems, conjectures, or speculative claims. The skill amplifies discipline, not insight — see [`eval_results/benchmark.md`](eval_results/benchmark.md) §Extended evals for the full caveat and [`CONTRIBUTING.md`](CONTRIBUTING.md) for the realistic operating envelope.
 
-### Aggregate (all 7 calibration evals)
+### Aggregate (calibration evals 1–7)
 
 **70/70 assertions pass (100%).** See [`eval_results/benchmark.md`](eval_results/benchmark.md) for the full report, including:
 - 2 critical sign errors caught in eval 5 (Sobolev) Phase D iter 1
 - A math error in eval 4's prompt itself (the `√(HT)` vs `√(H³T)` rate)
 - The eval 2 cite-fabrication failure mode from v1.0 that motivated R5
 - The R5 retrofit note for the 5 core evals
-
-### Blog companion: eval 08 — `reasoning-as-optimization`
-
-A separately-maintained 8th eval that doubles as the source proof for a marketing post on test-time scaling laws for thinking LLMs. **It is not part of the 7/7 calibration benchmark.** It is shipped as a worked example of what the skill produces end-to-end on a publication-shaped question.
-
-| Eval | Proof PDF | Phase D | Detail |
-|---|---|---|---|
-| 8 | Reasoning as Optimization (test-time scaling, anchored attention) | gates exit 0; 4 review iterations | 17 pages · 3 theorems + 2 corollaries + 7 lemmas · matching upper / lower bound · entropy-decay corollary · variance-reduced accuracy-scaling theorem · [eval source](eval_results/08-reasoning-as-optimization/) |
-
-The output of the skill on this eval — the assumptions, the dependency graph, the citation digests, the technique digests, the confidence trace, the four review iterations — is auditable in the eval directory. The compiled PDF is rebuilt by `latexmk-wrapper.py` and gitignored.
 
 ---
 
