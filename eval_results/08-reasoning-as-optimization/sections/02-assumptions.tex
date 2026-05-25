@@ -1,103 +1,116 @@
 \section{Assumptions}
 \label{sec:assumptions}
 
-The convergence theorem rests on five assumptions: a value-accuracy
-condition on the question-conditional anchor set
-(\Cref{ass:anchor_set_accuracy}), a positive-emission probability for
-anchors (\Cref{ass:anchor_emission_prob}), a score margin between anchor
-and non-anchor keys (\Cref{ass:score_margin}), uniform boundedness of
-value vectors (\Cref{ass:bounded_value_norms}), and existence of a
-decoding margin around the question-conditional target
-(\Cref{ass:decoding_existence}). Each assumption is accompanied by one
-remark commenting on its mildness, testability, and how it could be
-weakened.
+The convergence theorem rests on five assumptions: a per-token
+gradient-correctness condition with bounded bias
+(\Cref{ass:gradient_correctness_bounded_bias}), a second-moment bound on
+the per-token increment $g_j$ (\Cref{ass:bounded_second_moment}), uniform
+boundedness of value vectors (\Cref{ass:bounded_value_norms}), an
+operator-norm bound on the unembedding matrix (\Cref{ass:unembedding_norm}),
+and a finite initial-loss bound (\Cref{ass:initial_loss}). Each
+assumption is accompanied by one remark commenting on its mildness,
+testability, and how it could be weakened.
 
-\begin{assumption}[Anchor-set value accuracy]\label{ass:anchor_set_accuracy}
-There exist constants $\varepsilon_{\mathrm{anc}} \ge 0$ and
-$\gamma_{\min} > 0$ such that, for every question $Q \in F$, there is a
-non-empty question-conditional anchor set
-$\Acal(Q) \subseteq \mathcal V$ (a subset of the tokenizer vocabulary,
-depending on $Q$ but \emph{not} on the reasoning trajectory) and a
-vector $V^*(Q) \in \R^d$ with
-\begin{align}\label{eq:anchor_value_close}
-   \max_{a \in \Acal(Q)} \norm{V(a) - V^*(Q)} \;\le\; \varepsilon_{\mathrm{anc}}.
+\begin{assumption}[Gradient correctness with bounded bias]\label{ass:gradient_correctness_bounded_bias}
+There exist constants $\eta_0 > 0$ and $\beta \ge 0$ such that, for every
+question $Q \in F$ and every reasoning step $j \ge 1$, the per-token
+increment $g_j$ of \Cref{eq:gj_def} satisfies
+\begin{align}\label{eq:gc_bb_def}
+   \E\!\bigl[\, g_j \;\big|\; \mathcal F_{j-1} \,\bigr]
+   \;=\; -\eta_j\, \nabla \loss(x_{j-1}; Q) \;+\; b_j,
 \end{align}
-Here $V(a) \in \R^d$ is the layer-$i$, head-$h$ value-projection vector
-of the token $a$ when $a$ is decoded as the current reasoning token under
-$Q$.\footnote{$V(\cdot)$ depends on the trajectory through positional
-embeddings and prior context. We assume this dependence is mild enough
-that $\norm{V(a) - V^*(Q)}\le \varepsilon_{\mathrm{anc}}$ holds whenever
-$a \in \Acal(Q)$, uniformly across the trajectories the reasoning policy
-can emit. See \Cref{rem:anchor_set_accuracy_remark}.}
-We further assume $\gamma(Q) > 2 \varepsilon_{\mathrm{anc}}$ for every
-$Q \in F$, where $\gamma(Q)$ is the decoding margin of
-\Cref{ass:decoding_existence}; we write
-$\gamma_{\min} \coloneqq \min_{Q \in F} \gamma(Q) > 0$.
+with $\eta_j \ge \eta_0$ almost surely and the bias $b_j$ \emph{relative-scale}
+bounded as
+\begin{align}\label{eq:gc_bb_bias}
+   \norm{b_j} \;\le\; \eta_j\, \beta.
+\end{align}
+almost surely (both for every $j \ge 1$ and every $Q \in F$).
 \end{assumption}
 
-\begin{remark}\label{rem:anchor_set_accuracy_remark}
-\Cref{ass:anchor_set_accuracy} is the central sellable assumption.
-It says: for each question, the model has learned a set of vocabulary
-tokens whose layer-$i$/head-$h$ value projections cluster within
-$\varepsilon_{\mathrm{anc}}$ of a single target $V^*(Q)$. The set
-$\Acal(Q)$ is not required to be unique, exhaustive, or constructively
-specifiable; the proof only needs that some such set exists and that
-$\varepsilon_{\mathrm{anc}}$ is bounded uniformly across $F$. Examples
-of natural anchor sets: synonyms of the correct answer, tokens that
-appear in the chain-of-thought of a verified solution, or simply
-$\Acal(Q) = $ the set of tokens whose embedding decodes to a string in
-$\Correct(Q)$.
-The assumption is testable from inference-time observations alone:
-sample value vectors $V(a)$ at the relevant layer/head for $a \in \Acal(Q)$
-across a held-out set of trajectories, and verify that they cluster.
+\begin{remark}\label{rem:gc_bb_remark}
+\Cref{ass:gradient_correctness_bounded_bias} is the central sellable
+assumption: it postulates that, on average over the model's stochastic
+sampling, the attention-weighted value increment $g_j$ points in the
+direction of $-\nabla \loss(x_{j-1}; Q)$ up to a bounded bias $b_j$. This
+form is exactly the \emph{biased-SGD} condition standardly analysed in
+non-convex stochastic optimisation~\cite{bottou2018optimization}. Two
+points are essential to understanding the assumption's empirical scope.
+
+\emph{(i) (GC-bounded-bias) is a property of trained reasoning policies,
+not of transformers in general.} The condition asserts $\eta_j > 0$
+almost surely, i.e.\ the conditional expectation of $g_j$ is strictly
+correlated with $-\nabla \loss$. The unembedding direction
+$\nabla \loss(x) = W_U^\top (p(x) - \qcond(x))$ (see
+\Cref{lem:gradient_form} below) is a property of the unembedding matrix
+$W_U$, while $g_j$ is determined by the layer-$i$/head-$h$ value matrix
+$W_V$ and key matrix $W_K$ via $V_j = W_V^\top h_j$, $k_j = W_K^\top h_j$.
+There is no architectural identity that aligns $V_j$ with
+$-\nabla \loss$; any alignment is \emph{learned}. The accompanying
+numerical sanity check (`.proof-research/risk-2-sanity-check.md`) confirms
+this: for randomly-initialised one-layer/one-head transformers,
+approximately $50\%$ of $(j, \text{init}, \text{question})$ triples have
+$\hat\eta_j < 0$, so the condition is \emph{violated} for untrained
+weights. A small amount of stylised training alignment
+($\alpha \ge 0.1$) flips this completely (frac.\ negative drops to $0$);
+this matches the (GC-bb) condition. The honest characterisation is that
+the assumption holds for reasoning-tuned policies trained on verifiable
+rewards (e.g.\ \cite{openai2024o1, deepseek2025r1, qwen2025thinking}), and
+should be expected to fail on untrained or non-reasoning models.
+
+\emph{(ii) $\beta$ is empirically measurable, with a worst-case
+observable upper bound.} The relative bias $\norm{b_j}/\eta_j$ at a
+fixed prefix is estimable from $K$-fold resampling of the next-token
+hidden state: estimate $\E[g_j \mid \mathcal F_{j-1}]$ by Monte-Carlo,
+take the residual
+$\hat b_j = \E[g_j \mid \mathcal F_{j-1}] + \hat\eta_j \nabla \loss(x_{j-1}; Q)$,
+and report $\norm{\hat b_j}/\hat\eta_j$. For practitioners with limited
+inference budgets, the upper bound
+\begin{align*}
+   \frac{\norm{b_j}}{\eta_j}
+   \;\le\;
+   \frac{\norm{\E[g_j \mid \mathcal F_{j-1}]}}{\eta_j} + \norm{\nabla \loss(x_{j-1}; Q)}
+   \;\le\;
+   \frac{\norm{g_j}_{\mathrm{rms}}}{\eta_j} \;+\; L_{\mathrm{sm}}\, R,
+\end{align*}
+(where $R$ bounds $\norm{x_{j-1} - x^*}$ for some loss-stationary $x^*$,
+and $L_{\mathrm{sm}}$ is the smoothness constant of $\loss$) gives a
+worst-case proxy from observables. The convergence horizon depends
+quadratically on $\beta$ through the floor
+$\beta^2/\eta_0$ of \Cref{thm:main_convergence_biased_sgd} below.
+We adopt the relative-scale bound \Cref{eq:gc_bb_bias} rather than an
+absolute bound $\norm{b_j} \le \beta$ because the bias-floor analysis
+of \Cref{lem:descent_inequality,lem:telescoping} requires the bias to
+scale with the effective rate $\eta_j$ to yield a $T$-independent floor;
+absolute-bias formulations of biased SGD~\cite{bottou2018optimization}
+correspondingly produce a $T$-dependent floor that grows with the
+step-size sum and is not asymptotically useful for the purpose of a
+test-time-scaling rate.
 \end{remark}
 
-\begin{assumption}[Conditional anchor-emission probability]\label{ass:anchor_emission_prob}
-There exists a constant $p_0 \in (0, 1]$ such that, for every $Q \in F$
+\begin{assumption}[Bounded second moment of $g_j$]\label{ass:bounded_second_moment}
+There exists a constant $G > 0$ such that, for every question $Q \in F$
 and every reasoning step $j \ge 1$,
-\begin{align}\label{eq:anchor_emit_prob}
-   \Pr\!\big[\, a_j \in \Acal(Q) \,\big|\, \mathcal F_{j-1} \,\big]
-   \;\ge\; p_0,
+\begin{align}\label{eq:second_moment_def}
+   \E\!\bigl[\, \norm{g_j}^2 \;\big|\; \mathcal F_{j-1} \,\bigr]
+   \;\le\; \eta_j^2\, G^2,
 \end{align}
-almost surely on the event that $Q$ is the active question.
-That is, conditional on the history $\mathcal F_{j-1}$ of the trajectory,
-the reasoning policy emits an anchor token at step $j$ with probability at
-least $p_0$, uniformly in $j$ and $Q$.
+matching the natural $\eta_j$-scaling of $g_j$ (cf.\ \Cref{eq:gc_bb_def}).
 \end{assumption}
 
-\begin{remark}\label{rem:anchor_emission_prob_remark}
-\Cref{ass:anchor_emission_prob} is satisfied if the reasoning policy
-re-mentions answer-relevant tokens with positive frequency at every step,
-which is empirically the dominant mode of chain-of-thought reasoning in
-modern thinking models~\cite{wei2022cot, openai2024o1, deepseek2025r1,
-qwen2025thinking}. The lower bound $p_0$ can be small (e.g.\ $p_0 = 0.05$
-in practice) and need not be tight; the polynomial-horizon bound
-\Cref{thm:main_convergence_hp} depends on $1/p_0$ polynomially.
-\end{remark}
-
-\begin{assumption}[Score margin]\label{ass:score_margin}
-There exists a constant $\Delta > 0$ such that, for every step $j \ge 1$
-and every pair of tokens $(a, a')$ with $a \in \Acal(Q)$ and
-$a' \notin \Acal(Q)$, the softmax pre-activation scores at the
-$\langle/\mathrm{think}\rangle$ position satisfy
-\begin{align}\label{eq:score_margin}
-   \inner{q}{k(a)} \;-\; \inner{q}{k(a')} \;\ge\; \Delta,
-\end{align}
-where $k(a) \in \R^{d_k}$ is the layer-$i$, head-$h$ key vector that the
-model produces when $a$ is the token at the current reasoning position.
-The margin $\Delta$ is uniform in $j$ and in $Q \in F$.
-\end{assumption}
-
-\begin{remark}\label{rem:score_margin_remark}
-\Cref{ass:score_margin} says the attention mechanism systematically
-upweights anchor positions over non-anchor positions. This is a
-``trained-model'' condition: it must hold for the fixed weights of layer
-$i$, head $h$. Empirically, attention heads in reasoning models do exhibit
-strong inductive biases toward answer-relevant tokens (this is the
-standard observation behind ``attention pattern analysis''); the margin
-$\Delta$ can be estimated from the post-softmax weight distribution on
-held-out trajectories. The dependence of the convergence horizon on
-$\Delta$ is polynomial in $e^{-\Delta}$.
+\begin{remark}\label{rem:bounded_second_moment_remark}
+\Cref{ass:bounded_second_moment} is the relative-scale second-moment
+bound paired with \Cref{ass:gradient_correctness_bounded_bias} (whose
+$\eta_j$ multiplies $-\nabla \loss$ in \Cref{eq:gc_bb_def}). The
+absolute bound $\norm{g_j} \le \norm{V_j} \le M$ follows from
+\Cref{ass:bounded_value_norms} below together with
+$0 \le e^{\inner{q}{k_j}}/s_j \le 1$ (since $s_j \ge e^{\inner{q}{k_j}}$
+by the definition of $s_j$). When the natural attention factor
+$e^{\inner{q}{k_j}}/s_j$ scales as $1/\sqrt j$ (the asymptotic regime
+where $s_j$ grows linearly), one has $\norm{g_j} \asymp \norm{V_j}/\sqrt j$,
+and $\eta_j = \eta_0/\sqrt j$ gives $\E\norm{g_j}^2 \asymp M^2 / j = \eta_j^2 G^2$
+with $G = M / \eta_0$ — i.e.\ the relative-scale form
+\Cref{eq:second_moment_def} is realised with explicit constants. A
+sharper $G$ may be available from anisotropic value-vector statistics.
 \end{remark}
 
 \begin{assumption}[Bounded value norms]\label{ass:bounded_value_norms}
@@ -111,29 +124,73 @@ Consequently $\norm{V_j} \le M$ for every reasoning step $j$.
 token embeddings are bounded; LayerNorm and finite-precision
 implementations guarantee $\norm{V(a)}$ stays in a finite range. The
 constant $M$ can be computed exactly for a given model by enumerating
-$\mathcal V$. The convergence bound depends on $M$ polynomially.
+$\mathcal V$. Combined with the running-average identity of
+\Cref{lem:softmax_running_average}, this also gives $\norm{x_j} \le M$
+almost surely (since $x_j$ is a convex combination of the value vectors).
 \end{remark}
 
-\begin{assumption}[Decoding margin (existence)]\label{ass:decoding_existence}
-For every $Q \in F$, there exist a vector $V^*(Q) \in \R^d$ (the same
-$V^*(Q)$ as in \Cref{ass:anchor_set_accuracy}) and a constant
-$\gamma(Q) > 0$ such that, for every $x \in \R^d$,
-\begin{align}\label{eq:decoding_margin}
-   \norm{x - V^*(Q)} \;\le\; \gamma(Q)
-   \quad \Longrightarrow \quad
-   \dec(x) \in \Correct(Q).
+\begin{assumption}[Unembedding operator norm]\label{ass:unembedding_norm}
+The unembedding matrix $W_U \in \R^{|\mathcal V| \times d}$ satisfies
+\begin{align}\label{eq:unembedding_norm_def}
+   \norm{W_U}_{\mathrm{op}} \;\le\; B_U.
+\end{align}
+for a known constant $B_U > 0$.
+\end{assumption}
+
+\begin{remark}\label{rem:unembedding_norm_remark}
+\Cref{ass:unembedding_norm} is structural and computable: $B_U$ is the
+largest singular value of $W_U$ and can be computed exactly from the
+trained model's weights by a single SVD. We use it in
+\Cref{lem:smoothness} to bound the smoothness constant of $\loss$.
+\end{remark}
+
+\begin{assumption}[Finite initial loss]\label{ass:initial_loss}
+There exists a constant $L_0 < \infty$ such that for every $Q \in F$,
+\begin{align}\label{eq:initial_loss_def}
+   \loss(x_0; Q) \;\le\; L_0.
 \end{align}
 \end{assumption}
 
-\begin{remark}\label{rem:decoding_existence_remark}
-\Cref{ass:decoding_existence} is an \emph{existence} statement, not a
-constructive one. It says only that \emph{some} ball around the
-question-conditional target $V^*(Q)$ exists whose decoded output lies in
-the correct-answer set $\Correct(Q)$. The size $\gamma(Q)$ of the ball is
-question-dependent and may be small in absolute terms — what matters is
-that it is strictly positive, and (per \Cref{ass:anchor_set_accuracy})
-that it exceeds $2 \varepsilon_{\mathrm{anc}}$ uniformly. The assumption
-does not require knowing $\gamma(Q)$ at inference time or constructing
-the ball explicitly; it is purely an existence statement about the
-geometry of the decoding map.
+\begin{remark}\label{rem:initial_loss_remark}
+\Cref{ass:initial_loss} is automatic by \Cref{rem:loss_nondegenerate}
+($\loss < \infty$ since $\cmass > 0$), with the worst-case bound
+$L_0 \le \log(|\mathcal V| / |\Cset(Q)|)$ attained when the initial
+posterior is uniform. For trained models the initial loss $\loss(x_0; Q)$
+is typically much smaller than this worst-case bound, since the
+post-prompt initial hidden state $x_0$ already concentrates posterior on
+the correct set. We isolate $L_0$ as an assumption to make the
+$Q$-uniform dependence of the rate explicit.
+\end{remark}
+
+\begin{assumption}[Logit-margin non-degeneracy along the trajectory]\label{ass:logit_margin_nondegen}
+For every $Q \in F$, every reasoning step $j \ge 1$, and every iterate
+$X$ that is a fixed or random function of the trajectory $\{x_k\}_{k \le j}$
+under consideration (e.g.\ $X = x_j$ or $X = x_R$ for randomised
+$R \in \{1, \ldots, j\}$),
+\begin{align}\label{eq:logit_margin_nondegen_assumption}
+   |\Cset(Q)| \cdot \max_{v \notin \Cset(Q)} p(X)_v
+   \;<\;
+   \max_{v \in \Cset(Q)} p(X)_v,
+\end{align}
+holds almost surely. Equivalently, no incorrect token's posterior
+captures non-trivial mass relative to the most-likely correct token.
+\end{assumption}
+
+\begin{remark}\label{rem:logit_margin_nondegen_remark}
+\Cref{ass:logit_margin_nondegen} is the inference-time non-degeneracy
+condition required for the decoding bridge of
+\Cref{lem:logit_margin_decoding}. As discussed in
+\Cref{rem:logit_margin_nondegen_typical}, the condition is implied by
+either (i) $\cmass(X; Q) \ge 1/2$ together with
+$\max_{v \notin \Cset(Q)} p(X)_v < 1/(2 |\Cset(Q)|^2)$, or (ii)
+$\Cset(Q)$ being a singleton and $\max_{v \neq v^*} p(X)_v < p(X)_{v^*}$.
+For trained reasoning policies on verifiable tasks the incorrect-token
+posteriors are exponentially small in the logit margin, so the
+condition is satisfied along typical trajectories. We adopt
+\Cref{ass:logit_margin_nondegen} as a uniform hypothesis to keep the
+statement of \Cref{thm:main_convergence_biased_sgd} self-contained;
+under a non-uniform condition the failure-probability bound of
+\Cref{eq:main_failure_bound} acquires an additional term for the
+probability that \Cref{eq:logit_margin_nondegen_assumption} fails,
+which is empirically small for trained models.
 \end{remark}

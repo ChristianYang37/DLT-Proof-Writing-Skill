@@ -16,6 +16,16 @@
 \DeclareMathOperator{\dec}{decode}
 \DeclareMathOperator{\Correct}{Correct}
 
+% --- Constrained-softmax loss notation (paper rewrite, May 2026) ---
+% \loss is the constrained-softmax loss L(x;Q) = -log pi(x;Q).
+% \cmass is the correct-token mass pi(x;Q) = sum_{v in C(Q)} softmax(W_U x)_v.
+% \qcond is the C-conditional posterior q_C.
+% \Cset is the correct-token set C(Q) = Correct(Q).
+\newcommand{\loss}{L}
+\newcommand{\cmass}{\pi}
+\newcommand{\qcond}{q_C}
+\newcommand{\Cset}{C}
+
 % --- Norm and inner product ---
 \newcommand{\norm}[1]{\left\| #1 \right\|}
 \newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}

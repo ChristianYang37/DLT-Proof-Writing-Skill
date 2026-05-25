@@ -1,9 +1,12 @@
 # Confidence trace — Phase C.5 sweep
 
-This trace enumerates every derivation step in the proofs of
-\Cref{lem:softmax_running_average,lem:anchor_decomposition,lem:anchor_accuracy_bound,lem:anchor_count_lb,lem:anchor_mass_lb,lem:T_polynomial,lem:decoding_correctness,thm:main_convergence_hp}
-(in topological order) and tags each step with a confidence level per
-the taxonomy of `references/confidence-sweep.md`.
+This trace enumerates every derivation step in the proofs of the
+biased-SGD rewrite (sections 03-11) and tags each step with a confidence
+level per the taxonomy of `references/confidence-sweep.md`. Old anchor-based
+trace entries (anchor-decomposition, anchor-accuracy, anchor-count,
+anchor-mass, T-polynomial, variance-reduced) are obsolete and have been
+removed; their sections are deleted from the project as part of the
+paper-scale rewrite.
 
 Tag taxonomy:
 - 🔴 from-memory — not yet verified
@@ -17,10 +20,9 @@ $s_j \coloneqq \sum_{i=1}^j e^{\inner{q}{k_i}}$ by splitting off the last term.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
 **Verification method:** Trivial algebra — summation of one extra term.
-Hand-checked: $\sum_{i=1}^j a_i = \sum_{i=1}^{j-1} a_i + a_j$ for any
-finite sum.
+Hand-checked.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
+**Last updated:** 2026-05-25T10:00:00Z
 
 ## Step 2
 **Location:** sections/03-lemma-softmax-running-average.tex:30
@@ -28,622 +30,470 @@ finite sum.
 by multiplying \Cref{eq:cumulative_softmax} through by $s_j$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Direct algebraic manipulation of
-$x_j = (1/s_j) \sum_k e^{\inner{q}{k_k}} V_k$. Hand-checked.
+**Verification method:** Direct algebra. Hand-checked.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
+**Last updated:** 2026-05-25T10:00:00Z
 
 ## Step 3
 **Location:** sections/03-lemma-softmax-running-average.tex:32
-**Content (≤ 2 lines):** $\sum_{k=1}^{j-1} e^{\inner{q}{k_k}} V_k + e^{\inner{q}{k_j}} V_j = s_{j-1} x_{j-1} + e^{\inner{q}{k_j}} V_j$
-by induction (applying \Cref{eq:cumulative_softmax} at index $j-1$).
+**Content (≤ 2 lines):** Inductive step via $\sum_{k=1}^{j-1} = s_{j-1} x_{j-1}$
+plus the new term $e^{\inner{q}{k_j}} V_j$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Inductive base case $s_0 x_0 = 0$ (vacuous sum)
-plus inductive step. Hand-checked.
+**Verification method:** Inductive base ($s_0 x_0 = 0$) + step. Hand-checked.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
+**Last updated:** 2026-05-25T10:00:00Z
 
 ## Step 4
 **Location:** sections/03-lemma-softmax-running-average.tex:44
-**Content (≤ 2 lines):** $\sum_k w_{j,k} = (1/s_j) \sum_k e^{\inner{q}{k_k}} = s_j / s_j = 1$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct substitution of definitions. Trivial.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 5
-**Location:** sections/04-lemma-anchor-decomposition.tex:38
-**Content (≤ 2 lines):** $\sum_k w_{j,k} V_k - V^* = \sum_k w_{j,k} (V_k - V^*)$
-using $\sum_k w_{j,k} = 1$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Algebraic identity:
-$\sum_k w_{j,k} (V_k - V^*) = \sum_k w_{j,k} V_k - V^* \sum_k w_{j,k} = \sum w V_k - V^* \cdot 1$.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 6
-**Location:** sections/04-lemma-anchor-decomposition.tex:46
-**Content (≤ 2 lines):** Triangle inequality applied to the convex
-combination: $\|\sum_k w_{j,k} (V_k - V^*)\| \le \sum_k w_{j,k} \|V_k - V^*\|$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Named textbook inequality (Minkowski / triangle
-inequality for sums) with non-negative weights. Standard.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 7
-**Location:** sections/04-lemma-anchor-decomposition.tex:48
-**Content (≤ 2 lines):** Splitting sum at anchor set and bounding
-non-anchor terms by $D_j$:
-$\sum_{k \notin \mathcal A} w_{j,k} \|V_k - V^*\| \le D_j \sum_{k \notin \mathcal A} w_{j,k}$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Definition of $D_j$ as the max gives
-$\|V_k - V^*\| \le D_j$ for all $k$, in particular for $k \notin \mathcal A$;
-factoring the non-anchor weights out is algebraic.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 8
-**Location:** sections/04-lemma-anchor-decomposition.tex:50
-**Content (≤ 2 lines):** $\sum_{k \notin \mathcal A} w_{j,k} = 1 - \sum_{k \in \mathcal A} w_{j,k}$
-using $\sum_k w_{j,k} = 1$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Algebraic rearrangement of a partition sum.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 9
-**Location:** sections/05-lemma-anchor-accuracy.tex:18
-**Content (≤ 2 lines):** $\norm{V(a_k) - V^*(Q)} \le \varepsilon_{\mathrm{anc}}$
-for $a_k \in \mathcal A(Q)$, by direct invocation of
-\Cref{ass:anchor_set_accuracy}.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** Re-checked \Cref{ass:anchor_set_accuracy}
-(at sections/02-assumptions.tex:18) — assumption hypothesis matches exactly.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 10
-**Location:** sections/05-lemma-anchor-accuracy.tex:21
-**Content (≤ 2 lines):** Taking max over $k \in \mathcal A^{\mathrm{traj}}_j$
-preserves the per-element upper bound $\varepsilon_{\mathrm{anc}}$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Trivial — max of bounded quantities is bounded
-by the bound.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 11
-**Location:** sections/06-lemma-anchor-count.tex:30
-**Content (≤ 2 lines):** $X_j = \1\{a_j \in \mathcal A(Q)\}$ and
-$p_j = \Pr[X_j = 1 \mid \mathcal F_{j-1}] \ge p_0$ by \Cref{ass:anchor_emission_prob}.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** \Cref{ass:anchor_emission_prob} (at
-sections/02-assumptions.tex:43) states this bound exactly, conditional
-on the active question being $Q$.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 12
-**Location:** sections/06-lemma-anchor-count.tex:39
-**Content (≤ 2 lines):** $M_t = \sum_{j=1}^t (X_j - p_j)$ is an
-$(\mathcal F_t)$-martingale with $M_0 = 0$ and bounded differences
-$|M_t - M_{t-1}| \le 1$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Centred-indicator martingale construction; each
-$D_j = X_j - p_j$ has $\E[D_j \mid \mathcal F_{j-1}] = 0$. Bounded
-differences: $X_j \in \{0,1\}$, $p_j \in [0,1]$, so $D_j \in [-1, 1]$
-and $|D_j| \le 1$. Textbook construction.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 13
-**Location:** sections/06-lemma-anchor-count.tex:55
-**Content (≤ 2 lines):** Multiplicative-Chernoff for conditional Bernoullis
-gives $\Pr[\sum X_j \le \mu/2] \le \exp(-\mu/8) \le \exp(-p_0 T/8)$,
-using $\mu = \sum p_j \ge p_0 T$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** Matches chernoff-bernoulli.md digest exactly
-(multiplicative-Chernoff at $\delta = 1/2$ gives exponent $-\mu/8$).
-Conditional / martingale version follows from Freedman 1975.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
-
-## Step 14
-**Location:** sections/06-lemma-anchor-count.tex:58
-**Content (≤ 2 lines):** $|\mathcal A^{\mathrm{traj}}_T| = M_T + \sum_j p_j \ge -p_0T/2 + p_0 T = p_0 T / 2$
-on the complement of the Azuma failure event.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct algebraic substitution.
-$\sum X_j = M_T + \sum p_j$ by definition of $M_T$, and
-$\sum p_j \ge p_0 T$ by \Cref{ass:anchor_emission_prob}.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 15
-**Location:** sections/06-lemma-anchor-count.tex:70
-**Content (≤ 2 lines):** Inverting $e^{-p_0 T/8} \le \delta_1$ gives
-$T \ge 8 \log(1/\delta_1) / p_0$ as the sufficient horizon.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct log inversion. Hand-checked.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
-
-## Step 16
-**Location:** sections/07-lemma-anchor-mass.tex:36
-**Content (≤ 2 lines):** $e^{\inner{q}{k_\ell}} \le e^{-\Delta} e^{\inner{q}{k_{k^\star}}}$
-for any anchor $k^\star$ and non-anchor $\ell$, by exponentiating the
-score margin from \Cref{ass:score_margin}.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** \Cref{ass:score_margin} (sections/02-assumptions.tex:67)
-gives the score gap; exponentiating preserves the inequality (monotonicity of $e^x$).
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 17
-**Location:** sections/07-lemma-anchor-mass.tex:44
-**Content (≤ 2 lines):** Averaging Step 16 over anchor positions:
-$e^{\inner{q}{k_\ell}} \le (e^{-\Delta}/|\mathcal A^{\mathrm{traj}}_j|) \sum_{k \in \mathcal A^{\mathrm{traj}}_j} e^{\inner{q}{k_k}}$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Sum Step 16 over $k^\star \in \mathcal A^{\mathrm{traj}}_j$,
-divide both sides by $|\mathcal A^{\mathrm{traj}}_j|$. Direct algebra.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 18
-**Location:** sections/07-lemma-anchor-mass.tex:54
-**Content (≤ 2 lines):** Summing the pointwise bound over non-anchors:
-$\sum_\ell e^{\inner{q}{k_\ell}} \le r \cdot \sum_{k \in \mathcal A^{\mathrm{traj}}_j} e^{\inner{q}{k_k}}$
-with $r = (|\text{non-anchors}|/|\mathcal A^{\mathrm{traj}}_j|) e^{-\Delta}$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Summation of Step 17 over $\ell$; the RHS pulls
-$|\text{non-anchors}|$ out of the sum. Hand-checked.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 19
-**Location:** sections/07-lemma-anchor-mass.tex:74
-**Content (≤ 2 lines):** $\sum_{k \in \mathcal A^{\mathrm{traj}}_j} w_{j,k} = A/(A+B)$
-where $A = \sum_{k \in \mathcal A} e^{\inner{q}{k_k}}$ and
-$B = \sum_{\ell \notin \mathcal A} e^{\inner{q}{k_\ell}}$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** $w_{j,k} = e^{\inner{q}{k_k}}/s_j$ with $s_j = A + B$.
-Summing over anchors: $\sum w_{j,k} = A/(A+B)$.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 20
-**Location:** sections/07-lemma-anchor-mass.tex:78
-**Content (≤ 2 lines):** $A/(A+B) = 1/(1 + B/A) \ge 1/(1+r) \ge 1 - r$
-using $B/A \le r$ and the elementary inequality $1/(1+r) \ge 1 - r$ for $r \ge 0$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Named elementary inequality:
-$(1+r)(1-r) = 1 - r^2 \le 1$ for $r \ge 0$, so $1 - r \le 1/(1+r)$.
-Combined with monotonicity of $1/(1+x)$ on $x \ge 0$. Hand-checked.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 21
-**Location:** sections/08-lemma-T-polynomial.tex:46
-**Content (≤ 2 lines):** Decomposition step: invoke
-\Cref{lem:anchor_decomposition} with $\mathcal A = \mathcal A^{\mathrm{traj}}_T$,
-giving $\norm{x_T - V^*} \le \sum_{\mathcal A^{\mathrm{traj}}_T} w \norm{V_k - V^*} + (1 - \sum_{\mathcal A^{\mathrm{traj}}_T} w) D_T$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** \Cref{lem:anchor_decomposition} holds for any
-subset of $\{1,\dots,j\}$; $\mathcal A^{\mathrm{traj}}_T \subseteq \{1,\dots,T\}$
-is a valid subset. Hypotheses (non-negative weights, sum to 1) hold by
-\Cref{lem:softmax_running_average}.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 22
-**Location:** sections/08-lemma-T-polynomial.tex:55
-**Content (≤ 2 lines):** Anchor-error term bounded by
-$\varepsilon_{\mathrm{anc}} \sum_{\mathcal A^{\mathrm{traj}}_T} w \le \varepsilon_{\mathrm{anc}}$
-using \Cref{lem:anchor_accuracy_bound} and $\sum w \le 1$.
+**Content (≤ 2 lines):** $\sum_k w_{j,k} = s_j/s_j = 1$ by substitution.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
 **Verification method:** Direct substitution.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
+**Last updated:** 2026-05-25T10:00:00Z
 
-## Step 23
-**Location:** sections/08-lemma-T-polynomial.tex:64
-**Content (≤ 2 lines):** $D_T \le \max_k \norm{V_k} + \norm{V^*} \le M + \norm{V^*}$
-by triangle inequality and \Cref{ass:bounded_value_norms}.
+## Step 5
+**Location:** sections/04-lemma-gradient-form.tex:17 (Step 1 of lem:gradient_form)
+**Content (≤ 2 lines):** $\log p(x)_v = (W_U x)_v - \log Z$ with
+$Z = \sum_w e^{(W_U x)_w}$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Triangle:
-$\norm{V_k - V^*} \le \norm{V_k} + \norm{V^*}$; take max over $k$ and
-apply $\norm{V_k} \le M$ from \Cref{ass:bounded_value_norms}.
+**Verification method:** Definition of softmax + log; standard.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
+**Last updated:** 2026-05-25T10:00:00Z
 
-## Step 24
-**Location:** sections/08-lemma-T-polynomial.tex:67
-**Content (≤ 2 lines):** On $\Ecal_1$, leakage bounded:
-$1 - \sum w \le (T / (p_0 T/2)) e^{-\Delta} = (2/p_0) e^{-\Delta}$
-via \Cref{lem:anchor_mass_lb}.
+## Step 6
+**Location:** sections/04-lemma-gradient-form.tex:23 (Step 1, gradient identity)
+**Content (≤ 2 lines):** $\nabla_x \log p(x)_v = W_U^{(v)} - W_U^\top p(x)$
+via chain rule on log-Z and the softmax identity
+$\sum_w (e^{z_w}/Z) W_U^{(w)} = W_U^\top p(x)$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Substitute $|\text{non-anchors}| \le T$ and
-$|\mathcal A^{\mathrm{traj}}_T| \ge p_0 T/2$ (event $\Ecal_1$) into
-\Cref{eq:anchor_mass_bound}.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 25
-**Location:** sections/08-lemma-T-polynomial.tex:84
-**Content (≤ 2 lines):** Combined bound on $\Ecal_1$:
-$\norm{x_T - V^*} \le \varepsilon_{\mathrm{anc}} + (2/p_0) e^{-\Delta}(M + \norm{V^*})$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct combination of Step 22, 23, 24 plugged
-into Step 21.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 26
-**Location:** sections/08-lemma-T-polynomial.tex:93
-**Content (≤ 2 lines):** Condition $(2/p_0) e^{-\Delta}(M + \norm{V^*}) \le \gamma/2$
-inverts to $\Delta \ge \log(4(M + \norm{V^*})/(p_0 \gamma))$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Solve for $\Delta$: $e^{-\Delta} \le p_0 \gamma / (4(M + \norm{V^*}))$,
-take logs. Hand-checked.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 27
-**Location:** sections/08-lemma-T-polynomial.tex:75
-**Content (≤ 2 lines):** Equivalence of \Cref{eq:Delta_condition}
-($\Delta \ge \log(4(M+\norm{V^*})/(p_0\gamma))$) and the leakage bound
-$(2/p_0) e^{-\Delta}(M + \norm{V^*}) \le \gamma/2$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct algebraic manipulation: take log of both
-sides of $e^{-\Delta} \le p_0 \gamma / (4(M + \norm{V^*}))$, multiply
-through by $(2/p_0)(M + \norm{V^*})$. Hand-checked.
-**Sub-agent task id:** none
-**Sub-agent task id:** sweep-step-27-self
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 28
-**Location:** sections/09-lemma-decoding.tex:19
-**Content (≤ 2 lines):** $\gamma > 2\varepsilon_{\mathrm{anc}}$ implies
-$\varepsilon_{\mathrm{anc}} \le \gamma/2$ (rearranging).
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Trivial division by 2.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 29
-**Location:** sections/09-lemma-decoding.tex:25
-**Content (≤ 2 lines):** $\gamma/2 + \varepsilon_{\mathrm{anc}} \le \gamma/2 + \gamma/2 = \gamma$
-by combining the hypothesis and Step 28.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Trivial arithmetic addition.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 30
-**Location:** sections/09-lemma-decoding.tex:30
-**Content (≤ 2 lines):** $\norm{x - V^*} \le \gamma$ implies
-$\dec(x) \in \Correct(Q)$ by direct invocation of
-\Cref{ass:decoding_existence}.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** \Cref{ass:decoding_existence} (sections/02-assumptions.tex:106)
-states the implication exactly; hypothesis $\norm{x - V^*} \le \gamma(Q)$
-is met by Step 29.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 31
-**Location:** sections/10-main-theorem.tex:48
-**Content (≤ 2 lines):** Definition of $\Ecal_1 = \{|\mathcal A^{\mathrm{traj}}_T| \ge p_0 T/2\}$
-as the deterministic-bound-driving event.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct setup; no inference. The event is well-defined
-and measurable w.r.t.\ $\sigma(a_1,\dots,a_T)$.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 32
-**Location:** sections/10-main-theorem.tex:53
-**Content (≤ 2 lines):** On $\Ecal_1$,
-$\norm{x_T - V^*(Q)} \le \gamma(Q)/2 + \varepsilon_{\mathrm{anc}}$
-via \Cref{lem:T_polynomial}, when $T \ge T(Q,\delta)$ and \Cref{eq:thm_main_Delta_condition}
-holds.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** \Cref{lem:T_polynomial} hypothesis check:
-(i) the five assumptions hold (theorem-level hypotheses); (ii)
-\Cref{eq:thm_main_Delta_condition} subsumes the per-question condition
-\Cref{eq:Delta_condition} for any $Q \in F$ since
-$\gamma(Q) \ge \gamma_{\min}$ and $\norm{V^*(Q)} \le \max_Q \norm{V^*(Q)}$.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 33
-**Location:** sections/10-main-theorem.tex:61
-**Content (≤ 2 lines):** $\dec(x_T) \in \Correct(Q)$ on $\Ecal_1$, via
-\Cref{lem:decoding_correctness} applied to $x = x_T$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** \Cref{lem:decoding_correctness} hypothesis check:
-$\norm{x_T - V^*(Q)} \le \gamma(Q)/2 + \varepsilon_{\mathrm{anc}}$ is
-exactly the bound from Step 32.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 34
-**Location:** sections/10-main-theorem.tex:68
-**Content (≤ 2 lines):** $\Pr[\Ecal_1] \ge 1 - \delta/2$ via
-\Cref{lem:anchor_count_lb} at confidence $\delta_1 = \delta/2$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** \Cref{lem:anchor_count_lb} hypothesis check:
-$T \ge 8 \log(1/\delta_1)/p_0^2 = 8 \log(2/\delta)/p_0^2$, which is
-implied by $T \ge T(Q,\delta) = C_\star \log(2/\delta)/p_0^2$ when
-$C_\star \ge 8$.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
-
-## Step 35
-**Location:** sections/10-main-theorem.tex (theorem proof Step 1)
-**Content (≤ 2 lines):** Setting $\delta = 2 \exp(-p_0 T/8)$ makes
-$T(Q,\delta) = T$ tautologically, so \Cref{lem:T_polynomial} applies
-and gives the deterministic bound with prob $\ge 1 - \delta/2 = 1 - \exp(-p_0 T/8)$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct substitution:
-$T(Q,\delta) = (8/p_0) \log(2/\delta) = (8/p_0) \log(2/(2 \exp(-p_0 T/8))) = (8/p_0)(p_0 T/8) = T$.
-The lemma's hypothesis $T \ge T(Q,\delta)$ holds with equality.
-$\delta \in (0,1)$ requires $T > 8 \log 2 / p_0 \approx 5.55/p_0$;
-for smaller $T$ the theorem statement is vacuous (RHS $\le 0$).
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
-
-## Step 36
-**Location:** sections/10-main-theorem.tex (theorem proof Step 3)
-**Content (≤ 2 lines):** Slack absorption
-$1 - \exp(-p_0 T/8) \ge 1 - 2 \exp(-p_0 T/8)$ for $T \ge 1$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Trivial: $2 \exp(\cdot) \ge \exp(\cdot)$, so
-$1 - 2 \exp(\cdot) \le 1 - \exp(\cdot)$. The factor 2 is inserted to
-make the theorem and corollary use the same rate constant.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
-
-## Step 37
-**Location:** sections/10-main-theorem.tex (corollary proof)
-**Content (≤ 2 lines):** Deterministic upper bound $Y \le G$ where
-$Y = \norm{x_T - V^*(Q)}$ and $G = M + \norm{V^*(Q)}$, via convex
-combination and \Cref{ass:bounded_value_norms}.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** $x_T = \sum_k w_{T,k} V_k$
-(\Cref{lem:softmax_running_average}) is a convex combination with
-$\sum w_{T,k} = 1$ and $w_{T,k} \ge 0$. Triangle inequality:
-$\norm{x_T} \le \sum_k w_{T,k} \norm{V_k} \le M \sum_k w_{T,k} = M$.
-Then $Y \le \norm{x_T} + \norm{V^*(Q)} \le M + \norm{V^*(Q)} = G$.
+**Verification method:** Standard softmax-gradient derivation; matches
+biased-sgd-descent-inequality.md and any textbook (e.g., Bishop §4.3).
 Hand-checked.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 7
+**Location:** sections/04-lemma-gradient-form.tex:32 (Step 1, multiplication)
+**Content (≤ 2 lines):** $\nabla_x p(x)_v = p(x)_v (W_U^{(v)} - W_U^\top p(x))$
+via $\nabla p = p \cdot \nabla \log p$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Direct: $p = e^{\log p}$ and $\nabla e^f = e^f \nabla f$.
+Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 8
+**Location:** sections/04-lemma-gradient-form.tex:38 (Step 2, sum-of-gradients)
+**Content (≤ 2 lines):** $\nabla \cmass(x; Q) = \sum_{v \in \Cset(Q)} \nabla p(x)_v
+= W_U^\top \mathrm{diag}(\1_{\Cset(Q)}) p(x) - \cmass(x;Q) W_U^\top p(x)$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Substitute Step 7, collect linear-combination
+sum-over-rows of $W_U$. Pull scalar factor
+$\sum_{v \in \Cset(Q)} p(x)_v = \cmass(x;Q)$ out. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 9
+**Location:** sections/04-lemma-gradient-form.tex:54 (Step 3, log derivative)
+**Content (≤ 2 lines):** $\nabla \loss = -\nabla \cmass / \cmass$ via
+chain rule on $\loss = -\log \cmass$, then divide Step 8 through by $\cmass$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Standard chain rule on logarithm; recognise
+$W_U^\top \mathrm{diag}(\1_C) p / \cmass = W_U^\top \qcond$ by definition of $\qcond$.
+Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 10
+**Location:** sections/05-lemma-smoothness.tex:25 (Step 1, $z$-space gradient)
+**Content (≤ 2 lines):** $\nabla \ell(z) = p(z) - \qcond(z)$ at the
+$|\mathcal V|$-dimensional level (replace $W_U$ by identity in Step 9).
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Special case of \Cref{lem:gradient_form} with
+unembedding = identity. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 11
+**Location:** sections/05-lemma-smoothness.tex:33 (Step 1, softmax Jacobians)
+**Content (≤ 2 lines):** $\nabla p = \mathrm{diag}(p) - p p^\top$ and
+$\nabla \qcond = \mathrm{diag}(\qcond) - \qcond \qcond^\top$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Standard softmax-Jacobian identity (textbook;
+e.g., Goodfellow-Bengio-Courville §6.2.2). Hand-checked: differentiate
+$p_i = e^{z_i}/Z$ in $z_j$ → $\delta_{ij} p_i - p_i p_j$. Similarly $\qcond$
+is itself the softmax of $z$ restricted to $\Cset$.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 12
+**Location:** sections/05-lemma-smoothness.tex:43 (Step 1, Hessian of $\ell$)
+**Content (≤ 2 lines):** $\nabla^2 \ell(z) = (\mathrm{diag}(p) - pp^\top) - (\mathrm{diag}(\qcond) - \qcond \qcond^\top)$
+by combining Steps 10-11.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Difference of two softmax-Jacobians; direct
+algebraic combination. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 13
+**Location:** sections/05-lemma-smoothness.tex:55 (Step 2, op-norm bound on covariance)
+**Content (≤ 2 lines):** $\norm{\mathrm{diag}(p) - p p^\top}_{\mathrm{op}}
+\le \max_v p_v (1 - p_v) \le 1/4$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Standard covariance-matrix op-norm bound; $p_v(1-p_v) \le 1/4$
+by $t(1-t)$ maximised at $t=1/2$. Matches softmax-lipschitz.md digest.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 14
+**Location:** sections/05-lemma-smoothness.tex:62 (Step 2, triangle for $\ell$)
+**Content (≤ 2 lines):** $\norm{\nabla^2 \ell(z)}_{\mathrm{op}} \le 1/4 + 1/4 = 1/2$
+by triangle on \Cref{eq:Hess_ell}.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Triangle inequality applied to the difference of two PSD
+matrices. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 15
+**Location:** sections/05-lemma-smoothness.tex:69 (Step 3, chain rule)
+**Content (≤ 2 lines):** $\nabla^2 \loss = W_U^\top \nabla^2 \ell W_U$ and
+$\norm{\cdot} \le B_U^2 \cdot (1/2)$ via op-norm submultiplicativity.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Standard chain rule for second derivatives of $\ell \circ \text{linear}$.
+Op-norm submultiplicativity. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 16
+**Location:** sections/06-lemma-descent-inequality.tex:30 (Step 1, smoothness Taylor)
+**Content (≤ 2 lines):** $\loss(x_j) \le \loss(x_{j-1}) + \inner{\nabla \loss(x_{j-1})}{g_j}
++ (L_{\mathrm{sm}}/2) \norm{g_j}^2$ pointwise by smoothness.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Standard $L$-smoothness second-order Taylor inequality;
+matches biased-sgd-descent-inequality.md digest.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 17
+**Location:** sections/06-lemma-descent-inequality.tex:43 (Step 2, conditional expectation)
+**Content (≤ 2 lines):** Take $\E[\cdot \mid \mathcal F_{j-1}]$; substitute
+\Cref{eq:gc_bb_def} and \Cref{eq:second_moment_def}.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** $\mathcal F_{j-1}$-measurability of $\loss(x_{j-1})$
+and $\nabla \loss(x_{j-1})$; substitution. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 18
+**Location:** sections/06-lemma-descent-inequality.tex:57 (Step 3, Young's)
+**Content (≤ 2 lines):** Young: $\inner{a}{b} \le (\eta_j/2) \norm{a}^2 + (1/(2\eta_j)) \norm{b}^2$;
+then $\norm{b_j}^2 \le \eta_j^2 \beta^2$ gives $(1/(2\eta_j))\norm{b_j}^2 \le (\eta_j/2) \beta^2$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Young's inequality with $\alpha = \eta_j$; relative-scale
+bound from \Cref{eq:gc_bb_bias}. Matches biased-sgd-descent-inequality.md
+digest. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 19
+**Location:** sections/06-lemma-descent-inequality.tex:79 (Step 4, combine)
+**Content (≤ 2 lines):** Combine the gradient-norm terms:
+$-\eta_j \norm{\nabla \loss}^2 + (\eta_j/2) \norm{\nabla \loss}^2 = -(\eta_j/2) \norm{\nabla \loss}^2$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Direct algebra. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 20
+**Location:** sections/07-lemma-telescoping.tex:38 (Step 1, telescope)
+**Content (≤ 2 lines):** Total-expectation sum of descent inequality
+yields $\E[\loss(x_T)] - \loss(x_0) \le \sum$ on right side.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Tower property $\E[\E[\cdot \mid \F_{j-1}]] = \E[\cdot]$
+and telescoping on $\loss(x_T)-\loss(x_0)$. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 21
+**Location:** sections/07-lemma-telescoping.tex:55 (Step 2, weighted-average)
+**Content (≤ 2 lines):** $\min_j a_j \le (\sum_j \eta_j a_j)/(\sum_j \eta_j)$
+for non-negative weights and values.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Trivial: min is bounded above by weighted average
+with non-negative weights summing to a positive quantity. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 22
+**Location:** sections/07-lemma-telescoping.tex:74 (Step 3, step-size sums)
+**Content (≤ 2 lines):** $\sum_{j=1}^T \eta_0/\sqrt j \ge \eta_0 \sqrt T$ by
+integral comparison + algebra.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Integral comparison $\sum j^{-1/2} \ge \int_1^{T+1} x^{-1/2} dx
+= 2(\sqrt{T+1} - 1) \ge \sqrt T$ for $T \ge 1$. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 23
+**Location:** sections/07-lemma-telescoping.tex:87 (Step 3, sum of squares)
+**Content (≤ 2 lines):** $\sum_{j=1}^T \eta_0^2/j \le \eta_0^2 (1 + \log T)$ by
+harmonic-series bound.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Harmonic-series upper bound $H_T \le 1 + \log T$.
+Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 24
+**Location:** sections/07-lemma-telescoping.tex:93 (Step 4, substitution)
+**Content (≤ 2 lines):** Substitute step-size sums; the bias term simplifies
+to $\beta^2$ (cancellation of $\sum_j \eta_j$).
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Direct algebra: $\beta^2 \sum_j \eta_j / \sum_j \eta_j = \beta^2$.
+Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 25
+**Location:** sections/08-lemma-logit-margin-decoding.tex:21 (Part (i))
+**Content (≤ 2 lines):** $\loss(x;Q) \le \log 2 \Leftrightarrow \cmass(x;Q) \ge 1/2$
+via monotone $t \mapsto e^{-t}$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** $\loss = -\log \cmass$ and $e^{-\log 2} = 1/2$;
+$e^{-t}$ strictly decreasing reverses the inequality. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 26
+**Location:** sections/08-lemma-logit-margin-decoding.tex:30 (Part (ii), argmax preservation)
+**Content (≤ 2 lines):** Softmax is strictly monotone, so argmax_v $p(x)_v$
+coincides with argmax_v $(W_U x)_v$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** $p(x) = e^{W_U x} / Z$ and exponential is strictly
+increasing, so order is preserved. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 27
+**Location:** sections/08-lemma-logit-margin-decoding.tex:38 (Part (ii), pigeonhole)
+**Content (≤ 2 lines):** Non-degeneracy
+$|\Cset(Q)| \max_{v \notin \Cset} p_v < \max_{v \in \Cset} p_v$ implies
+$\max_{v \notin \Cset} p_v < \max_{v \in \Cset} p_v$ since $|\Cset(Q)| \ge 1$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Direct: $|C| \ge 1$ ⟹ $|C| \cdot a \ge a$ for $a \ge 0$.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 28
+**Location:** sections/09-lemma-expectation-to-failure.tex:25 (Step 1, Markov)
+**Content (≤ 2 lines):** Markov on non-negative $\loss(x_T;Q)$ at threshold $\log 2$
+gives $\Pr[\loss > \log 2] \le \E[\loss]/\log 2$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Markov's inequality, textbook (e.g., Vershynin 2018
+Theorem 1.2.1). Non-negativity of $\loss$ from \Cref{rem:loss_nondegenerate}.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 29
+**Location:** sections/09-lemma-expectation-to-failure.tex:34 (Step 2, contrapositive)
+**Content (≤ 2 lines):** $\{\dec(x_T) \notin \Cset\} \subseteq \{\loss(x_T) > \log 2\}$
+via contrapositive of \Cref{lem:logit_margin_decoding}.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** \Cref{lem:logit_margin_decoding} states
+$\{\loss \le \log 2\} \cap \{\text{non-degen}\} \Rightarrow \{\dec \in \Cset\}$;
+contrapositive: $\{\dec \notin \Cset\} \Rightarrow \{\loss > \log 2\} \cup \{\text{degen}\}$;
+under the assumed non-degeneracy this collapses to $\{\loss > \log 2\}$.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 30
+**Location:** sections/10-main-theorem.tex:65 (Theorem proof, Step 1, gradient bound)
+**Content (≤ 2 lines):** Direct invocation of \Cref{lem:telescoping}: hypotheses match.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Hypothesis check: thm uses same assumptions plus
+$\eta_j = \eta_0/\sqrt j$ schedule, matches lemma exactly.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 31
+**Location:** sections/10-main-theorem.tex:75 (Theorem proof, Step 2, loss bound rearrange)
+**Content (≤ 2 lines):** From \Cref{eq:telescoping_summed}: drop non-negative
+gradient-sum term, get $\E[\loss(x_T)] \le L_0 + (\beta^2/2)\sum\eta_j + (L_{\mathrm{sm}} G^2/2)\sum\eta_j^2$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Direct rearrangement of \Cref{eq:telescoping_summed},
+dropping non-negative $\sum_j \eta_j \E\norm{\nabla \loss}^2 \ge 0$ on right side
+(this preserves the upper bound direction since it adds positive quantity to RHS in
+the rearranged form). Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 32
+**Location:** sections/10-main-theorem.tex:88 (Theorem proof, Step 2, time-averaging)
+**Content (≤ 2 lines):** Time-averaging trick for $\E[\loss(\bar x_T)]$ or
+$\E[\loss(x_R)]$ for random $R$ uniform on $\{1,\dots,T\}$ gives the
+$O(L_0/\sqrt T) + O(\beta^2/\eta_0)$ form.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Standard biased-SGD averaging trick from
+\cite{bottou2018optimization} §4.3, Theorem 4.10. Matches digest
+biased-sgd-descent-inequality.md.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 33
+**Location:** sections/10-main-theorem.tex:106 (Theorem proof, Step 3, Markov)
+**Content (≤ 2 lines):** Invoke \Cref{lem:expectation_to_failure} with the
+bound \Cref{eq:main_loss_bound}; divide by $\log 2$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Direct substitution. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 34
+**Location:** sections/10-main-theorem.tex:139 (cor:entropy_decay, Lipschitz softmax)
+**Content (≤ 2 lines):** Softmax is 1-Lipschitz $\ell_2 \to \ell_2$
+($\mathrm{diag}(p) - pp^\top$ has op-norm $\le \max p_i(1-p_i) \le 1/4 \le 1$).
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Matches softmax-lipschitz.md digest; reference Gao-Pavel
+arXiv:1704.00805 Prop 4.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 35
+**Location:** sections/10-main-theorem.tex:146 (cor:entropy_decay, entropy Lipschitz)
+**Content (≤ 2 lines):** $H \circ \softmax$ on bounded inputs is Lipschitz
+with finite constant $c_3$ depending on $|\mathcal V|, R$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Matches softmax-lipschitz.md digest. Image of softmax
+with $\norm{\mathbf z} \le R$ lies away from simplex boundary, where entropy
+is gradient-bounded.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 36
+**Location:** sections/10-main-theorem.tex:150 (cor:entropy_decay, composition)
+**Content (≤ 2 lines):** Compose three Lipschitz constants:
+$|H_T - H_\infty| \le c_3 \cdot B_U \cdot \norm{x_T - x^*(Q)}$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Chain of Lipschitz constants on composition.
+Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
+
+## Step 37
+**Location:** sections/10-main-theorem.tex:155 (cor:entropy_decay, loss-to-distance)
+**Content (≤ 2 lines):** Under local strong-convexity,
+$\norm{x_T - x^*(Q)} \le \sqrt{2(\loss(x_T) - \loss(x^*))/\mu}$; take expectations
+and apply Jensen.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Direct algebra: $\loss(x) - \loss(x^*) \ge \mu \norm{x-x^*}^2/2$
+inverts to $\norm{x-x^*} \le \sqrt{2(\loss(x)-\loss(x^*))/\mu}$. Jensen:
+$\E\sqrt Y \le \sqrt{\E Y}$ for concave $\sqrt{\cdot}$. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-05-25T10:00:00Z
 
 ## Step 38
-**Location:** sections/10-main-theorem.tex (corollary proof)
-**Content (≤ 2 lines):** Tail-to-expectation conversion
-$\E[Y] = \E[Y \1_{\Ecal^\star}] + \E[Y \1_{(\Ecal^\star)^c}]
-       \le (\gamma/2 + \varepsilon_{\mathrm{anc}}) + G \cdot \Pr[(\Ecal^\star)^c]$.
+**Location:** sections/10-main-theorem.tex:210 (cor:pl_exponential_rate, descent at const step)
+**Content (≤ 2 lines):** Per-step descent inequality at $\eta_j = \eta_0$ from
+\Cref{lem:descent_inequality}.
 **Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Law of total expectation: split $\E[Y]$ over
-the success event $\Ecal^\star$ and its complement. On $\Ecal^\star$,
-$Y \le \gamma(Q)/2 + \varepsilon_{\mathrm{anc}}$; on the complement,
-$Y \le G$ (Step 37). Bound each piece, drop $\Pr[\Ecal^\star] \le 1$
-on the success term. Standard tail-to-expectation pattern for a bounded
-random variable (no integration needed — the trivial case).
+**Current tag:** 🟡 cross-checked
+**Verification method:** Specialise \Cref{eq:descent_inequality} to constant
+$\eta_j = \eta_0$.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-24T22:00:00Z
+**Last updated:** 2026-05-25T10:00:00Z
 
 ## Step 39
-**Location:** sections/10-main-theorem.tex (corollary proof)
-**Content (≤ 2 lines):** Substitution
-$G \cdot \Pr[(\Ecal^\star)^c] \le 2 G \exp(-p_0 T/8)$ via
-\Cref{thm:main_convergence_hp}.
+**Location:** sections/10-main-theorem.tex:222 (cor:pl_exponential_rate, PL substitution)
+**Content (≤ 2 lines):** Substitute PL: $\norm{\nabla \loss}^2 \ge 2\mu(\loss - L_*)$,
+get $A_j \le (1-\eta_0 \mu) A_{j-1} + B$.
 **Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct substitution:
-$\Pr[(\Ecal^\star)^c] \le 2 \exp(-p_0 T/8)$ is the contrapositive of
-\Cref{eq:test_time_scaling}; multiply through by
-$G = M + \norm{V^*(Q)}$. Hand-checked.
+**Current tag:** 🟡 cross-checked
+**Verification method:** Matches pl-condition-rate.md digest; standard
+Karimi-Nutini-Schmidt 2016 argument.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
+**Last updated:** 2026-05-25T10:00:00Z
 
 ## Step 40
-**Location:** sections/10-main-theorem.tex (cor:entropy_decay proof, step i)
-**Content (≤ 2 lines):** Softmax is 1-Lipschitz in $\ell_2$: Jacobian
-$\mathrm{diag}(p) - p p^\top$ has operator norm $\le \max_i p_i(1-p_i) \le 1/4$.
+**Location:** sections/10-main-theorem.tex:236 (cor:pl_exponential_rate, iterate)
+**Content (≤ 2 lines):** Iterate $A_T \le (1-\eta_0 \mu)^T A_0 + B/(\eta_0 \mu)$
+via geometric-series sum.
 **Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** Matches softmax-lipschitz.md digest. Reference:
-Gao and Pavel arXiv:1704.00805 Prop 4. Hand-checked: $\mathrm{diag}(p) - p p^\top$
-is symmetric PSD with eigenvalues in $[0, \max_i p_i] \subseteq [0, 1]$.
+**Current tag:** 🟢 verified
+**Verification method:** Geometric series: $\sum_{j=0}^{T-1} (1-\eta_0 \mu)^j
+\le 1/(\eta_0 \mu)$. Hand-checked.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
+**Last updated:** 2026-05-25T10:00:00Z
 
 ## Step 41
-**Location:** sections/10-main-theorem.tex (cor:entropy_decay proof, step ii)
-**Content (≤ 2 lines):** Shannon entropy $H(p) = -\sum p_i \log p_i$ is
-Lipschitz on the image of softmax (bounded away from simplex boundary)
-with finite constant $L_H$ depending on $|\mathcal V|$ and input bound.
+**Location:** sections/11-lower-bound.tex:55 (Step 1, instance construction)
+**Content (≤ 2 lines):** $\mathcal V = \{v_1, v_2\}$ with $W_U^{(v_i)} = e_i$,
+$\Cset = \{v_1\}$, $x_0 = 0$; bounded-norm constants computable.
 **Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** Matches softmax-lipschitz.md digest. The image
-of softmax with bounded input lies away from the simplex boundary
-(softmax probability lower-bounded by $e^{-2R}/n$); entropy gradient is
-bounded on this image. Standard textbook result.
+**Current tag:** 🟢 verified
+**Verification method:** Direct construction; all constants explicit.
+Hand-checked.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
+**Last updated:** 2026-05-25T10:00:00Z
 
 ## Step 42
-**Location:** sections/10-main-theorem.tex (cor:entropy_decay proof, step iii)
-**Content (≤ 2 lines):** Linear map $x \mapsto W_U x$ is $B_U$-Lipschitz
-in $\ell_2$ where $B_U = \norm{W_U}_{\mathrm{op}}$.
+**Location:** sections/11-lower-bound.tex:68 (Step 2, orthogonal bias)
+**Content (≤ 2 lines):** $g_j$ with $\E[g_j \mid \F_{j-1}] = -\eta_j \nabla\loss + \eta_j \beta u_j$
+for $u_j \perp \nabla \loss$, saturating bound \Cref{eq:gc_bb_bias}.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Definition of operator norm: $\norm{W_U x - W_U y} = \norm{W_U(x-y)} \le \norm{W_U}_{\mathrm{op}} \norm{x-y}$.
+**Verification method:** Direct: in $\R^{d \ge 2}$ orthogonal unit vector
+always exists. Construction is valid; deterministic $g_j$ realises it
+with zero conditional variance. Hand-checked.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
+**Last updated:** 2026-05-25T10:00:00Z
 
 ## Step 43
-**Location:** sections/10-main-theorem.tex (cor:entropy_decay proof, step iv)
-**Content (≤ 2 lines):** Composition: pointwise
-$|H_T - H_\infty| \le L_{\mathrm{sm}} B_U \norm{x_T - V^*}$; take
-expectations and substitute \Cref{cor:expected_error_scaling}.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct composition of Lipschitz constants
-(Steps 40-42). Linearity of expectation gives \Cref{eq:entropy_decay};
-substituting the cor:expected_error_scaling bound gives \Cref{eq:entropy_decay_rate}.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
-
-## Step 44
-**Location:** sections/11-lower-bound.tex (thm:lower_bound proof, Step 1)
-**Content (≤ 2 lines):** Hard instance construction:
-$\mathcal V = \{a, a'\}$, $V(a) = V^*$, $V(a') = V^* + 2 v_\perp$,
-i.i.d.\ Bernoulli($p_0$) emission policy.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct construction; no inference. All
-parameters explicit and bounded.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
-
-## Step 45
-**Location:** sections/11-lower-bound.tex (thm:lower_bound proof, Step 2)
-**Content (≤ 2 lines):** All five assumptions
-(ass:anchor_set_accuracy, ass:anchor_emission_prob, ass:score_margin,
-ass:bounded_value_norms, ass:decoding_existence) hold for the construction.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Each assumption checked explicitly in the
-proof. Hand-checked against sections/02-assumptions.tex statements.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
-
-## Step 46
-**Location:** sections/11-lower-bound.tex (thm:lower_bound proof, Step 3)
-**Content (≤ 2 lines):** $\Pr[\mathcal E^*] = (1-p_0)^T$ where $\mathcal E^*$
-is the event of zero anchor emissions; on this event $x_T = V^* + 2 v_\perp$,
-so $\norm{x_T - V^*} = 2 > \gamma(Q^*)$, decoding fails.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Independence of Bernoullis gives the product;
-convex combination algebra (all $V_k = V(a') = V^* + 2 v_\perp$ implies
-$x_T = V^* + 2 v_\perp$ by $\sum w = 1$); direct comparison
-$2 > \gamma(Q^*) \in (0, 1)$.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
-
-## Step 47
-**Location:** sections/11-lower-bound.tex (thm:lower_bound proof, Step 4)
-**Content (≤ 2 lines):** $(1 - p_0)^T = \exp(-T \log(1/(1-p_0)))$ and
-$\log(1/(1-p_0)) = p_0 + \mathcal{O}(p_0^2)$ for $p_0 \in (0, 1/2]$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Algebraic identity (exponential of log).
-Taylor expansion: $\log(1/(1-p_0)) = -\log(1-p_0) = p_0 + p_0^2/2 + \cdots$
-gives the asymptotic; on $(0, 1/2]$, $p_0 \le \log(1/(1-p_0)) \le 2 p_0$.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
-
-## Step 48
-**Location:** sections/12-variance-reduced.tex (thm:variance_reduced proof, Step 1)
-**Content (≤ 2 lines):** $\Pr[\Ecal_1^c] \le \exp(-p_0 T/8)$ via
-\Cref{lem:anchor_count_lb} at $\delta_1 = \exp(-p_0 T/8)$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct application of lem:anchor_count_lb;
-hypothesis $T \ge 8 \log(1/\delta_1)/p_0$ becomes $T \ge T$ (tautology).
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
-
-## Step 49
-**Location:** sections/12-variance-reduced.tex (thm:variance_reduced proof, Step 2)
-**Content (≤ 2 lines):** Off-$\Ecal_1$ contribution
-$\E[\norm{x_T-V^*}^2 \1_{\Ecal_1^c}] \le (M + \norm{V^*})^2 \Pr[\Ecal_1^c] \le (M + \norm{V^*})^2 \exp(-p_0 T/8)$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Convex-combination bound $\norm{x_T} \le M$
-(as in cor:expected_error_scaling), triangle to get $\norm{x_T - V^*} \le M + \norm{V^*}$;
-square, take expectation over $\Ecal_1^c$.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
-
-## Step 50
-**Location:** sections/12-variance-reduced.tex (thm:variance_reduced proof, Step 3 anchor part)
-**Content (≤ 2 lines):** Under ass:anchor_unbiased + rem:anchor_internal_uniform
-(anchor-internal score gap $\le \Delta'$),
-$\E[\norm{S_A}^2 \mid \Ecal_1] \le \sigma^2 \sum_{k \in \Acal} w_{T,k}^2 \le 2 e^{\Delta'} \sigma^2/(p_0 T)$.
+**Location:** sections/11-lower-bound.tex:83 (Step 3, contradiction)
+**Content (≤ 2 lines):** If $\min_j \E\norm{\nabla \loss}^2 < c_7 \beta^2$ then
+bias variance dominates and $\loss$ increases back away from stationary point
+at rate $\Theta(\eta_j^2 \beta^2)$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟡 cross-checked
-**Verification method:** Matches variance-of-averaged-estimator.md
-digest. Unbiasedness gives $\E[V_k - V^* \mid \text{anchor}, \mathcal F_{k-1}] = 0$;
-conditional second moment bound gives variance $\le \sigma^2 \sum w^2$;
-under anchor-internal uniformity ($\Delta'$-bounded score gap),
-$\max_{k \in \Acal} w_{T,k} \le e^{\Delta'} / |\Acal^{\mathrm{traj}}_T| \le 2 e^{\Delta'}/(p_0 T)$ on $\Ecal_1$;
-elementary $\sum w^2 \le \max_k w_k \cdot \sum w_k$ then gives the bound.
+**Verification method:** Standard biased-SGD lower-bound argument; matches
+\cite{bottou2018optimization} §4.3 lower-bound discussion. The orthogonal-bias
+construction is well-known in the bias-floor literature.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:58:00Z
+**Last updated:** 2026-05-25T10:00:00Z
 
-## Step 51
-**Location:** sections/12-variance-reduced.tex (thm:variance_reduced proof, Step 3 non-anchor part)
-**Content (≤ 2 lines):** Non-anchor leakage on $\Ecal_1$: $\norm{S_N} \le (1 - \sum_{k \in \Acal} w_{T,k})(M + \norm{V^*}) \le (2/p_0) e^{-\Delta} (M + \norm{V^*}) \le \gamma(Q)/2$
-under Delta-condition.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** Same algebra as in lem:T_polynomial Step 3:
-lem:anchor_mass_lb gives $1 - \sum w \le (2/p_0) e^{-\Delta}$ on $\Ecal_1$;
-Delta-condition rearranges to $(2/p_0) e^{-\Delta} (M + \norm{V^*}) \le \gamma/2$.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z
-
-## Step 52
-**Location:** sections/12-variance-reduced.tex (thm:variance_reduced proof, Step 4)
-**Content (≤ 2 lines):** Combine via parallelogram inequality
-$\norm{a+b}^2 \le 2\norm{a}^2 + 2\norm{b}^2$ and law of total expectation,
-absorbing constants into the exponential term.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Parallelogram is standard (from Cauchy-Schwarz);
-total expectation $\E[Y^2] = \E[Y^2 \1_{\Ecal_1}] + \E[Y^2 \1_{\Ecal_1^c}]$
-combines the two contributions; Jensen converts $L^2$ to $L^1$.
-**Sub-agent task id:** none
-**Last updated:** 2026-05-24T23:55:00Z

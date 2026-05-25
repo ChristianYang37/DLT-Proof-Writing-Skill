@@ -6,11 +6,11 @@ arithmetic conventions used throughout the rest of the paper.
 
 \paragraph{Notation.}
 We work in $\R^d$ with the Euclidean norm $\norm{\cdot}$ and the inner
-product $\inner{\cdot}{\cdot}$. Throughout, $c, C, C_1, C_2, \ldots$
+product $\inner{\cdot}{\cdot}$. Throughout, $c, C, c_1, c_2, \ldots$
 denote universal positive constants whose values may change from line to
 line and depend only on quantities specified in each lemma's hypothesis.
 Constants that depend on additional problem parameters carry those
-parameters as subscripts (e.g.\ $C_{B, M}$).
+parameters as subscripts (e.g.\ $C_{B_U, M}$).
 
 We fix a finite set $F$ of \emph{questions} (the ``question field''), a
 single transformer layer index $i$ and a single attention-head index $h$
@@ -49,30 +49,91 @@ s_j \;\coloneqq\; \sum_{i=1}^{j} e^{\inner{q}{k_i}},
 \end{align}
 where $\inner{q}{k_k}$ denotes the rescaled inner product $q^\top k_k / \sqrt{d_k}$
 absorbing the standard $\sqrt{d_k}$ normalisation factor of
-\cite{vaswani2017attention}.
+\cite{vaswani2017attention}. We write the per-step contribution as
+\begin{align}\label{eq:gj_def}
+   g_j \;\coloneqq\; \frac{e^{\inner{q}{k_j}}}{s_j}\, V_j,
+\end{align}
+so that the recurrence $x_j = (s_{j-1}/s_j)\, x_{j-1} + g_j$ holds (see
+\Cref{lem:softmax_running_average} for the formal identity).
 \end{definition}
 
 \begin{remark}\label{rem:notation_recurrence}
 With $x_0 \coloneqq 0$, the recurrence form
-$x_j = (s_{j-1}/s_j)\, x_{j-1} + (e^{\inner{q}{k_j}}/s_j)\, V_j$
-is equivalent to \Cref{def:softmax_attention} (see
-\Cref{lem:softmax_running_average} for the formal identity). This is the
-shape that motivates the ``one-step update'' framing of the
-$x_j$-dynamics.
+$x_j = (s_{j-1}/s_j)\, x_{j-1} + g_j$
+is equivalent to \Cref{def:softmax_attention}. This is the
+shape that motivates the ``one-step (biased) gradient update'' framing
+of the $x_j$-dynamics formalised by the assumption and analysis in the
+following sections.
 \end{remark}
 
-\paragraph{Vocabulary and anchors.}
+\paragraph{Vocabulary, unembedding, and the constrained-softmax loss.}
 Let $\mathcal V$ denote the model's tokenizer vocabulary, a fixed finite
-set of tokens. The reasoning trajectory is a sequence of tokens
-$a_1, a_2, \ldots \in \mathcal V$ (with $a_j$ the token emitted at step
-$j$). We will tag certain $\mathcal F_{j-1}$-conditional events on
-$a_j$ as ``the trajectory emitted an anchor token at step $j$''; the
-anchor set itself is question-conditional and is fixed in
-\Cref{ass:anchor_set_accuracy} below.
+set of tokens. Let $W_U \in \R^{|\mathcal V| \times d}$ denote the
+(fixed) unembedding matrix that maps a $d$-dimensional latent vector to
+logits over the tokenizer vocabulary. For each $v \in \mathcal V$ we
+write $W_U^{(v)} \in \R^d$ for the $v$-th row of $W_U$ (viewed as a
+column vector).
+For each $x \in \R^d$, define
+the softmax logits and posterior over the vocabulary:
+\begin{align}\label{eq:z_p_def}
+   z(x) \;\coloneqq\; W_U\, x \;\in\; \R^{|\mathcal V|},
+   \qquad
+   p(x) \;\coloneqq\; \softmax(z(x)) \;\in\; \Delta^{|\mathcal V|},
+\end{align}
+where $\Delta^{|\mathcal V|}$ is the probability simplex over $\mathcal V$.
+
+\begin{definition}[Correct token set]\label{def:correct_set}
+For each question $Q \in F$, the \emph{correct-token set} is a non-empty
+subset $\Cset(Q) \coloneqq \Correct(Q) \subseteq \mathcal V$ of vocabulary
+tokens that decode as correct answers for $Q$. We write
+$\1_{\Cset(Q)} \in \{0,1\}^{|\mathcal V|}$ for its indicator vector.
+\end{definition}
+
+\begin{definition}[Correct-mass and constrained-softmax loss]\label{def:loss}
+For each $Q \in F$ and each $x \in \R^d$, define the
+\emph{correct-token softmax mass} and the
+\emph{constrained-softmax loss}:
+\begin{align}\label{eq:loss_def}
+   \cmass(x; Q) \;\coloneqq\; \sum_{v \in \Cset(Q)} p(x)_v
+                          \;=\; \1_{\Cset(Q)}^{\top}\, p(x),
+   \qquad
+   \loss(x; Q) \;\coloneqq\; -\log \cmass(x; Q).
+\end{align}
+The $\Cset(Q)$-conditional posterior over $\mathcal V$ is
+\begin{align}\label{eq:qcond_def}
+   \qcond(x; Q)_v \;\coloneqq\;
+   \frac{p(x)_v \cdot \1[v \in \Cset(Q)]}{\cmass(x; Q)},
+   \qquad v \in \mathcal V,
+\end{align}
+so $\qcond(x; Q) \in \Delta^{|\mathcal V|}$ is supported on $\Cset(Q)$
+(it is the posterior $p(x)$ conditioned on the event $\{v \in \Cset(Q)\}$).
+Both $p$ and $\qcond$ are probability vectors on $\mathcal V$.
+\end{definition}
+
+\begin{remark}\label{rem:loss_nondegenerate}
+$\cmass(x; Q) > 0$ for every $x \in \R^d$ since $p(x)$ is the softmax of
+a finite vector and $\Cset(Q)$ is non-empty; consequently
+$\loss(x; Q) < \infty$ for every $x$, and $\loss(x; Q) \ge 0$ since
+$\cmass(x; Q) \le 1$. The minimum value $\loss = 0$ corresponds to the
+correct set carrying all the softmax mass, $\cmass = 1$.
+\end{remark}
 
 \paragraph{Decoding.}
-The model's decoding map, applied to a latent vector
-$x \in \R^d$, returns a final answer token (or token sequence)
-$\dec(x) \in \mathcal V^*$. We treat $\dec(\cdot)$ as a black-box
-deterministic function of $x$, and write $\Correct(Q) \subseteq \mathcal V^*$
-for the (non-empty) set of answer strings that are correct for question $Q$.
+The model's decoding map applied to a latent vector $x \in \R^d$ returns
+a final answer token
+\begin{align}\label{eq:decode_def}
+   \dec(x) \;\coloneqq\; \arg\max_{v \in \mathcal V} (W_U x)_v,
+\end{align}
+breaking ties arbitrarily (e.g.\ by vocabulary index). The decode is
+\emph{correct} for $Q$ if $\dec(x) \in \Cset(Q)$.
+
+\begin{remark}\label{rem:decode_loss_relationship}
+The decoding correctness event $\{\dec(x) \in \Cset(Q)\}$ is a discrete
+event on the polyhedral cone
+$\{x : \max_{v \in \Cset(Q)} (W_U x)_v \ge \max_{v \notin \Cset(Q)} (W_U x)_v\}$,
+while the loss $\loss(x; Q)$ is a smooth function of $x$. We connect the
+two in \Cref{lem:logit_margin_decoding}: a sufficient (not necessary)
+condition for correct decoding is that $\loss(x; Q)$ is small enough.
+This is the bridge from the optimisation analysis of $\loss$ to the
+decoding guarantee that appears in the headline theorem.
+\end{remark}

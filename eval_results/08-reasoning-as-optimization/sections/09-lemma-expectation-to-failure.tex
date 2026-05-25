@@ -1,0 +1,67 @@
+\section{Expectation-to-failure-probability via Markov}
+\label{sec:expectation_to_failure}
+
+\begin{lemma}[Markov bound on the failure probability]\label{lem:expectation_to_failure}
+Let $X$ be any random variable taking values in $\R^d$ (e.g.\
+$X = x_T$ for a fixed terminal index, or $X = x_R$ for a randomised
+iterate). For every $Q \in F$,
+\begin{align}\label{eq:markov_loss_tail}
+   \Pr\!\bigl[\, \loss(X; Q) \;>\; \log 2 \,\bigr]
+   \;\le\;
+   \frac{\E[\loss(X; Q)]}{\log 2}.
+\end{align}
+Consequently, on the event that the non-degeneracy condition
+\Cref{eq:logit_margin_nondegen} of \Cref{lem:logit_margin_decoding}
+holds for $X$,
+\begin{align}\label{eq:markov_decoding_failure}
+   \Pr\!\bigl[\, \dec(X) \notin \Cset(Q) \,\bigr]
+   \;\le\;
+   \Pr\!\bigl[\, \loss(X; Q) \;>\; \log 2 \,\bigr]
+   \;\le\;
+   \frac{\E[\loss(X; Q)]}{\log 2}.
+\end{align}
+\end{lemma}
+
+
+\begin{proof}
+We prove the two displays in order.
+
+\noindent\textbf{Step 1: Markov on $\loss(X; Q)$.}
+By \Cref{rem:loss_nondegenerate}, $\loss(X; Q) \ge 0$ almost surely (the
+non-negativity is uniform in $x$ and hence transfers to any random $X$).
+Markov's inequality applied to the non-negative random variable
+$\loss(X; Q)$ at threshold $\log 2 > 0$ gives
+\begin{align*}
+   \Pr\!\bigl[\, \loss(X; Q) > \log 2 \,\bigr]
+   \;\le\;
+   \frac{\E[\loss(X; Q)]}{\log 2},
+\end{align*}
+which is \Cref{eq:markov_loss_tail}.
+
+\noindent\textbf{Step 2: bound on the decoding-failure event.}
+On the event $\{\loss(X; Q) \le \log 2\}$, both implications of
+\Cref{lem:logit_margin_decoding} apply (the second using the assumed
+non-degeneracy condition \Cref{eq:logit_margin_nondegen} of
+$X$), so $\dec(X) \in \Cset(Q)$. Contrapositively, the decoding-failure
+event $\{\dec(X) \notin \Cset(Q)\}$ is contained in
+$\{\loss(X; Q) > \log 2\}$. Therefore
+\begin{align*}
+   \Pr\!\bigl[\, \dec(X) \notin \Cset(Q) \,\bigr]
+   \;\le\;
+   \Pr\!\bigl[\, \loss(X; Q) > \log 2 \,\bigr],
+\end{align*}
+and combining with Step 1 yields \Cref{eq:markov_decoding_failure}.
+\end{proof}
+
+\begin{remark}\label{rem:markov_tightness}
+Markov's inequality is the simplest tail bound and is generically loose
+by a constant factor (Chebyshev's inequality with a second-moment bound
+on $\loss(X; Q)$ would tighten the $1/\log 2$ to a $1/(\log 2)^2$ factor
+against a second-moment quantity). For the present purpose we adopt
+Markov because (i) it requires only \Cref{ass:initial_loss} and the
+descent analysis of \Cref{lem:telescoping}, no second-moment hypothesis
+on $\loss(X; Q)$, and (ii) the resulting failure-probability bound
+\Cref{eq:markov_decoding_failure} has the same asymptotic rate
+$O(1/\sqrt T) + O(\beta^2/\eta_0)$ as the loss bound, so improving the
+constant in front does not change the qualitative picture.
+\end{remark}

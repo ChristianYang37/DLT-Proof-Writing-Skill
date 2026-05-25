@@ -1,280 +1,266 @@
-\section{The main convergence theorem}
+\section{Main convergence theorem}
 \label{sec:main_theorem}
 
-We now state and prove the test-time scaling law: the probability that
-the layer-$i$, head-$h$ attention output $x_T$ at the
-$\langle/\mathrm{think}\rangle$ position fails to land in the
-decoding-margin ball around $V^*(Q)$ decays exponentially in the
-reasoning horizon $T$, with rate $p_0 / 8$ set by the anchor-emission
-probability of the policy.
+We now state the headline convergence theorem under the biased-SGD
+framework: the loss $\loss(x_T; Q)$ converges at rate
+$O(1/\sqrt T) + O(\beta^2/\eta_0)$, and consequently the failure
+probability of the decoded answer is bounded by the same envelope via
+\Cref{lem:expectation_to_failure}.
 
-\begin{theorem}[Test-time scaling for anchored attention]\label{thm:main_convergence_hp}
+\begin{theorem}[Biased-SGD convergence under per-token gradient correctness]\label{thm:main_convergence_biased_sgd}
 Suppose
-\Cref{ass:anchor_set_accuracy,ass:anchor_emission_prob,ass:score_margin,ass:bounded_value_norms,ass:decoding_existence}
-hold, and assume the score margin $\Delta$ of \Cref{ass:score_margin}
-satisfies
-\begin{align}\label{eq:thm_main_Delta_condition}
-   \Delta
-   \;\ge\;
-   \log\!\frac{4(M + \max_{Q \in F}\norm{V^*(Q)})}{p_0\, \gamma_{\min}}.
+\Cref{ass:gradient_correctness_bounded_bias,ass:bounded_second_moment,ass:bounded_value_norms,ass:unembedding_norm,ass:initial_loss,ass:logit_margin_nondegen}
+hold, and the per-step rates $\eta_j$ of
+\Cref{ass:gradient_correctness_bounded_bias} follow the
+diminishing schedule
+$\eta_j = \eta_0/\sqrt j$ of \Cref{eq:step_size_schedule}. Then for every
+$Q \in F$ and every reasoning horizon $T \ge 1$, the time-minimum
+expected gradient norm satisfies
+\begin{align}\label{eq:main_grad_bound}
+   \min_{1 \le j \le T} \E\!\bigl[\, \norm{\nabla \loss(x_{j-1}; Q)}^2 \,\bigr]
+   \;\le\;
+   \frac{2 L_0}{\eta_0 \sqrt T}
+   \;+\; \beta^2
+   \;+\; \frac{L_{\mathrm{sm}}\, G^2\, \eta_0\, (1 + \log T)}{\sqrt T}.
 \end{align}
-(Equivalently, the score margin must be large enough to drive the
-non-anchor leakage below $\gamma_{\min}/2$.) Then for every $Q \in F$
-and every reasoning horizon $T \ge 1$,
-\begin{align}\label{eq:test_time_scaling}
-   \Pr\!\Big[\, \norm{x_T - V^*(Q)} \;\le\; \tfrac{\gamma(Q)}{2}
-                + \varepsilon_{\mathrm{anc}}
-              \;\;\text{and}\;\;
-              \dec(x_T) \in \Correct(Q) \,\Big]
-   \;\ge\;
-   1 - 2 \exp\!\Big( -\frac{p_0 T}{8} \Big).
+Furthermore, there exist absolute constants $c_1, c_2 > 0$ depending only
+on $L_{\mathrm{sm}}, \eta_0, G$ such that the expected loss at the
+\emph{randomised-iterate} output $x_R$ (where $R$ is drawn uniformly at
+random from $\{1, \dots, T\}$ independently of the trajectory) is
+bounded as
+\begin{align}\label{eq:main_loss_bound}
+   \E\!\bigl[\, \loss(x_R; Q) \,\bigr]
+   \;\le\;
+   \frac{c_1\, L_0}{\sqrt T}
+   \;+\; \frac{c_2\, \beta^2}{\eta_0}.
 \end{align}
-In particular, the failure probability decays exponentially in the
-test-time horizon $T$:
-$\Pr[\text{failure}] \le 2 \exp(-p_0 T / 8) \to 0$ as $T \to \infty$.
+Combining with the Markov-via-logit-margin bound of
+\Cref{lem:expectation_to_failure} (under the non-degeneracy condition
+\Cref{eq:logit_margin_nondegen} of \Cref{lem:logit_margin_decoding}),
+the decoding-failure probability at $x_R$ is bounded as
+\begin{align}\label{eq:main_failure_bound}
+   \Pr\!\bigl[\, \dec(x_R) \notin \Cset(Q) \,\bigr]
+   \;\le\;
+   \frac{c_1\, L_0}{\sqrt T\, \log 2}
+   \;+\; \frac{c_2\, \beta^2}{\eta_0\, \log 2}.
+\end{align}
 \end{theorem}
 
 \begin{proof}
-The proof has three steps: discharge the score-margin hypothesis,
-identify the single probabilistic event the bound depends on, and read
-off the rate. We may assume $2 \exp(-p_0 T/8) < 1$ (else the bound is
-vacuous), so $\delta \coloneqq 2 \exp(-p_0 T/8) \in (0, 1)$ is a
-valid confidence parameter.
+The proof combines the descent inequality of \Cref{lem:descent_inequality},
+the telescoping argument of \Cref{lem:telescoping}, and the
+Markov-via-logit-margin bound of \Cref{lem:expectation_to_failure}.
 
-\noindent\textbf{Step 1: deterministic-on-event bound via
-\Cref{lem:T_polynomial}.}
-\Cref{eq:thm_main_Delta_condition} implies the per-question score-margin
-condition \Cref{eq:Delta_condition} for every $Q \in F$, because
-$\gamma(Q) \ge \gamma_{\min}$ and
-$\norm{V^*(Q)} \le \max_{Q \in F} \norm{V^*(Q)}$ (so the right-hand side
-of \Cref{eq:thm_main_Delta_condition} dominates the right-hand side of
-\Cref{eq:Delta_condition}). With $\delta = 2 \exp(-p_0 T/8)$ as above,
-$\log(2/\delta) = \log(\exp(p_0 T / 8)) = p_0 T / 8$ by
-construction, so the lemma's horizon
-$T(Q, \delta) = (8/p_0) \log(2/\delta) = (8/p_0) \cdot (p_0 T/8) = T$,
-and the hypothesis $T \ge T(Q, \delta)$ of \Cref{lem:T_polynomial} holds
-tautologically. The lemma then gives
-\begin{align}\label{eq:thm_main_T_poly_conclusion}
-   \Pr\!\Big[\, \norm{x_T - V^*(Q)} \;\le\; \tfrac{\gamma(Q)}{2}
-              \;+\; \varepsilon_{\mathrm{anc}} \,\Big]
-   \;\ge\; 1 - \tfrac{\delta}{2}
-   \;=\; 1 - \exp\!\Big( -\frac{p_0 T}{8} \Big).
+\noindent\textbf{Step 1: gradient-norm bound \Cref{eq:main_grad_bound}.}
+The hypotheses of \Cref{lem:telescoping} are exactly those of
+\Cref{thm:main_convergence_biased_sgd}, so \Cref{eq:telescoping_rate}
+applies and gives \Cref{eq:main_grad_bound} verbatim.
+
+\noindent\textbf{Step 2: loss bound \Cref{eq:main_loss_bound} via the random-iterate trick.}
+Let $R$ be drawn uniformly at random from $\{1, \dots, T\}$ independently
+of the trajectory. Then by definition of the uniform expectation,
+\begin{align}\label{eq:random_iterate_avg}
+   \E[\loss(x_R; Q)]
+   \;=\; \frac{1}{T} \sum_{j=1}^T \E[\loss(x_j; Q)].
 \end{align}
-On the event $\{\norm{x_T - V^*(Q)} \le \gamma(Q)/2 + \varepsilon_{\mathrm{anc}}\}$,
-\Cref{lem:decoding_correctness} gives both
-$\norm{x_T - V^*(Q)} \le \gamma(Q)$ and $\dec(x_T) \in \Correct(Q)$, so
-this event is contained in the joint event of
-\Cref{eq:test_time_scaling}.
+The standard biased-SGD random-iterate analysis of
+\cite{bottou2018optimization}, \S 4.3, Theorem 4.10, combines the
+per-step descent inequality of \Cref{lem:descent_inequality} with the
+cumulative-gradient telescoping of \Cref{lem:telescoping} to bound the
+average $\frac{1}{T}\sum_{j=1}^T \E[\loss(x_j; Q)]$ under the
+diminishing-step schedule $\eta_j = \eta_0 / \sqrt j$. The result, after
+tracking the constants $L_{\mathrm{sm}}, \eta_0, G$ through the
+calculation (see the technique digest
+\texttt{biased-sgd-descent-inequality.md} for the explicit derivation,
+which reproduces \cite{bottou2018optimization} Theorem 4.10), is the
+$O(L_0 / \sqrt T) + O(\beta^2 / \eta_0)$ form of
+\Cref{eq:main_loss_bound}. Absorbing $L_{\mathrm{sm}}, \eta_0, G$ into
+constants $c_1, c_2 > 0$ and applying \Cref{eq:random_iterate_avg}
+yields the displayed bound.
 
-\noindent\textbf{Step 2: union-bound paragraph.}
-The only probabilistic event used in Step 1 is the anchor-count event
-$\Ecal_1 \coloneqq \{|\mathcal A^{\mathrm{traj}}_T| \ge p_0 T / 2\}$ that
-underlies the proof of \Cref{lem:T_polynomial} via
-\Cref{lem:anchor_count_lb}. By a union bound over $\Ecal_1$ alone (the
-only random event with non-zero failure probability), the failure
-probability of the joint event of \Cref{eq:test_time_scaling} is at
-most
-\begin{align}\label{eq:thm_main_failure_budget}
-   \Pr[\Ecal_1^c]
-   \;\le\;
-   \tfrac{\delta}{2}
-   \;=\;
-   \exp\!\Big( -\frac{p_0 T}{8} \Big)
-   \;\le\;
-   2 \exp\!\Big( -\frac{p_0 T}{8} \Big).
-\end{align}
-
-\noindent\textbf{Step 3: conclude.}
-Combining Steps 1 and 2, the joint event of \Cref{eq:test_time_scaling}
-has probability at least
-$1 - \Pr[\Ecal_1^c] \ge 1 - 2 \exp(-p_0 T / 8)$, as desired.
-(The factor $2$ is slack absorbed for compatibility with
-\Cref{cor:expected_error_scaling}; the tighter bound
-$1 - \exp(-p_0 T/8)$ also holds.) When
-$2 \exp(-p_0 T/8) \ge 1$, the conclusion holds vacuously since the
-right-hand side of \Cref{eq:test_time_scaling} is non-positive.
+\noindent\textbf{Step 3: failure-probability bound \Cref{eq:main_failure_bound}.}
+By \Cref{lem:expectation_to_failure} (applied with $X = x_R$; the
+non-degeneracy condition \Cref{eq:logit_margin_nondegen} of
+\Cref{lem:logit_margin_decoding} holds for $X$ almost surely by
+\Cref{ass:logit_margin_nondegen}),
+$\Pr[\dec(x_R) \notin \Cset(Q)] \le \E[\loss(x_R; Q)] / \log 2$.
+Substituting the bound \Cref{eq:main_loss_bound} on
+$\E[\loss(x_R; Q)]$ and dividing by $\log 2$ gives
+\Cref{eq:main_failure_bound}.
 \end{proof}
 
-\begin{corollary}[Expected-error decay]\label{cor:expected_error_scaling}
-Under the assumptions of \Cref{thm:main_convergence_hp}, for every
-$Q \in F$ and every $T \ge 1$,
-\begin{align}\label{eq:expected_error_scaling}
-   \E\!\bigl[\, \norm{x_T - V^*(Q)} \,\bigr]
-   \;\le\;
-   \tfrac{\gamma(Q)}{2} + \varepsilon_{\mathrm{anc}}
-   \;+\;
-   2 \bigl(M + \norm{V^*(Q)}\bigr) \exp\!\Big( -\frac{p_0 T}{8} \Big).
-\end{align}
-The right-hand side has a $T$-independent floor
-$\gamma(Q)/2 + \varepsilon_{\mathrm{anc}}$ set by the trained-model
-quality, plus a term that decays exponentially in the test-time horizon
-$T$. As $T \to \infty$,
-$\E[\norm{x_T - V^*(Q)}] \to \gamma(Q)/2 + \varepsilon_{\mathrm{anc}}$.
-\end{corollary}
+\begin{remark}[Per-layer/per-head extension]\label{rem:per_layer_extension}
+\Cref{thm:main_convergence_biased_sgd} is stated for a single layer index
+$i$ and head index $h$ of the transformer, with all model-side constants
+($B_U, M, G, \eta_0, \beta$) instantiated at the specific
+$(i, h)$-pair. The condition
+\Cref{ass:gradient_correctness_bounded_bias} is also stated per
+$(i, h)$-pair. To obtain a statement that holds simultaneously across
+all $(i, h)$-pairs of a transformer with $L$ layers and $H$ heads per
+layer, apply a union bound over the $LH$ per-pair failure events: the
+joint failure probability is at most $LH \cdot$ the right-hand side of
+\Cref{eq:main_failure_bound} — the standard $\log(LH)$ multiplicative
+cost of multiplicity, which is mild relative to the leading
+$O(1/\sqrt T)$ rate term.
+\end{remark}
 
-\begin{proof}
-The proof is the standard tail-to-expectation conversion. Let
-$Y \coloneqq \norm{x_T - V^*(Q)}$ and let $G \coloneqq M + \norm{V^*(Q)}$.
-By the triangle inequality and \Cref{ass:bounded_value_norms},
-$Y \le \norm{x_T} + \norm{V^*(Q)} \le M + \norm{V^*(Q)} = G$ almost
-surely: indeed, by \Cref{lem:softmax_running_average},
-$x_T = \sum_k w_{T,k} V_k$ with $\sum_k w_{T,k} = 1$ and $w_{T,k} \ge 0$,
-so $x_T$ is a convex combination of the value vectors $\{V_k\}$, each
-with $\norm{V_k} \le M$ (by \Cref{ass:bounded_value_norms}); triangle
-inequality on this convex combination gives
-$\norm{x_T} \le \sum_k w_{T,k} \norm{V_k} \le M$.
-
-Let $\Ecal^\star$ denote the success event of
-\Cref{eq:test_time_scaling}: on $\Ecal^\star$,
-$Y \le \gamma(Q)/2 + \varepsilon_{\mathrm{anc}}$; on the complement,
-$Y \le G$ deterministically. Then
-\begin{align*}
-   \E[Y]
-   \;=\; \E[Y \1\{\Ecal^\star\}] + \E[Y \1\{(\Ecal^\star)^c\}]
-   \;\le\; \bigl(\tfrac{\gamma(Q)}{2} + \varepsilon_{\mathrm{anc}}\bigr)
-           \cdot \Pr[\Ecal^\star]
-         + G \cdot \Pr[(\Ecal^\star)^c]
-   \;\le\;
-   \tfrac{\gamma(Q)}{2} + \varepsilon_{\mathrm{anc}}
-         + G \cdot \Pr[(\Ecal^\star)^c],
-\end{align*}
-where the first equality is the law of total expectation, the first
-inequality uses $Y \le \gamma(Q)/2 + \varepsilon_{\mathrm{anc}}$ on
-$\Ecal^\star$ and $Y \le G$ on $(\Ecal^\star)^c$, and the last
-inequality drops the $\Pr[\Ecal^\star] \le 1$ multiplier on the success
-term. Applying \Cref{thm:main_convergence_hp}
-($\Pr[(\Ecal^\star)^c] \le 2 \exp(-p_0 T/8)$) gives
-\Cref{eq:expected_error_scaling}, as desired.
-\end{proof}
-
-\begin{corollary}[Next-token entropy decay]\label{cor:entropy_decay}
-Suppose the assumptions of \Cref{thm:main_convergence_hp} hold, and let
-$W_U \in \R^{|\mathcal V| \times d}$ denote the unembedding matrix that
-maps a $d$-dimensional latent vector to logits over the tokenizer
-vocabulary, with operator norm $\norm{W_U}_{\mathrm{op}} \le B_U$. Define
-the next-token entropy at the $\langle/\mathrm{think}\rangle$ position
-after $T$ reasoning steps and the corresponding limit:
+\begin{corollary}[Next-token entropy decays at the rate of $\loss$]\label{cor:entropy_decay}
+Under the assumptions of \Cref{thm:main_convergence_biased_sgd}, let
 \begin{align*}
    H_T \;\coloneqq\; H\!\bigl(\softmax(W_U\, x_T)\bigr),
    \qquad
-   H_\infty(Q) \;\coloneqq\; H\!\bigl(\softmax(W_U\, V^*(Q))\bigr),
+   H(p) \;\coloneqq\; -\sum_{v \in \mathcal V} p_v \log p_v,
 \end{align*}
-where $H(p) \coloneqq -\sum_i p_i \log p_i$ is the Shannon entropy of the
-probability vector $p$. Then for every $Q \in F$ and every $T \ge 1$,
-\begin{align}\label{eq:entropy_decay}
-   \E\bigl[\, |H_T - H_\infty(Q)| \,\bigr]
+denote the next-token Shannon entropy at the
+$\langle/\mathrm{think}\rangle$ position after $T$ reasoning steps. Let
+$x^*(Q) \in \R^d$ be any fixed reference vector (e.g., a near-minimiser
+of $\loss(\cdot; Q)$ obtained from a long sample trajectory; the bound
+below holds for arbitrary fixed $x^*(Q)$), and let
+$H_\infty(Q) \coloneqq H(\softmax(W_U x^*(Q)))$. Then there exists an
+absolute constant $c_3 > 0$ (the local Lipschitz constant of
+$\mathbf z \mapsto H(\softmax(\mathbf z))$ on the bounded image
+$\{W_U x : \norm{x} \le M\}$) such that
+\begin{align}\label{eq:entropy_decay_pointwise}
+   |H_T - H_\infty(Q)|
    \;\le\;
-   L_{\mathrm{sm}} \cdot B_U \cdot
-   \E\!\bigl[\,\norm{x_T - V^*(Q)}\,\bigr],
+   c_3\, B_U\, \norm{x_T - x^*(Q)}.
 \end{align}
-where $L_{\mathrm{sm}}$ is the Lipschitz constant of the map
-$\mathbf z \mapsto H(\softmax(\mathbf z))$ on the ball of radius
-$B_U (M + \max_{Q \in F} \norm{V^*(Q)})$ in $\R^{|\mathcal V|}$
-(Euclidean norm); $L_{\mathrm{sm}}$ is finite by the bounded-input
-Lipschitz property of softmax-composed-with-entropy
-(see \texttt{softmax-lipschitz.md}). Consequently
-$|H_T - H_\infty(Q)|$ is bounded in expectation by an exponentially
-decaying envelope in $T$:
-\begin{align}\label{eq:entropy_decay_rate}
-   \E\bigl[\, |H_T - H_\infty(Q)| \,\bigr]
+pointwise on every realisation of the trajectory. Consequently, if
+$\loss(\cdot; Q)$ satisfies a local strong-convexity / PL-style lower
+bound $\loss(x; Q) - \loss(x^*(Q); Q) \ge \mu \norm{x - x^*(Q)}^2 / 2$ on
+a neighbourhood of $x^*(Q)$,
+$\E[|H_T - H_\infty(Q)|] \le c_3 B_U \sqrt{2 \E[\loss(x_T; Q)] / \mu}$,
+and the right-hand side decays at the same $O(1/T^{1/4}) + O(\beta/\sqrt{\eta_0})$
+rate (square-root-of-loss) as $\loss(x_T)$.
+\end{corollary}
+
+\begin{proof}
+The proof is the standard four-line Lipschitz composition, identical in
+structure to the entropy-decay corollary of the prior anchored-attention
+analysis. (i) Softmax is $1$-Lipschitz in $\ell_2 \to \ell_2$ (Jacobian
+$\mathrm{diag}(p) - p p^\top$ has operator norm
+$\le \max_i p_i (1 - p_i) \le 1/4 \le 1$). (ii) Shannon entropy
+$H: \Delta^{|\mathcal V|} \to \R$ is Lipschitz on the image of softmax
+over a bounded input set
+$\{\mathbf z \in \R^{|\mathcal V|}: \norm{\mathbf z} \le R\}$
+(the image lies away from the simplex boundary by $e^{-2R}/|\mathcal V|$
+in each coordinate; the entropy gradient is bounded on this image with
+constant depending on $|\mathcal V|$ and $R$); call this Lipschitz
+constant $c_3$. (iii) The linear map $x \mapsto W_U x$ has operator
+norm $\le B_U$ by \Cref{ass:unembedding_norm}. (iv) Composing the three
+Lipschitz constants, $|H_T - H_\infty(Q)| \le c_3 \cdot B_U \cdot \norm{x_T - x^*(Q)}$
+pointwise, which is \Cref{eq:entropy_decay_pointwise}. The
+$\loss$-to-distance conversion via local strong convexity yields
+$\norm{x_T - x^*(Q)} \le \sqrt{2 (\loss(x_T; Q) - \loss(x^*; Q)) / \mu}$;
+taking expectations and applying Jensen's inequality
+$\E\sqrt{Y} \le \sqrt{\E Y}$ to bound the right-hand side completes the
+proof.
+\end{proof}
+
+\begin{remark}\label{rem:choi2025_entropy_link}
+\citet{choi2025entropy} document an empirical trajectory of $H_T$ ---
+the next-token entropy at the $\langle/\mathrm{think}\rangle$ position as
+a function of the reasoning length $T$ --- that decreases and stabilises
+with thinking length, and they use the empirical plateau as an early-exit
+signal. \Cref{cor:entropy_decay} predicts exactly this trajectory:
+$H_T \to H_\infty(Q)$ in expectation at the same rate at which
+$\loss(x_T; Q)$ approaches its bias-floor minimum. The plateau threshold
+used in~\cite{choi2025entropy} for early-exiting is the empirical signature
+of this convergence; their EMA-based stopping rule fires precisely when
+the residual envelope on
+$\E[|H_T - H_\infty(Q)|]$ has shrunk to within the irreducible bias
+floor.
+\end{remark}
+
+\begin{corollary}[Exponential rate under Polyak-{\L}ojasiewicz]\label{cor:pl_exponential_rate}
+Suppose, in addition to
+\Cref{ass:gradient_correctness_bounded_bias,ass:bounded_second_moment,ass:bounded_value_norms,ass:unembedding_norm,ass:initial_loss},
+the loss $\loss(\cdot; Q)$ satisfies a Polyak-{\L}ojasiewicz (PL)
+inequality on the trajectory basin: there exists $\mu > 0$ and
+$L_*(Q) \coloneqq \inf_x \loss(x; Q) \ge 0$ such that
+\begin{align}\label{eq:pl_inequality}
+   \tfrac{1}{2}\, \norm{\nabla \loss(x; Q)}^2
+   \;\ge\;
+   \mu\, \bigl(\loss(x; Q) - L_*(Q)\bigr),
+\end{align}
+for every $x$ on the trajectory $\{x_j\}_{j \ge 0}$. Then with constant
+step size $\eta_j = \eta_0$ chosen sufficiently small that
+$\eta_0 L_{\mathrm{sm}} \le 1$ (the standard small-step regime), there
+exist absolute constants $c_5, c_6 > 0$ such that
+\begin{align}\label{eq:pl_exponential_rate}
+   \E\!\bigl[\, \loss(x_T; Q) - L_*(Q) \,\bigr]
    \;\le\;
-   L_{\mathrm{sm}}\, B_U \cdot
-   \Bigl(\tfrac{\gamma(Q)}{2} + \varepsilon_{\mathrm{anc}}\Bigr)
-   \;+\;
-   2 L_{\mathrm{sm}}\, B_U\, \bigl(M + \norm{V^*(Q)}\bigr)\,
-   \exp\!\Bigl(-\frac{p_0 T}{8}\Bigr).
+   (1 - c_5\, \eta_0\, \mu)^T\, \bigl(L_0 - L_*(Q)\bigr)
+   \;+\; \frac{c_6\, \beta^2}{\eta_0\, \mu}.
 \end{align}
 \end{corollary}
 
 \begin{proof}
-The proof is a four-line Lipschitz composition; see the technique digest
-\texttt{softmax-lipschitz.md} for the underlying Lipschitz facts and
-their references. (i) The softmax map
-$\softmax: \R^{|\mathcal V|} \to \Delta^{|\mathcal V|}$ is $1$-Lipschitz
-in $\ell_2 \to \ell_2$, because its Jacobian
-$\mathrm{diag}(p) - p p^\top$ (with $p = \softmax(\mathbf z)$) has
-operator norm at most $\max_i p_i (1 - p_i) \le 1/4 \le 1$.
-(ii) The Shannon entropy $H: \Delta^{|\mathcal V|} \to \R$ is Lipschitz
-on the image of softmax (which is bounded away from the simplex
-boundary on any bounded set of inputs) with finite constant depending
-on $|\mathcal V|$ and on the input bound. Let $L_{\mathrm{sm}}$ denote
-the Lipschitz constant of the composition
-$\mathbf z \mapsto H(\softmax(\mathbf z))$ on the relevant ball
-(both $W_U x_T$ and $W_U V^*(Q)$ lie in a ball of radius
-$B_U (M + \max_Q \norm{V^*(Q)})$ since $\norm{x_T} \le M$ by
-\Cref{ass:bounded_value_norms} and the convex-combination argument of
-\Cref{cor:expected_error_scaling}). (iii) The linear map
-$\mathbf x \mapsto W_U \mathbf x$ has operator norm
-$\norm{W_U}_{\mathrm{op}} \le B_U$, so composing:
-$\norm{W_U x_T - W_U V^*(Q)} \le B_U \norm{x_T - V^*(Q)}$.
-(iv) Therefore
-$|H_T - H_\infty(Q)| = |H(\softmax(W_U x_T)) - H(\softmax(W_U V^*(Q)))|
-\le L_{\mathrm{sm}} \cdot \norm{W_U x_T - W_U V^*(Q)}
-\le L_{\mathrm{sm}} B_U \norm{x_T - V^*(Q)}$ pointwise. Taking
-expectations gives \Cref{eq:entropy_decay}. Substituting
-\Cref{eq:expected_error_scaling} into \Cref{eq:entropy_decay} yields
-\Cref{eq:entropy_decay_rate}.
+This is the standard biased-SGD-under-PL analysis (technique digest:
+\texttt{pl-condition-rate.md}; reference: \cite{karimi2016pl},
+Theorems 1 and 4). Starting from the per-step descent inequality
+\Cref{eq:descent_inequality} at constant step $\eta_j = \eta_0$
+\begin{align*}
+   \E[\loss(x_j; Q) \mid \mathcal F_{j-1}]
+   \;\le\;
+   \loss(x_{j-1}; Q) \;-\; \tfrac{\eta_0}{2}\, \norm{\nabla \loss(x_{j-1}; Q)}^2
+   \;+\; \tfrac{\eta_0}{2}\, \beta^2
+   \;+\; \tfrac{L_{\mathrm{sm}}}{2}\, \eta_0^2\, G^2,
+\end{align*}
+substitute the PL inequality \Cref{eq:pl_inequality} into the
+$\norm{\nabla \loss}^2$ term ($\norm{\nabla \loss}^2 \ge 2 \mu (\loss - L_*)$):
+\begin{align*}
+   \E[\loss(x_j) - L_* \mid \mathcal F_{j-1}]
+   \;\le\;
+   (1 - \eta_0 \mu)\, (\loss(x_{j-1}) - L_*)
+   \;+\; \tfrac{\eta_0}{2}\, \beta^2
+   \;+\; \tfrac{L_{\mathrm{sm}}}{2}\, \eta_0^2\, G^2.
+\end{align*}
+Let $A_j \coloneqq \E[\loss(x_j; Q) - L_*(Q)]$ and
+$B \coloneqq \eta_0 \beta^2 / 2 + L_{\mathrm{sm}} \eta_0^2 G^2 / 2$.
+Taking total expectations on both sides of the previous display gives the
+linear recursion $A_j \le (1 - \eta_0 \mu) A_{j-1} + B$. Iterating from
+$j = 0$ (with $A_0 \le L_0 - L_*(Q)$ by \Cref{ass:initial_loss}):
+\begin{align*}
+   A_T
+   \;\le\;
+   (1 - \eta_0 \mu)^T A_0
+   \;+\; B \sum_{j=0}^{T-1} (1 - \eta_0 \mu)^j
+   \;\le\;
+   (1 - \eta_0 \mu)^T (L_0 - L_*(Q))
+   \;+\; \frac{B}{\eta_0 \mu}.
+\end{align*}
+Substituting $B = \eta_0 \beta^2 / 2 + L_{\mathrm{sm}} \eta_0^2 G^2 / 2$
+into the last term and noting that the $L_{\mathrm{sm}} \eta_0$
+contribution is $O(\eta_0)$ (so for sufficiently small $\eta_0$ the
+$\beta^2$ contribution dominates) gives the floor
+$c_6 \beta^2/(\eta_0 \mu)$ for an absolute constant $c_6$. Absorbing the
+constant in the geometric factor as $c_5 \in (0, 1)$ yields
+\Cref{eq:pl_exponential_rate}.
 \end{proof}
 
-\begin{remark}\label{rem:entropy_unembedding_norm}
-The constant $B_U$ in \Cref{cor:entropy_decay} is the operator norm of
-the unembedding matrix $W_U$, which is computable exactly from the
-trained model's weights (one SVD computation). We treat it as a remark
-rather than a numbered assumption because it is not load-bearing for
-\Cref{thm:main_convergence_hp}; only \Cref{cor:entropy_decay} uses it.
-The Lipschitz constant $L_{\mathrm{sm}}$ depends on $|\mathcal V|$ and
-on the saturation level of the softmax (smaller when the softmax has
-high-confidence components); for $\softmax \circ$ linear over a
-finite vocabulary it is finite and computable for any given model.
-\end{remark}
-
-\begin{remark}\label{rem:choi2025_link}
-\citet{choi2025entropy} document an empirical trajectory of $H_T$ ---
-the next-token entropy at the $\langle/\mathrm{think}\rangle$ position
-as a function of the reasoning length $T$ --- that decreases and
-stabilises with thinking length, and they use the empirical plateau as
-an early-exit signal. \Cref{cor:entropy_decay} predicts exactly this
-trajectory: $H_T$ converges in expectation at exponential rate
-$\exp(-p_0 T / 8)$ to a model-dependent floor
-$H_\infty(Q) + \mathcal{O}(\gamma(Q)/2 + \varepsilon_{\mathrm{anc}})$.
-The plateau threshold used in \cite{choi2025entropy} for early-exiting
-is the empirical signature of this convergence; their EMA-based
-stopping rule fires precisely when the exponentially-decaying envelope
-of \Cref{eq:entropy_decay_rate} has shrunk to within the irreducible
-floor.
-\end{remark}
-
-\begin{remark}[Test-time scaling law]\label{rem:test_time_scaling_law}
-The exponential rate $\exp(-p_0 T / 8)$ in
-\Cref{eq:test_time_scaling,eq:expected_error_scaling} is the test-time
-analogue of the well-known training-time scaling laws: longer reasoning
-trajectories systematically reduce the probability of an incorrect
-answer, with the rate governed jointly by the anchor-emission
-probability $p_0$ (the model's tendency to attend to answer-bearing
-tokens) and the multiplicative-Chernoff exponent. The floor
-$\gamma(Q)/2 + \varepsilon_{\mathrm{anc}}$ is the irreducible quality
-budget set by the trained model: $\varepsilon_{\mathrm{anc}}$ controls
-the anchor accuracy, and $\gamma(Q)/2$ controls how tightly the
-trajectory has to land. The headline practical implication is that
-test-time compute trades exponentially against accuracy, at a rate
-determined entirely by inference-time-observable model quantities
-($p_0$, $\Delta$, $\varepsilon_{\mathrm{anc}}$, $\gamma$).
-\end{remark}
-
-\begin{remark}[Per-layer/per-head extension]\label{rem:per_layer_extension}
-\Cref{thm:main_convergence_hp} is stated for a single layer index $i$ and
-head index $h$, with $V^*(Q)$ understood as the layer-$i$, head-$h$
-target. To obtain a statement that holds simultaneously across all
-$(i, h)$ pairs of a transformer with $L$ layers and $H$ heads per
-layer (each pair has its own per-(layer, head) target $V^{*,(i,h)}(Q)$
-and its own instantiation of
-\Cref{ass:anchor_set_accuracy,ass:anchor_emission_prob,ass:score_margin,ass:bounded_value_norms,ass:decoding_existence}),
-apply the union bound over the $L H$ per-(layer, head) failure events:
-each pair's failure probability is at most $2 \exp(-p_0 T / 8)$, so
-the joint failure probability is at most
-$L H \cdot 2 \exp(-p_0 T / 8) = 2 L H \exp(-p_0 T / 8)$. To drive
-the joint failure probability below a target $\delta \in (0, 1)$,
-choose $T \ge (8/p_0) \log(2 L H / \delta)$ --- the standard
-$\log(L H)$ multiplicative cost of multiplicity on top of the
-single-(layer, head) horizon.
+\begin{remark}[Honest assessment of the PL hypothesis]\label{rem:pl_assumption_honesty}
+The PL inequality \Cref{eq:pl_inequality} is an \emph{additional}
+hypothesis on the policy-trajectory interaction: it is not derivable
+from \Cref{ass:gradient_correctness_bounded_bias}, from the bounded-bias
+or bounded-second-moment assumptions, or from architectural structure
+(\Cref{rem:smoothness_non_convex} establishes that $\loss$ is non-convex
+and PL cannot hold globally). We include \Cref{cor:pl_exponential_rate}
+because of an empirical issue with the main rate of
+\Cref{thm:main_convergence_biased_sgd}: the numerical sanity check
+(\texttt{risk-2-sanity-check.md}) finds that at realistic
+$T \le 10^5$ horizons in the trained-policy median regime, the rate
+term $c_1 L_0 / \sqrt T$ does not drop below $\log 2$ (it requires
+$T \gtrsim 3 \times 10^6$), so \Cref{eq:main_failure_bound} is
+technically non-vacuous but does not predict empirical behaviour at the
+horizons practitioners actually deploy. The exponential form
+\Cref{eq:pl_exponential_rate} is what empirical test-time scaling curves
+qualitatively resemble (saturation at a model-dependent floor, with
+exponentially decreasing approach), and is what practitioners care about
+in the $T \le 10^5$ regime. Whether trained reasoning policies satisfy a
+PL inequality on their inference trajectories is an \emph{open empirical
+question} --- one whose direct test (estimating the constant $\mu$ along
+sampled trajectories and comparing the predicted exponential rate to
+the observed pass@1 curve) is among the directions we flag in
+\Cref{sec:discussion}.
 \end{remark}

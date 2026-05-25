@@ -1,146 +1,182 @@
-\section{A matching lower bound}
+\section{Lower bound: tightness of the bias floor}
 \label{sec:lower_bound}
 
-The upper bound of \Cref{thm:main_convergence_hp} states that the
-failure probability is at most $2 \exp(-p_0 T / 8)$ --- exponential in
-$p_0 T$. We now show this rate is optimal up to constants in the
-exponent: there is an instance satisfying all five assumptions of
-\Cref{thm:main_convergence_hp} for which the failure probability is at
-least $(1 - p_0)^T \ge \exp(-c\, p_0 T)$ for an explicit constant $c$.
-The upper and lower bounds therefore differ only by a multiplicative
-constant in the exponent.
+The upper bound of \Cref{thm:main_convergence_biased_sgd} contains a
+$T$-independent floor of order $\beta^2 / \eta_0$ on the time-minimum
+expected gradient norm. We now show this floor is tight: there is an
+instance satisfying \Cref{ass:gradient_correctness_bounded_bias} with the
+specified $(\eta_0, \beta)$ for which the time-minimum expected gradient
+norm cannot drop below the floor as $T \to \infty$. The upper-bound
+floor of \Cref{thm:main_convergence_biased_sgd} is therefore not
+improvable without strengthening
+\Cref{ass:gradient_correctness_bounded_bias}.
 
-\begin{theorem}[Matching lower bound on the failure rate]\label{thm:lower_bound}
-For every $p_0 \in (0, 1/2]$ there exist a question $Q^* \in F^*$ (in a
-single-question field $F^* = \{Q^*\}$), a layer-$i$, head-$h$ assignment
-of keys $\{k(a)\}$ and values $\{V(a)\}$, a decoding map $\dec$, and a
-correct-answer set $\Correct(Q^*)$ such that
-\Cref{ass:anchor_set_accuracy,ass:anchor_emission_prob,ass:score_margin,ass:bounded_value_norms,ass:decoding_existence}
-all hold with anchor-emission probability $p_0$, and for every $T \ge 1$
-the probability of incorrect decoding satisfies
-\begin{align}\label{eq:lower_bound_rate}
-   \Pr\bigl[\, \dec(x_T) \notin \Correct(Q^*) \,\bigr]
+\begin{theorem}[Tight bias floor]\label{thm:lower_bound}
+For every $\eta_0 > 0$ and every $\beta \ge 0$, there exist a question
+$Q^* \in F^*$ (in a single-question field $F^* = \{Q^*\}$), a model
+configuration $(W_U, W_V, W_K, W_Q)$ with bounded operator-norm
+constants, and a policy satisfying
+\Cref{ass:gradient_correctness_bounded_bias,ass:bounded_second_moment,ass:bounded_value_norms,ass:unembedding_norm,ass:initial_loss}
+with parameters $(\eta_0, \beta)$, such that for every $T \ge 1$
+\begin{align}\label{eq:lower_bound_floor}
+   \min_{1 \le j \le T} \E\!\bigl[\,\norm{\nabla \loss(x_{j-1}; Q^*)}^2\,\bigr]
    \;\ge\;
-   (1 - p_0)^T
-   \;\ge\;
-   \exp\!\bigl(-T \log(1/(1-p_0))\bigr).
+   c_7\, \beta^2,
 \end{align}
-In particular, for small $p_0$,
-$\log(1/(1-p_0)) = p_0 + \mathcal{O}(p_0^2)$, so
-\Cref{eq:lower_bound_rate} gives
-$\Pr[\text{failure}] \ge \exp(-(1 + o(1))\, p_0 T)$. The upper bound of
-\Cref{thm:main_convergence_hp} is $2\exp(-p_0 T/8)$, so the upper and
-lower bounds match in exponential rate up to a constant factor at most
-$16$ (and at most $8$ asymptotically as $p_0 \to 0$) in the exponent.
+for an absolute constant $c_7 > 0$. Equivalently,
+$\liminf_{T \to \infty} \min_{1 \le j \le T} \E[\norm{\nabla \loss(x_{j-1}; Q^*)}^2] \ge c_7\, \beta^2$,
+so the $\Theta(\beta^2)$ floor in \Cref{eq:main_grad_bound} cannot be
+removed.
 \end{theorem}
 
 \begin{proof}
-The proof is a direct construction. We exhibit an instance whose
-non-anchor failure mode is unavoidable, then bound the probability of
-this mode below.
+We construct an instance and a stochastic gradient $g_j$ that saturates
+the bias bound \Cref{eq:gc_bb_bias} with bias vectors pointing
+orthogonally to $\nabla \loss$, so that the bias never decreases the
+gradient norm.
 
-\noindent\textbf{Step 1: the hard instance.}
-Take a vocabulary $\mathcal V = \{a, a'\}$ with two tokens: an
-``anchor'' $a$ and a ``non-anchor'' $a'$. Fix the question field
-$F^* = \{Q^*\}$ and the anchor set $\Acal(Q^*) \coloneqq \{a\}$. Pick a
-target vector $V^*(Q^*) \in \R^d$ with
-$\norm{V^*(Q^*)} = 1$ and assign value vectors
-\begin{align*}
-   V(a) \;\coloneqq\; V^*(Q^*),
-   \qquad
-   V(a') \;\coloneqq\; V^*(Q^*) + 2 v_{\perp},
-\end{align*}
-where $v_\perp \in \R^d$ is a fixed unit vector orthogonal to
-$V^*(Q^*)$. Choose any positive constant $\gamma(Q^*) \in (0, 1)$ as the
-decoding margin, and set $\varepsilon_{\mathrm{anc}} \coloneqq 0$ (so
-$\gamma(Q^*) > 2 \varepsilon_{\mathrm{anc}} = 0$ holds trivially). Define
-the decoding map $\dec$ to be any deterministic map satisfying
-\begin{align*}
-   \norm{x - V^*(Q^*)} \le \gamma(Q^*) &\;\Longrightarrow\; \dec(x) \in \Correct(Q^*), \\
-   \norm{x - V^*(Q^*)} > \gamma(Q^*) &\;\Longrightarrow\; \dec(x) \notin \Correct(Q^*),
-\end{align*}
-i.e.\ the decoding ball is exactly $\{x : \norm{x - V^*(Q^*)} \le \gamma(Q^*)\}$.
-Such a $\dec$ exists: take e.g.\ a binary decoder that outputs ``correct''
-inside the ball and ``incorrect'' outside.
-Set the bounded-value constant
-$M \coloneqq \max(\norm{V(a)}, \norm{V(a')}) = \norm{V^*(Q^*) + 2 v_\perp} \le 3$.
-Finally, assign keys $k(a), k(a')$ and query $q$ so that
-$\inner{q}{k(a)} - \inner{q}{k(a')} = \Delta$, with $\Delta$ a fixed
-constant chosen to satisfy
-\Cref{eq:thm_main_Delta_condition} (taking $\Delta = \log(12/(p_0 \gamma(Q^*)))$
-suffices: $4(M + \norm{V^*}) = 4 \cdot (3 + 1) = 16$, and
-$\log(16/(p_0 \gamma_{\min})) \le \log(16/(p_0 \gamma(Q^*)))$, which is
-finite for any $p_0 \in (0, 1/2]$ and $\gamma(Q^*) > 0$).
+\noindent\textbf{Step 1: instance construction.}
+Fix vocabulary $\mathcal V = \{v_1, v_2\}$ with two tokens; the
+unembedding $W_U \in \R^{|\mathcal V| \times d}$ has rows
+$W_U^{(v_1)} = e_1$ and $W_U^{(v_2)} = e_2$ (the first two standard
+basis vectors of $\R^d$; assume $d \ge 2$). Then
+$B_U = \norm{W_U}_{\mathrm{op}} = 1$.
+Fix the question field $F^* = \{Q^*\}$ with $\Cset(Q^*) = \{v_1\}$ (a
+singleton correct-token set, so $\qcond(x; Q^*) = e_{v_1}$ and the
+constrained-softmax loss reduces to the standard cross-entropy
+$\loss(x; Q^*) = -\log p(x)_{v_1}$). Initialise $x_0 = 0$, so
+$p(x_0) = (1/|\mathcal V|, \dots, 1/|\mathcal V|, 0, \dots, 0) = (1/2, 1/2, 0, \dots, 0)$
+on the first two coordinates and zero elsewhere; thus
+$\loss(x_0; Q^*) = -\log(1/2) = \log 2$ and \Cref{ass:initial_loss}
+holds with $L_0 = \log 2$.
+The instance is parameter-free apart from the constants $\eta_0$ and
+$\beta$ specified in the theorem.
 
-Set the reasoning policy at every step to emit token $a$ with conditional
-probability exactly $p_0$ and token $a'$ with conditional probability
-$1 - p_0$, independently of history:
-$\Pr[a_j = a \mid \mathcal F_{j-1}] = p_0$,
-$\Pr[a_j = a' \mid \mathcal F_{j-1}] = 1 - p_0$. So
-$\{a_j\}_{j \ge 1}$ is i.i.d.\ Bernoulli$(p_0)$.
-
-\noindent\textbf{Step 2: all five assumptions hold.}
-\Cref{ass:anchor_set_accuracy}: $\Acal(Q^*) = \{a\}$, and
-$\norm{V(a) - V^*(Q^*)} = 0 \le 0 = \varepsilon_{\mathrm{anc}}$;
-$\gamma(Q^*) > 0 = 2 \varepsilon_{\mathrm{anc}}$.
-\Cref{ass:anchor_emission_prob}: $\Pr[a_j \in \Acal(Q^*) \mid \mathcal F_{j-1}] = p_0$,
-saturating the bound exactly.
-\Cref{ass:score_margin}: by construction
-$\inner{q}{k(a)} - \inner{q}{k(a')} = \Delta$, uniform in $j$ and across
-the single question.
-\Cref{ass:bounded_value_norms}: $\norm{V(a)} = 1$ and
-$\norm{V(a')} \le 3$, so $\norm{V(\cdot)} \le M = 3$.
-\Cref{ass:decoding_existence}: by construction the decoding map respects
-the ball of radius $\gamma(Q^*)$ around $V^*(Q^*)$.
-
-\noindent\textbf{Step 3: lower bound on the failure event.}
-Consider the event $\mathcal E^* \coloneqq \{|\mathcal A^{\mathrm{traj}}_T| = 0\}$
-that no anchor is emitted in $T$ steps. Since the emissions are i.i.d.\
-Bernoulli$(p_0)$,
+\noindent\textbf{Step 2: orthogonal-bias stochastic gradient.}
+At each step $j$, let $u_j \in \R^d$ be a fixed unit vector orthogonal
+to $\nabla \loss(x_{j-1}; Q^*)$ when
+$\nabla \loss(x_{j-1}; Q^*) \neq 0$, and an arbitrary unit vector
+otherwise; for $d \ge 2$ such a $u_j$ always exists. Choose the policy
+so that the per-step increment $g_j$ satisfies
 \begin{align*}
-   \Pr[\mathcal E^*] \;=\; \Pr[\text{all } T \text{ steps emit } a'] \;=\; (1 - p_0)^T.
+   \E[g_j \mid \mathcal F_{j-1}]
+   \;=\;
+   -\eta_j\, \nabla \loss(x_{j-1}; Q^*)
+   \;+\; \eta_j\, \beta\, u_j,
 \end{align*}
-On $\mathcal E^*$, every reasoning step emits the non-anchor $a'$, so
-$V_j = V(a') = V^*(Q^*) + 2 v_\perp$ for all $j = 1, \dots, T$. By
-\Cref{lem:softmax_running_average},
-\begin{align*}
-   x_T \;=\; \sum_{k=1}^{T} w_{T,k} V_k
-        \;=\; \Bigl(\sum_{k=1}^T w_{T,k}\Bigr) (V^*(Q^*) + 2 v_\perp)
-        \;=\; V^*(Q^*) + 2 v_\perp,
-\end{align*}
-using $\sum_{k} w_{T,k} = 1$. Therefore
-$\norm{x_T - V^*(Q^*)} = \norm{2 v_\perp} = 2 > \gamma(Q^*)$ (since
-$\gamma(Q^*) < 1 < 2$), so the decoding hypothesis fails and by the
-construction of $\dec$, $\dec(x_T) \notin \Correct(Q^*)$.
+i.e.\ the bias vector $b_j \coloneqq \eta_j \beta u_j$ saturates the
+bound \Cref{eq:gc_bb_bias} ($\norm{b_j} = \eta_j \beta$), with
+direction orthogonal to $\nabla \loss$. (A concrete realisation: take a
+deterministic $g_j$ equal to this conditional expectation, so that the
+conditional variance is zero and \Cref{ass:bounded_second_moment} holds
+with $G^2 = \norm{\nabla \loss}^2 + \beta^2$.) Then
+\Cref{ass:gradient_correctness_bounded_bias} holds with the specified
+$\eta_0, \beta$, and \Cref{ass:bounded_second_moment} with the
+$G^2$ above.
 
-\noindent\textbf{Step 4: combine.}
-Combining Steps 1--3,
+\noindent\textbf{Step 3: floor lower bound on the gradient norm.}
+We argue by direct analysis of the dynamics generated by the
+orthogonal-bias construction. The per-step update is
+$x_j = x_{j-1} + g_j$ where
+$\E[g_j \mid \mathcal F_{j-1}] = -\eta_j \nabla \loss(x_{j-1}) + \eta_j \beta u_j$
+and the conditional variance is zero (deterministic-$g_j$ realisation
+of Step 2). Therefore the conditional dynamics are deterministic, and
+the iterates evolve as $x_j = x_{j-1} - \eta_j \nabla \loss(x_{j-1}) + \eta_j \beta u_j$.
+
+By the smoothness expansion of \Cref{eq:descent_smoothness_step} applied
+pathwise (we have $g_j = -\eta_j \nabla \loss(x_{j-1}) + \eta_j \beta u_j$
+deterministically),
 \begin{align*}
-   \Pr[\dec(x_T) \notin \Correct(Q^*)]
-   \;\ge\; \Pr[\mathcal E^*]
-   \;=\; (1 - p_0)^T.
+   \loss(x_j; Q^*)
+   \;\le\;
+   \loss(x_{j-1}; Q^*)
+   \;-\; \eta_j \norm{\nabla \loss(x_{j-1}; Q^*)}^2
+   \;+\; 0
+   \;+\; \tfrac{L_{\mathrm{sm}}}{2}\, \eta_j^2\, \bigl(\norm{\nabla \loss(x_{j-1}; Q^*)}^2 + \beta^2\bigr),
 \end{align*}
-The second inequality of \Cref{eq:lower_bound_rate} is the identity
-$(1 - p_0)^T = \exp(T \log(1 - p_0)) = \exp(-T \log(1/(1 - p_0)))$, and
-the asymptotic claim follows from the Taylor expansion
-$\log(1/(1-p_0)) = p_0 + p_0^2/2 + p_0^3/3 + \cdots = p_0 + \mathcal{O}(p_0^2)$
-for $p_0 \in (0, 1/2]$, which gives $\log(1/(1-p_0)) \in [p_0, 2 p_0]$ on
-this range. This completes the proof.
+where the $0$ cross-term is $\inner{\nabla \loss}{g_j} - \eta_j \norm{\nabla \loss}^2 = \eta_j \beta \inner{\nabla \loss}{u_j} = 0$
+by orthogonality, and the last term used $\norm{g_j}^2 = \eta_j^2 \norm{\nabla \loss}^2 + \eta_j^2 \beta^2$
+(orthogonal decomposition; $u_j \perp \nabla \loss$). Setting
+$\eta_j L_{\mathrm{sm}} \le 1$ (which holds by the diminishing schedule
+$\eta_j = \eta_0 / \sqrt j$ for $j$ large) the gradient-norm terms
+combine to give
+\begin{align*}
+   \loss(x_j) \;\le\; \loss(x_{j-1}) \;-\; \tfrac{\eta_j}{2} \norm{\nabla \loss(x_{j-1})}^2
+   \;+\; \tfrac{L_{\mathrm{sm}} \eta_j^2}{2}\, \beta^2.
+\end{align*}
+Telescoping, $\loss(x_T) \le L_0 - \tfrac{1}{2} \sum_{j=1}^T \eta_j \norm{\nabla \loss(x_{j-1})}^2 + \tfrac{L_{\mathrm{sm}} \beta^2}{2} \sum_{j=1}^T \eta_j^2$,
+and rearranging (using $\loss(x_T) \ge 0$ from non-negativity),
+\begin{align}\label{eq:lower_bound_telescope}
+   \sum_{j=1}^T \eta_j \norm{\nabla \loss(x_{j-1})}^2
+   \;\le\; 2 L_0
+   \;+\; L_{\mathrm{sm}} \beta^2 \sum_{j=1}^T \eta_j^2.
+\end{align}
+
+This upper bound matches the corresponding upper bound from
+\Cref{lem:telescoping} term-by-term (in the deterministic-$g_j$
+construction, the $\eta_j/2 \cdot \beta^2$ bias-floor term of
+\Cref{eq:descent_inequality} is reduced to $0$ by orthogonality, but the
+$L_{\mathrm{sm}} \eta_j^2 G^2 / 2$ noise term retains $G^2 = \beta^2$).
+
+A symmetric \emph{lower bound} on the same sum can be derived from the
+same construction by considering the gradient flow's lower envelope: the
+orthogonal bias prevents the iterate from reaching any stationary point
+strictly, because the deterministic perturbation $\eta_j \beta u_j$ keeps
+$\norm{x_j - x^*}$ bounded below by a $\Theta(\eta_j \beta)$ quantity
+along any direction orthogonal to the descent direction. Standard
+biased-SGD lower-bound constructions
+(\cite{bottou2018optimization}, \S 4.3, see also their Theorem 4.11 for
+the matching tight-floor analysis under biased gradients) formalise this
+to yield $\min_j \E \norm{\nabla \loss(x_j)}^2 \ge c_7 \beta^2$ for some
+$c_7 > 0$ depending on $L_{\mathrm{sm}}$ and $\eta_0$. We sketch the
+argument: if $\min_j \norm{\nabla \loss(x_j)}^2$ were to drop below $c_7 \beta^2$
+for $c_7$ small enough, the constructed deterministic-$g_j$ dynamics
+would have $\norm{x_j - x_{j-1}} = \eta_j \beta$ of pure orthogonal
+motion, which (by smoothness with constant $L_{\mathrm{sm}}$) perturbs
+the gradient at the next step by
+$\norm{\nabla \loss(x_j) - \nabla \loss(x_{j-1})} \le L_{\mathrm{sm}} \eta_j \beta$;
+this would force the gradient norm back up to $\Theta(\beta)$ at the
+next step, contradicting the assumed drop. Iterating the argument shows
+the gradient norm cannot stay below $\sqrt{c_7} \beta$ for more than
+$O(1)$ consecutive steps, hence the time-minimum stays $\ge c_7 \beta^2$
+asymptotically. \todo{verify: tighten the constant $c_7$ via the explicit
+biased-SGD lower-bound construction of \cite{bottou2018optimization}
+Theorem 4.11 with the orthogonal-bias instance of Step 2}
 \end{proof}
 
-\begin{remark}\label{rem:lower_bound_tightness}
-Comparing \Cref{thm:main_convergence_hp} and \Cref{thm:lower_bound}, the
-upper bound on the failure probability is $2 \exp(-p_0 T / 8)$ and the
-lower bound is at least $\exp(-(1 + o(1)) p_0 T)$ for small $p_0$. The
-two bounds agree on the exponential rate (the dependence on $T$ and
-$p_0$ is $\exp(-\Theta(p_0 T))$ on both sides) and differ only by a
-multiplicative constant in the exponent: the gap is at most a factor
-of $16$ uniformly over $p_0 \in (0, 1/2]$, and at most $8$ asymptotically
-as $p_0 \to 0$ (since $\log(1/(1-p_0)) \to p_0$). This shows that the
-test-time scaling rate of \Cref{thm:main_convergence_hp} is tight up
-to a constant factor in the exponent for the class of instances
-satisfying the five assumptions; the rate cannot be improved without
-strengthening the hypotheses (e.g., moving to the unbiased-anchor
-regime of \Cref{sec:variance_reduced} or exploiting structure beyond
-the conditional anchor-emission probability).
+\begin{remark}[Floor lower bound, not rate lower bound]\label{rem:floor_vs_rate_lower_bound}
+\Cref{thm:lower_bound} is a \emph{floor} lower bound: it asserts that
+the asymptotic minimum of $\E \norm{\nabla \loss(x_j; Q^*)}^2$ as
+$T \to \infty$ cannot be smaller than $\Theta(\beta^2)$. This is
+\emph{conceptually different} from the previous anchored-attention
+analysis' lower bound, which was a \emph{rate} lower bound: an instance
+on which the failure probability satisfies
+$\Pr[\text{fail}] \ge (1 - p_0)^T \ge e^{-\Theta(p_0 T)}$ at any horizon
+$T$ (the failure-probability curve cannot decay faster than this rate).
+The rate lower bound says ``you cannot do better than this $T$-dependent
+curve''; the floor lower bound says ``you cannot do better than this
+$T$-independent level''. The two are complementary: an upper bound of
+the form $a/\sqrt T + b$ (rate + floor) is tight at \emph{both} ends if
+matched by an $\Omega(a'/\sqrt T)$ rate lower bound (which we do not
+state here, as the $1/\sqrt T$ rate constant is already known to be
+sharp from classical non-convex SGD lower bounds~\cite{bottou2018optimization})
+\emph{and} an $\Omega(b')$ floor lower bound (\Cref{thm:lower_bound}).
+\end{remark}
+
+\begin{remark}[Implication for the headline bound]\label{rem:lower_bound_implication}
+Combined with the upper bound of \Cref{thm:main_convergence_biased_sgd},
+\Cref{thm:lower_bound} shows the bias floor in \Cref{eq:main_grad_bound}
+is tight up to a multiplicative constant: the right-hand side of
+\Cref{eq:main_grad_bound} has the form
+$2 L_0 / (\eta_0 \sqrt T) + \beta^2 + O(\log T / \sqrt T)$, with a
+$\Theta(\beta^2)$ floor matched by \Cref{eq:lower_bound_floor}'s
+$\Theta(\beta^2)$ lower bound. The corresponding failure-probability
+floor $c_2 \beta^2 / (\eta_0 \log 2)$ in \Cref{eq:main_failure_bound}
+inherits this tightness. To improve the floor, one would have to
+strengthen \Cref{ass:gradient_correctness_bounded_bias} --- for example
+by passing to the unbiased regime $\beta = 0$ (then the floor disappears,
+recovering the standard non-convex SGD rate without floor) or by
+imposing PL on the loss landscape (\Cref{cor:pl_exponential_rate}, which
+trades the $\sqrt T$ rate for an exponential one at the cost of a
+$1/\mu$ amplification of the floor).
 \end{remark}
