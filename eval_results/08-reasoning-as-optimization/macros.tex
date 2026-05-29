@@ -16,24 +16,74 @@
 \DeclareMathOperator{\dec}{decode}
 \DeclareMathOperator{\Correct}{Correct}
 
-% --- Constrained-softmax loss notation (paper rewrite, May 2026) ---
-% \loss is the constrained-softmax loss L(x;Q) = -log pi(x;Q).
-% \cmass is the correct-token mass pi(x;Q) = sum_{v in C(Q)} softmax(W_U x)_v.
-% \qcond is the C-conditional posterior q_C.
-% \Cset is the correct-token set C(Q) = Correct(Q).
+% --- Cross-entropy loss notation (clean-slate rewrite, 2026) ---
+% \loss is the cross-entropy loss
+%   L(x;Q) = log sum_{a in V} e^{<W_U^a, x>} - <W_U^{a*}, x>,
+% convex in x; the LayerNorm sphere M_d is the constraint.
+% \cmass is the correct-answer softmax mass pi(x;Q) = softmax(W_U x)_{a*}.
+% This rewrite is SINGLE-TOKEN (n = 1, answer set A = {a*}): W_U is the
+% LITERAL unembedding (linear head) in R^{|V| x d}, and
+% argmax_a <W_U^a, x> IS greedy decoding, so the linear-surrogate decoder
+% and the true decoder coincide. There is NO sequence-level V^n machinery.
+% \Vocab is a macro for the vocabulary set (token alphabet) \mathcal V.
 \newcommand{\loss}{L}
 \newcommand{\cmass}{\pi}
-\newcommand{\qcond}{q_C}
-\newcommand{\Cset}{C}
+\newcommand{\Vocab}{\mathcal{V}}
+\newcommand{\corr}{a^{\star}}              % the single correct token a*
 
 % --- Norm and inner product ---
 \newcommand{\norm}[1]{\left\| #1 \right\|}
 \newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
+\newcommand{\abs}[1]{\left| #1 \right|}
 
 % --- Calligraphic family shorthand ---
 \newcommand{\Acal}{\mathcal{A}}
 \newcommand{\Fcal}{\mathcal{F}}
 \newcommand{\Ecal}{\mathcal{E}}
+\newcommand{\Gcal}{\mathcal{G}}
+
+% --- Clean-slate framework specifics (noisy Riemannian SGD) ---
+% \Dec is the single greedy/argmax decoder D_true = D_lin (n = 1, so
+% they coincide). \snet is REPURPOSED as the net descent rate
+% delta := 2p - 1, the SINGLE behavioral knob from A1; it is no longer
+% a "net effective-token rate". \critrate is the critical rate delta_c
+% derived in R1.
+\newcommand{\Dec}{D_{\mathrm{true}}}        % the true decoder (= argmax = greedy)
+\newcommand{\snet}{\delta}                   % net alignment rate delta := 2p - 1 (A1)
+\newcommand{\critrate}{\delta_{\mathrm{c}}}  % critical rate in R1
+% Sign indicator zeta_k = sign(s_k), s_k = <V_k, \hat W_U^{a*}> the per-step
+% projection onto the UNIT correct-token row (Stage-2 framing correction:
+% stated on the CORRECT direction, NOT on loss descent -grad_R L).
+\newcommand{\descent}{\zeta}
+\newcommand{\rowhat}{\widehat{W}_{U}^{\corr}} % unit correct row W_U^{a*}/||W_U^{a*}||
+\newcommand{\proj}{s}                         % per-step correct-direction projection s_k
+% Cross-entropy / margin objects.
+\newcommand{\beerr}{\epsilon_{\mathrm{BE}}}  % Berry-Esseen rate scale (R2)
+\newcommand{\Lstar}{L^{\!\star}}             % decode threshold (= log 2 for |A|=1)
+\newcommand{\Margin}{M}                      % logit margin M(x;Q)
+\newcommand{\incoh}{\mu}                     % row-incoherence of W_U over the |V| token rows
+% \snorder STAYS the angular margin (scalar order parameter)
+%   m_t = <W_U^{a*}, x_t> / (||W_U^{a*}|| ||x_t||) in [-1, 1].
+\newcommand{\snorder}{m}
+
+% --- Sphere geometry / Riemannian SGD (NEW; Boumal 2023) ---
+% \Sphere is the LayerNorm sphere M_d = { x in R^d : ||x||_2 = sqrt(d) }.
+% \Retr is the normalization retraction R_x(s) = sqrt(d) (x+s)/||x+s||
+% (Boumal Def. 3.47, Example 3.49 eq. 3.32). \rgrad is the Riemannian
+% gradient grad_R L = (I - x x^T / ||x||^2) nabla L (Boumal Sec. 2.4).
+% \Tproj is the tangent-space projector I - x x^T / ||x||^2.
+\newcommand{\Sphere}{\mathcal{M}_d}
+\newcommand{\Retr}{\mathcal{R}}
+\newcommand{\rgrad}{\operatorname{grad}_{\!R}}
+\newcommand{\Tproj}[1]{P_{#1}}              % tangent projector at a point
+% \driftc is the per-step signal-MAGNITUDE constant c in (0,1], part of the
+% behavioral assumption A1 (Stage-2 framing correction: it is ASSUMED on the
+% correct-token direction via the conditional-mean projection floor
+% E[|s_k| | F_{k-1}] >= c rho_0, NOT derived from convexity). Rendered as c_*
+% (NOT the floating universal c) to avoid clashing with the universal-constant
+% convention. Convexity motivates c>0 and p>1/2 (see rem:descent_naming) but
+% does not derive c.
+\newcommand{\driftc}{c_{\star}}
 
 % --- TODO marker (renders as a visible flag in the PDF) ---
 \newcommand{\todo}[1]{\textbf{\color{red}[TODO: #1]}}

@@ -1,0 +1,150 @@
+\section{Signal floor for the correct-token logit}
+\label{sec:signal_floor}
+
+This is the complement of \Cref{lem:incorrect_max}: a high-probability
+\emph{lower} bound on the correct-token logit. It combines the two knobs of
+\Cref{ass:descent} --- the sign rate $\snet$ and the magnitude $\driftc$ ---
+through the net-drift identity \Cref{eq:net_drift}, established on the
+un-retracted iterate $\tilde x_T$ where $\sum_k w_{T,k}=1$ holds. The noise
+scale is the product of the $1/\sqrt d$ projection variance
+(\Cref{lem:orthogonality}, \Cref{eq:noise_isotropy}) and the $1/\sqrt T$
+quadratic variation (\Cref{lem:quad_variation}). No transitivity through the
+loss-descent direction is used.
+
+\begin{lemma}[Signal floor]
+\label{lem:signal_floor}
+Suppose \Cref{ass:descent,ass:bounded_architecture} hold, with net
+alignment rate $\snet=2p-1\ge0$ and magnitude constant $\driftc\in(0,1]$.
+Fix a horizon $T\ge1$ and $\delta_2\in(0,1)$. Then on an event of
+probability at least $1-\delta_2$ over the per-step noise, the
+correct-direction projection of the un-retracted iterate obeys
+\begin{align}\label{eq:signal_floor_unit}
+   \inner{\rowhat}{\tilde x_T}
+   \;=\; \sum_{k=0}^{T} w_{T,k}\,\proj_k
+   \;\ge\;
+   \snet\,\driftc\,\rho_0
+   \;-\;
+   2\,M\,\sqrt{\frac{2\,S_T\,\log(2/\delta_2)}{d}},
+\end{align}
+and consequently the correct-token logit and angular margin obey
+\begin{align}\label{eq:signal_floor_logit}
+   \inner{W_U^{\corr}}{\tilde x_T} \;\ge\; \rho_0\Bigl(\snet\driftc\rho_0
+      - 2M\sqrt{\tfrac{2S_T\log(2/\delta_2)}{d}}\Bigr),
+   \qquad
+   \snorder_T \;\ge\; \frac{\snet\driftc\rho_0 - 2M\sqrt{2S_T\log(2/\delta_2)/d}}{M},
+\end{align}
+where $S_T\le e^{2S}/T$ (\Cref{lem:quad_variation}) and the angular bound
+uses $\norm{\tilde x_T}_2\le M$. The same bounds hold for the on-sphere
+iterate $x_T$ up to the additive retraction error of
+\Cref{lem:retraction_stability} ($O(1/d)$ on the logit, $O(1/d^{1.5})$ on
+the angular margin); in the margin comparison of \Cref{thm:R1} the common
+rescaling factor $\sqrt d/\norm{\tilde x_T}$ cancels and even that error is
+absent.
+\end{lemma}
+
+\begin{proof}
+The proof splits the correct-direction projection into a predictable drift
+(lower-bounded by the net-drift identity) and a centred martingale
+fluctuation (\Cref{lem:azuma}); both live on $\tilde x_T$, where
+$\sum_k w_{T,k}=1$.
+
+\smallskip\noindent\textbf{Step 1 (drift/fluctuation split).} By
+\Cref{lem:running_average}, $\tilde x_T=\sum_{k}w_{T,k}V_k$, so projecting
+onto the unit correct row $\rowhat$ and writing
+$\proj_k=\inner{V_k}{\rowhat}$ (\Cref{def:descent_indicator}),
+\begin{align*}
+   \inner{\rowhat}{\tilde x_T}
+   \;=\; \sum_{k} w_{T,k}\,\proj_k
+   \;=\; \underbrace{\sum_{k} w_{T,k}\,\E[\proj_k\mid\Fcal_{k-1}]}_{\text{drift}}
+       \;+\; \underbrace{\sum_{k} w_{T,k}\bigl(\proj_k-\E[\proj_k\mid\Fcal_{k-1}]\bigr)}_{\text{fluctuation}}.
+\end{align*}
+
+\smallskip\noindent\textbf{Step 2 (drift floor via the net-drift identity).}
+By the net-drift identity \Cref{eq:net_drift} of \Cref{rem:descent_globality}
+--- the conditional independence of sign and magnitude
+(\Cref{ass:descent}(c)) giving
+$\E[\proj_k\mid\Fcal_{k-1}]=\snet\,\E[\abs{\proj_k}\mid\Fcal_{k-1}]$ ---
+together with the magnitude floor $\E[\abs{\proj_k}\mid\Fcal_{k-1}]\ge\driftc\rho_0$
+(\Cref{ass:descent}(b)) and $\snet\ge0$,
+\begin{align*}
+   \sum_{k} w_{T,k}\,\E[\proj_k\mid\Fcal_{k-1}]
+   \;=\; \snet\sum_k w_{T,k}\,\E[\abs{\proj_k}\mid\Fcal_{k-1}]
+   \;\ge\; \snet\,\driftc\,\rho_0\sum_k w_{T,k}
+   \;=\; \snet\,\driftc\,\rho_0,
+\end{align*}
+using $\sum_k w_{T,k}=1$ (\Cref{lem:running_average}). This is the drift
+floor, obtained \emph{directly} on the correct direction --- the magnitude
+$\driftc$ is the assumed per-step constant, not a quantity derived from the
+gradient (\Cref{rem:descent_naming}).
+
+\smallskip\noindent\textbf{Step 3 (fluctuation bound).} The summands
+$M_k\coloneqq w_{T,k}(\proj_k-\E[\proj_k\mid\Fcal_{k-1}])$ form a
+martingale-difference sequence. Writing $\proj_k=\inner{V_k}{\rowhat}$ and
+$\xi_k=V_k-\E[V_k\mid\Fcal_{k-1}]$ (so
+$\proj_k-\E[\proj_k\mid\Fcal_{k-1}]=\inner{\xi_k}{\rowhat}$), the
+conditional variance is
+\begin{align*}
+   \E[M_k^2\mid\Fcal_{k-1}]
+   \;=\; w_{T,k}^2\,\inner{\rowhat}{\operatorname{Cov}(\xi_k\mid\Fcal_{k-1})\,\rowhat}
+   \;\le\; w_{T,k}^2\,\frac{\sigma_{\max}^2}{d},
+\end{align*}
+by the isotropy upper bound \Cref{eq:noise_isotropy} and
+$\norm{\rowhat}_2=1$; the increments obey
+$\abs{M_k}\le w_{T,k}\norm{\xi_k}_2\le2w_{T,k}M$. The predictable variation
+is $\le S_T\sigma_{\max}^2/d$, so \Cref{lem:azuma} (with
+$\sigma^2\mapsto\sigma_{\max}^2$, horizon contribution $S_T$, and using
+$\sigma_{\max}\le2M$) gives, on an event of probability $\ge1-\delta_2$,
+\begin{align*}
+   \Bigl|\sum_k w_{T,k}\bigl(\proj_k-\E[\proj_k\mid\Fcal_{k-1}]\bigr)\Bigr|
+   \;\le\; 2M\sqrt{\frac{2\,S_T\log(2/\delta_2)}{d}}.
+\end{align*}
+Combining Steps~2--3 gives \Cref{eq:signal_floor_unit}.
+
+\smallskip\noindent\textbf{Step 4 (logit and angular forms; transfer).}
+Multiplying \Cref{eq:signal_floor_unit} by
+$\norm{W_U^{\corr}}_2\ge\rho_0$ gives the logit floor in
+\Cref{eq:signal_floor_logit} (the right-hand side of
+\Cref{eq:signal_floor_unit} is nonnegative in the regime of interest, so
+multiplying by $\norm{W_U^{\corr}}_2\ge\rho_0$ only decreases it). For the
+angular margin, $\snorder_T=\inner{\rowhat}{x_T}/\sqrt d=\inner{\rowhat}{\tilde x_T}/\norm{\tilde x_T}_2$
+(the cosine of \Cref{def:angular_margin}, since
+$x_T=\sqrt d\,\tilde x_T/\norm{\tilde x_T}$), and $\norm{\tilde x_T}_2\le M$
+(convex combination of vectors of norm $\le M$,
+\Cref{lem:running_average}), giving the angular bound. The transfer to the
+dynamics' on-sphere iterate adds the retraction error of
+\Cref{lem:retraction_stability}; in the \Cref{thm:R1} margin comparison the
+positive factor $\sqrt d/\norm{\tilde x_T}$ multiplies both the correct and
+the incorrect logits and cancels in the sign of $\Margin$, so the
+comparison may be performed on $\tilde x_T$ with no retraction error at all
+(\Cref{rem:signal_floor_provenance}).
+
+\smallskip\noindent\textbf{Union-bound paragraph.} The $1-\delta_2$ budget
+is consumed by a single application of the two-sided martingale tail
+(\Cref{lem:azuma}) to the scalar fluctuation of Step~3: one event
+$\Ecal_{\mathrm{noise}}=\{\,\abs{\text{fluctuation}}\le2M\sqrt{2S_T\log(2/\delta_2)/d}\,\}$
+of probability $\ge1-\delta_2$. The anti-pole non-degeneracy
+(\Cref{ass:bounded_architecture}(5)) adds no separate budget here --- it is
+folded into the assembly in \Cref{thm:R1}. This completes the proof.
+\end{proof}
+
+\begin{remark}[Provenance: two assumed knobs, no PL, no init condition]
+\label{rem:signal_floor_provenance}
+The floor $\snet\driftc\rho_0$ factorises into the \emph{behavioural} rate
+$\snet$ and the \emph{behavioural} magnitude $\driftc$, the two knobs of
+\Cref{ass:descent}; both are stated on the correct-direction projection
+$\proj_k$, and the floor follows from the first-moment identity
+\Cref{eq:net_drift}, \emph{not} from a Polyak--\L{}ojasiewicz / curvature
+inequality and \emph{not} from any transitivity between loss descent and
+correct-logit increase. It holds globally with no loss-basin and is
+established on $\tilde x_T$ (never applying $\sum_k w_{T,k}=1$ to the
+retracted $x_T$). Because the verifier-success event $\{\Margin(x_T)>0\}$
+is invariant under the positive rescaling $x_T=\sqrt d\,\tilde x_T/\norm{\tilde x_T}$,
+the entire margin comparison of \Cref{thm:R1} can be carried out on
+$\tilde x_T$, so the retraction error of \Cref{lem:retraction_stability}
+enters only the standalone logit/angular statements
+\Cref{eq:signal_floor_logit}, not the phase transition itself. The only
+place an initial condition could enter is the worst-case antipodal start;
+this is absorbed by the $x_0$-washout $w_{T,0}=O(1/T)$
+(\Cref{lem:running_average}) and the isotropic noise non-degeneracy of
+\Cref{ass:bounded_architecture}(5), not by any assumed initial angle.
+\end{remark}

@@ -1,0 +1,60 @@
+\section{Why the dynamics are ``descent'' on cross-entropy (motivation)}
+\label{sec:riem_gradient}
+
+This short section motivates the name ``noisy Riemannian SGD on the
+cross-entropy loss'': it explains why a step that raises the correct-token
+logit $\inner{W_U^{\corr}}{x}$ tends to \emph{lower} the loss, so that the
+behavioural rate $p$ of \Cref{ass:descent} (how often a step points towards
+$W_U^{\corr}$) deserves to be read as a descent rate. \textbf{Nothing in
+this section is load-bearing.} The per-step magnitude $\driftc$ is
+\emph{assumed} in \Cref{ass:descent}, not derived here; the net drift is
+the first-moment identity \Cref{eq:net_drift} on the correct-direction
+projection $\proj_k$, which uses neither the Riemannian gradient nor the
+incoherence gap. We record the gradient computation only because it makes
+the modelling assumption interpretable.
+
+\begin{remark}[Descent reading of the dynamics; not used in any proof]
+\label{rem:descent_naming}
+On $\Sphere$ (so $\norm{x}_2^2=d$) the Riemannian gradient of
+\Cref{def:riem_gradient_obj} is
+$\rgrad\loss(x;Q)=\bigl(I-xx^\top/d\bigr)W_U^\top(p-e_{\corr})$ with
+$p=\softmax(W_U x)$ (\Cref{fac:gradient_form}). Its alignment with the
+correct row quantifies the descent reading: by
+\Cref{fac:gradient_form}, $-\nabla\loss=W_U^\top(e_{\corr}-p)$, so
+\begin{align}\label{eq:gradient_alignment}
+   \inner{W_U^{\corr}}{-\nabla\loss(x;Q)}
+   &= \sum_{a\in\Vocab}(e_{\corr}-p)_a\,\inner{W_U^{\corr}}{W_U^a}
+   \nonumber\\
+   &= (1-p_{\corr})\norm{W_U^{\corr}}_2^2
+      - \sum_{a\neq\corr} p_a\,\inner{W_U^{\corr}}{W_U^a}
+   \;\ge\; (1-p_{\corr})\bigl(\rho_0^2 - \incoh_0 R_U^2\bigr),
+\end{align}
+using $(e_{\corr}-p)_{\corr}=1-p_{\corr}$, $(e_{\corr}-p)_a=-p_a$ for
+$a\neq\corr$, the row-norm floor $\norm{W_U^{\corr}}_2\ge\rho_0$, and the
+incoherence bound
+$\abs{\inner{W_U^{\corr}}{W_U^a}}\le\incoh_0 R_U^2$ with
+$\sum_{a\neq\corr}p_a=1-p_{\corr}$ (\Cref{def:incoherence},
+\Cref{ass:bounded_architecture}(1)). Thus \emph{when} the incoherence gap
+$\incoh_0<\rho_0^2/R_U^2$ holds, the correct row is a strict ascent
+direction for $\inner{W_U^{\corr}}{\cdot}$ and (to first order) a descent
+direction for the loss, with the gap largest exactly where the model is
+most wrong ($p_{\corr}$ small). This is why raising the correct-token logit
+is loss descent, and why $p>\tfrac12$ (steps point towards $W_U^{\corr}$
+more often than not) and a positive per-step magnitude $\driftc$ are
+\emph{plausible} for a competent reasoner.
+
+\smallskip\noindent\textbf{What this does and does not give.} The
+computation \Cref{eq:gradient_alignment} bounds the alignment of the
+\emph{negative gradient} with the correct row. It does \emph{not} bound the
+realised step's correct-direction projection $\proj_k=\inner{V_k}{\rowhat}$:
+a step $V_k$ that decreases the loss (positive inner product with
+$-\rgrad\loss$) need not have $\proj_k>0$, because inner-product alignment
+with one direction does not transfer to alignment with another. For that
+reason we do \emph{not} attempt to derive the per-step magnitude $\driftc$
+from \Cref{eq:gradient_alignment}; instead \Cref{ass:descent} posits the
+rate $p$ and magnitude $\driftc$ \emph{directly on $\proj_k$}, and the net
+drift follows from the identity \Cref{eq:net_drift}. Consequently the
+incoherence gap $\incoh_0<\rho_0^2/R_U^2$ is \emph{not} a hypothesis of any
+result in this paper (\Cref{rem:architecture_realism}); it appears here
+only to interpret the assumption.
+\end{remark}

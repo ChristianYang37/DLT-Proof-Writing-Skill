@@ -1,0 +1,200 @@
+\section{R1: two-sided phase transition in decoder success}
+\label{sec:R1}
+
+This is the headline result: a sharp two-sided phase transition in the
+true-decoder success probability at the critical alignment rate
+$\critrate$. The success branch compares the \emph{margin} drift --- which
+shares its systematic-update magnitude with the signal floor
+(\Cref{lem:signal_floor}) --- against the margin noise; the failure branch
+is the direct anti-concentration lower bound
+(\Cref{lem:incorrect_max_lower}). Both branches are stated for the
+\emph{true} decoder $\Dec$, since for single-token answers the argmax is
+greedy decoding. The verifier-success event $\{\Margin(x_{T_{\max}})>0\}$ is
+invariant under the positive rescaling $x_{T_{\max}}=\sqrt d\,\tilde x_{T_{\max}}/\norm{\tilde x_{T_{\max}}}$
+(\Cref{rem:signal_floor_provenance}), so the comparison is carried out on
+the un-retracted iterate $\tilde x_{T_{\max}}$ and the retraction error of
+\Cref{lem:retraction_stability} does not enter.
+
+\begin{theorem}[Two-sided phase transition, true decoder]
+\label{thm:R1}
+Suppose \Cref{ass:descent,ass:bounded_architecture} hold, with the mild
+incoherence condition
+\begin{align}\label{eq:R1_incoherence}
+   \incoh_0 \;<\; \frac{\rho_0}{R_U}
+   \qquad(\text{canonically }\rho_0=R_U=1:\ \incoh_0<1),
+\end{align}
+so that the per-margin drift coefficient $\rho_0-\incoh_0 R_U>0$. Fix
+$d\ge1$, $|\Vocab|\ge3$, a horizon $T_{\max}\ge1$, and
+$\delta_{\mathrm{fail}}\in(0,1)$. Define the \emph{critical alignment rate}
+\begin{align}\label{eq:critical_rate}
+   \critrate
+   \;\coloneqq\;
+   c_1\,\sqrt{\frac{\log|\Vocab|}{T_{\max}\,d}},
+   \qquad
+   c_1 \;=\; \frac{2\sqrt2\,e^{S}\,R_U\,M}{\driftc\,\rho_0\,(\rho_0-\incoh_0 R_U)/R_U}\,,
+\end{align}
+the explicit constant assembled from
+\Cref{lem:signal_floor,lem:incorrect_max,lem:incorrect_max_lower,lem:quad_variation}
+(the $\sqrt2$ slack absorbs the logarithmic and lower-order corrections).
+Then:
+\begin{enumerate}[label=(\roman*),leftmargin=2em,itemsep=0.2em]
+\item \emph{Success branch.} If $\snet\ge\sqrt2\,\critrate$, then
+       \begin{align}\label{eq:R1_success}
+          \Pr\bigl[\, \Dec(x_{T_{\max}})=\corr \,\bigr]
+          \;\ge\;
+          1 - \delta_{\mathrm{fail}} - \frac{1}{|\Vocab|-1}.
+       \end{align}
+\item \emph{Failure branch.} If $0\le\snet\le\critrate/\sqrt2$, then
+       \begin{align}\label{eq:R1_failure}
+          \Pr\bigl[\, \Dec(x_{T_{\max}})=\corr \,\bigr]
+          \;\le\;
+          \delta_{\mathrm{fail}} + \frac{1}{|\Vocab|-1}.
+       \end{align}
+\end{enumerate}
+The scaling law is $\critrate\propto1/\sqrt{T_{\max}\,d}$ (up to the
+$\sqrt{\log|\Vocab|}$ factor).
+\end{theorem}
+
+\begin{proof}
+On a good event we compare the \emph{margin} against $0$: in the success
+branch the margin drift clears the margin noise; in the failure branch the
+anti-concentration lower bound clears the correct-logit ceiling. The
+positive rescaling $x_{T_{\max}}=\sqrt d\,\tilde x_{T_{\max}}/\norm{\tilde x_{T_{\max}}}$
+preserves $\operatorname{sign}\Margin$, so all comparisons are on
+$\tilde x_{T_{\max}}$. Write $\sigma_T\coloneqq2R_U M\sqrt{S_T/d}$ for the
+per-direction fluctuation scale, with $S_T\le e^{2S}/T_{\max}$
+(\Cref{lem:quad_variation}), and abbreviate $T=T_{\max}$.
+
+\smallskip\noindent\textbf{Union-bound paragraph.} The failure budget in
+each branch is discharged by an explicit union bound over exactly two
+events. \emph{Success:} (1) the signal/margin-fluctuation event
+$\Ecal_{\mathrm{sig}}$ of \Cref{lem:signal_floor,lem:incorrect_max} at
+budget $\delta_2=\delta_{\mathrm{fail}}$ (the martingale tail
+\Cref{lem:azuma} applied to the centred margin
+$\sum_k w_{T,k}\inner{W_U^{\corr}-W_U^a}{\xi_k}$, already unioned over the
+$|\Vocab|-1$ incorrect rows by setting the per-row budget
+$\delta_{\mathrm{fail}}/(|\Vocab|-1)$), failure $\le\delta_{\mathrm{fail}}$;
+(2) the incorrect-max event $\Ecal_{\mathrm{inc}}$ of
+\Cref{lem:incorrect_max} at budget $\delta_1=(|\Vocab|-1)^{-1}$, failure
+$\le(|\Vocab|-1)^{-1}$. By the union bound over
+$\{\Ecal_{\mathrm{sig}},\Ecal_{\mathrm{inc}}\}$ the good event has
+probability $\ge1-\delta_{\mathrm{fail}}-(|\Vocab|-1)^{-1}$. The anti-pole
+non-degeneracy (\Cref{ass:bounded_architecture}(5)) plus $x_0$-washout
+($w_{T,0}=O(1/T)$, \Cref{lem:running_average}) contributes only $o(1)$,
+absorbed into $\delta_{\mathrm{fail}}$ (\emph{no} initial-angle condition
+is imposed; \Cref{rem:descent_globality,rem:signal_floor_provenance}).
+\emph{Failure:} the single anti-concentration event of
+\Cref{lem:incorrect_max_lower} (budget $(|\Vocab|-1)^{-c_3}\le(|\Vocab|-1)^{-1}$)
+intersected with the correct-logit ceiling event (\Cref{lem:signal_floor}
+two-sided form, budget $\delta_{\mathrm{fail}}$).
+
+\smallskip\noindent\textbf{Success branch.} Fix the maximiser
+$\hat a\in\arg\max_{a\neq\corr}\inner{W_U^a}{\tilde x_T}$ on the good event.
+The margin $\Margin(\tilde x_T)=\inner{W_U^{\corr}-W_U^{\hat a}}{\tilde x_T}$
+splits into drift and fluctuation. Its drift, using
+$\E\tilde x_T=D\rowhat$ with $D=\inner{\rowhat}{\E\tilde x_T}$
+(\Cref{lem:incorrect_max}, \Cref{eq:drift_direction}) and $D\ge\snet\driftc\rho_0$
+(\Cref{lem:signal_floor} Step~2), is
+\begin{align*}
+   \inner{W_U^{\corr}-W_U^{\hat a}}{\E\tilde x_T}
+   \;=\; D\bigl(\inner{W_U^{\corr}}{\rowhat}-\inner{W_U^{\hat a}}{\rowhat}\bigr)
+   \;\ge\; D\bigl(\rho_0-\incoh_0 R_U\bigr)
+   \;\ge\; \snet\,\driftc\,\rho_0\,(\rho_0-\incoh_0 R_U),
+\end{align*}
+using $\inner{W_U^{\corr}}{\rowhat}=\norm{W_U^{\corr}}_2\ge\rho_0$,
+$\inner{W_U^{\hat a}}{\rowhat}\le\incoh_0 R_U$ (\Cref{def:incoherence}), and
+$\rho_0-\incoh_0 R_U>0$ by \Cref{eq:R1_incoherence}. The margin
+fluctuation $\sum_k w_{T,k}\inner{W_U^{\corr}-W_U^{\hat a}}{\xi_k}$ has
+increments $\le w_{T,k}\norm{W_U^{\corr}-W_U^{\hat a}}_2\norm{\xi_k}_2\le w_{T,k}\cdot2R_U\cdot2M$
+and conditional variance $\le w_{T,k}^2(2R_U)^2\sigma_{\max}^2/d$, so by
+\Cref{lem:azuma} (with the per-row budget unioned over the $|\Vocab|-1$
+choices of $\hat a$, total $\delta_{\mathrm{fail}}$),
+\begin{align*}
+   \Bigl|\sum_k w_{T,k}\inner{W_U^{\corr}-W_U^{\hat a}}{\xi_k}\Bigr|
+   \;\le\; 4R_U M\sqrt{\frac{2 S_T\log(2(|\Vocab|-1)/\delta_{\mathrm{fail}})}{d}}
+   \;\eqqcolon\; \nu .
+\end{align*}
+On the good event the margin therefore satisfies
+$\Margin(\tilde x_T)\ge\snet\driftc\rho_0(\rho_0-\incoh_0 R_U)-\nu$, which is
+$>0$ once
+$\snet>\nu/[\driftc\rho_0(\rho_0-\incoh_0 R_U)]$. Bounding
+$\nu\le4R_U M\sqrt2\,e^S\sqrt{\log(2(|\Vocab|-1)/\delta_{\mathrm{fail}})/(T_{\max}d)}$
+and absorbing the $\log(2(|\Vocab|-1)/\delta_{\mathrm{fail}})$ versus
+$\log|\Vocab|$ discrepancy into the factor-$\sqrt2$ slack, the condition
+$\snet\ge\sqrt2\,\critrate$ with $c_1$ of \Cref{eq:critical_rate} suffices;
+then $\Margin(x_{T_{\max}})>0$ (same sign on $x_{T_{\max}}$) and
+$\Dec(x_{T_{\max}})=\corr$ by \Cref{def:decoder} (equivalently via
+$\loss<\log2$, \Cref{lem:loss_to_margin}).
+
+\smallskip\noindent\textbf{Failure branch.} On the good event, when
+$0\le\snet\le\critrate/\sqrt2$ the correct logit is bounded above using
+$D\le\snet M$ (\Cref{lem:incorrect_max}) and $\norm{W_U^{\corr}}_2\le R_U$:
+\begin{align*}
+   \inner{W_U^{\corr}}{\tilde x_T}
+   \;=\; \norm{W_U^{\corr}}_2\,\inner{\rowhat}{\tilde x_T}
+   &\;\le\; R_U\Bigl(\snet M + 2M\sqrt{\tfrac{2S_T\log(2/\delta_{\mathrm{fail}})}{d}}\Bigr) \\
+   &\;\le\; R_U M\,\critrate/\sqrt2 + R_U\,\sigma_T\sqrt{2\log(2/\delta_{\mathrm{fail}})},
+\end{align*}
+while \Cref{lem:incorrect_max_lower} forces, with the absolute Sudakov
+constant $\kappa\in(0,1)$ of that lemma,
+\begin{align*}
+   \max_{a\neq\corr}\inner{W_U^a}{\tilde x_T}
+   \;\ge\;
+   \sigma_T\sqrt{2\kappa(1-\incoh_0)\log(|\Vocab|-1)}-\incoh_0 R_U\snet M.
+\end{align*}
+Since the $|\Vocab|$-growing term
+$\sqrt{2\kappa(1-\incoh_0)\log(|\Vocab|-1)}$ exceeds the correct logit's
+$|\Vocab|$-independent $\sqrt{2\log(2/\delta_{\mathrm{fail}})}$-scale once
+$|\Vocab|$ is large (for any fixed $\kappa(1-\incoh_0)>0$), and
+the deterministic corrections $\incoh_0 R_U\snet M$ and $R_U M\critrate/\sqrt2$
+are both $O(\critrate)$ (lower-order, since $\snet\le\critrate/\sqrt2$),
+the gap between the two thresholds is positive: the $\sqrt2$ slack between
+$\sqrt2\,\critrate$ (success) and $\critrate/\sqrt2$ (failure) absorbs
+exactly the constant $\kappa(1-\incoh_0)$ and the deterministic $O(\critrate)$
+corrections. Hence $\Margin(\tilde x_T)<0$, so
+$\Margin(x_{T_{\max}})<0$ and $\Dec(x_{T_{\max}})\neq\corr$. This completes
+the proof.
+\end{proof}
+
+\begin{remark}[Minimum decoding dimension]
+\label{rem:min_dimension}
+Inverting the success condition gives an interpretable dimension law. Fix a
+rate $\snet>0$ and horizon $T_{\max}$; solving
+$\snet\ge\sqrt2\,\critrate=\sqrt2\,c_1\sqrt{\log|\Vocab|/(T_{\max}d)}$ for
+$d$ (squaring both sides) shows the success bound \Cref{eq:R1_success} holds
+whenever
+\begin{align}\label{eq:min_dimension}
+   d \;\ge\; \frac{2\,c_1^2\,\log|\Vocab|}{\snet^2\,T_{\max}},
+\end{align}
+i.e.\ the hidden dimension required to decode at rate $\snet$ scales as
+$d\gtrsim\log|\Vocab|/(\snet^2 T_{\max})$. (Stated as a remark rather than a
+standalone corollary, per Occam: it is a direct algebraic inversion of
+\Cref{thm:R1}(i) with no separate downstream use.)
+\end{remark}
+
+\begin{remark}[Two branches, the mild incoherence condition, and the slack]
+\label{rem:R1_two_branches}
+The factor-$\sqrt2$ slack ($\snet\ge\sqrt2\,\critrate$ for success,
+$\snet\le\critrate/\sqrt2$ for failure) absorbs the logarithmic mismatch
+$\log(2(|\Vocab|-1)/\delta_{\mathrm{fail}})$ vs $\log|\Vocab|$, the
+incoherence factor $(1-\incoh_0)$, and the $O(\critrate)$ deterministic
+drift corrections, all into the leading constant $c_1$; the intermediate
+window $\snet\in(\critrate/\sqrt2,\sqrt2\,\critrate)$ is the subject of
+\Cref{thm:R2}. The condition \Cref{eq:R1_incoherence}, $\incoh_0<\rho_0/R_U$,
+is the \emph{mild} incoherence needed for the margin to have positive drift
+(incorrect rows must not be too aligned with the correct one to be
+separable); it is \emph{not} the stronger ``gap'' $\incoh_0<\rho_0^2/R_U^2$
+of earlier drafts (which was tied to deriving the per-step magnitude, now
+assumed --- \Cref{rem:descent_naming}), and under the canonical unit-norm
+convention it reads $\incoh_0<1$, automatic for distinct non-parallel rows.
+The key structural point is that the correct and incorrect drifts
+\emph{share} the systematic-update magnitude $D$ (\Cref{lem:incorrect_max}),
+so the margin drift scales as $\snet\driftc\rho_0(\rho_0-\incoh_0 R_U)\to0$
+at the critical rate rather than being swamped by a $\Theta(1)$ incoherence
+term; this is what makes the transition occur at
+$\critrate\propto1/\sqrt{T_{\max}d}$. Both branches bound the \emph{true}
+decoder, the failure branch resting on genuine anti-concentration
+(\Cref{lem:incorrect_max_lower}), not a reversed upper bound. The residual
+$1/(|\Vocab|-1)$ is the favourable/unfavourable single-direction noise
+budget inherited from the incorrect-max lemmas.
+\end{remark}

@@ -1,74 +1,112 @@
-# Polyak–Łojasiewicz (PL) condition
+# Polyak-Lojasiewicz drift for conditional rate
 
-**Source.** Polyak (1963), *Gradient methods for the minimization of
-functionals*; Karimi–Nutini–Schmidt, *Linear Convergence of Gradient and
-Proximal-Gradient Methods Under the Polyak–Łojasiewicz Condition*,
-ECML-PKDD 2016 (arXiv:1608.04636) for the modern restatement and clean
-proofs.
+> **Status (Round 5, 2026-05-28):** The eval-08 framework no longer
+> invokes the PL amplification step. T2 (convergence rate) was
+> dropped entirely in Round 5: the Round-4 Path-A linear-gap
+> alternative to the PL-quadratic amplification was itself dropped
+> when hostile review identified a structural incompatibility
+> between the Foster-Lyapunov hitting-time framing and the
+> convex-combination dynamics of the softmax-running-average
+> representation (\Cref{lem:softmax_running_average}); see
+> `lyapunov.md` Round-5 header.
+>
+> **Round-4 historical note (superseded):** In Round 4 the framework
+> attempted to replace the PL amplification with a Path-A linear-gap
+> drift, producing a T2 rate linear in $(\rateinit - \critrate)$
+> rather than quadratic; the supporting `lem:expected_drift` and
+> `rem:expected_drift_no_PL` blocks (Round 4 additions in
+> `sections/04-verifier-geometry.tex`) and the `T2` chapter
+> (`sections/08-theorem-T2-convergence-rate.tex`) were deleted in
+> Round 5.
+>
+> Digest retained for historical context and for possible future use
+> if the framework is extended to recover a convergence-rate theorem
+> via a different (non-Foster-Lyapunov) approach.
 
-**Statement (PL inequality).** A differentiable function $F: \R^d \to \R$
-with finite minimum $F^* = \inf_x F(x) > -\infty$ satisfies the PL condition
-with constant $\mu > 0$ if for all $x \in \R^d$,
+## Source
+
+- Karimi, Nutini, Schmidt, *Linear Convergence of Gradient and
+  Proximal-Gradient Methods Under the Polyak-Lojasiewicz Condition*,
+  ECML PKDD 2016, LNCS 9851, pp. 795-811.
+- Polyak, B. T., *Gradient methods for the minimization of functionals*,
+  USSR Comput. Math. Math. Phys. 3 (1963), 643-653 (original PL paper).
+
+## Statement (PL inequality)
+
+A differentiable function $L : \R^d \to \R$ with global minimum
+$L^*$ satisfies the Polyak-Lojasiewicz inequality with constant
+$\mu > 0$ if for every $x$:
 $$
-   \tfrac{1}{2} \|\nabla F(x)\|^2 \;\ge\; \mu \big(F(x) - F^*\big).
+   \tfrac{1}{2} \norm{\nabla L(x)}^2
+   \;\ge\; \mu \cdot (L(x) - L^*).
 $$
-This implies $\mu$-strong-convexity-of-the-suboptimality-gap behaviour
-without requiring convexity.
 
-**Karimi-Nutini-Schmidt Theorem 1 (Cor.).** Under $L$-smoothness and PL with
-constant $\mu$, gradient descent with step size $\eta = 1/L$ satisfies
+## Karimi et al. Theorem 1 (deterministic GD rate)
+
+If $L$ is $L_{\mathrm{sm}}$-smooth and PL-$\mu$, then gradient descent
+with step size $\eta = 1/L_{\mathrm{sm}}$ achieves
 $$
-   F(x_t) - F^* \;\le\; \Big(1 - \frac{\mu}{L}\Big)^t \big(F(x_0) - F^*\big).
+   L(x_t) - L^*
+   \;\le\; \bigl(1 - \mu/L_{\mathrm{sm}}\bigr)^t \, (L(x_0) - L^*),
 $$
-For stochastic gradient with bounded variance $\sigma^2$, the same paper's
-Theorem 4 gives $\E[F(x_t) - F^*] = \mathcal O(1/(\mu t))$ in expectation
-with diminishing step sizes (Polyak averaging not required).
+i.e. linear (geometric) convergence to the global minimum **without**
+convexity.
 
-**Hypotheses (Theorem 1).**
-- $F$ differentiable.
-- $F$ is $L$-smooth: $\|\nabla F(x) - \nabla F(y)\| \le L \|x - y\|$.
-- $F$ satisfies PL with constant $\mu$.
-- For the stochastic variant: $\E[\hat g_t | \mathcal F_{t-1}] = \nabla F(x_{t-1})$
-  and $\E\|\hat g_t - \nabla F(x_{t-1})\|^2 \le \sigma^2$.
+## Karimi et al. Theorem 4 (biased SGD extension)
 
-**Why PL is attractive here.**
-- Does **not** require convexity.
-- Holds for the squared loss $\|f_\theta(x) - y\|^2$ when $f_\theta$ is in the
-  NTK regime, for wide overparameterized neural networks (Du et al. 2019,
-  Allen-Zhu-Li-Song 2019, ...).
-- Empirically a defensible "implicit landscape" property of LLM inference if
-  framed carefully.
+For biased stochastic gradients $g_t$ with bias $\|\E[g_t \mid \mathcal F_t]
+- \nabla L(x_t)\| \le \beta$ and second-moment bound
+$\E\|g_t\|^2 \le G^2$, constant-step-size SGD with $\eta = \eta_0$ satisfies
+$$
+   \E[L(x_T) - L^*]
+   \;\le\; (1 - c_3 \eta_0 \mu)^T (L(x_0) - L^*)
+       + \frac{c_4 \beta^2}{\eta_0 \mu}
+$$
+for constants $c_3, c_4 > 0$ depending only on $L_{\mathrm{sm}}$.
 
-**Why PL is also fragile here.**
-- It must be PL with respect to a *specific potential $F$*. As discussed in
-  `sgd-weight-decay-analogy.md`, the LLM's reasoning dynamics do not
-  obviously gradient-descend any natural $F$.
-- The hypothesis $\E[\hat g_t | \mathcal F_{t-1}] = \nabla F(x_{t-1})$ is
-  unbiased SGD; the LLM's $g_j$ has no such unbiasedness property unless
-  postulated.
-- PL is a *global* condition — it must hold everywhere on the trajectory.
-  Local-PL variants exist but require careful basin-of-attraction analysis.
+## How we use it (Theorem T2 conditional convergence)
 
-**Common misuses.**
-- Asserting PL on a domain where only convexity is known (PL implies
-  invex-on-its-stationary-set, but not the other direction).
-- Using PL with biased gradients without quantifying the bias contribution
-  (in the bias term, smoothness + bias gives an additive penalty in the rate).
-- Confusing PL with the (weaker) error-bound condition / quadratic-growth
-  condition.
+Conditional on the snowball event, the loss process $L_t$ satisfies a
+**PL-like Lyapunov drift** in expectation:
+$$
+   \E[L_{t+1} - L_t \mid \mathcal F_t, \mathrm{snowball}]
+   \;\le\; -\eta \cdot (L_t - L^*),
+   \qquad
+   \eta := \lambda_0 \alpha(d) - c \sigma^2/\bar r > 0.
+$$
+This is the *same structural inequality* as PL gradient descent: a
+multiplicative contraction of the loss gap per step, with rate
+$\eta = \lambda_0\alpha(d) - \lambda_c\alpha(d) = (\lambda_0 - \lambda_c)\alpha(d)$.
+Unrolling gives
+$\E[L_T \mid \mathrm{snowball}] \le (1 - \eta)^T L_0$, and the hitting
+time to $L \le \log 2$ satisfies
+$\E[T_{\mathrm{conv}}] \le \log(L_0/\log 2) / \eta = O(1/(\lambda_0 - \lambda_c))$.
 
-**Project citation key.** `\cite{karimi2016pl}` (Karimi-Nutini-Schmidt 2016)
-for the modern reference; `\cite{polyak1963gradient}` for the original.
+**Key adaptation.** Our drift is *additive in the gap*
+($\eta(L_t - L^*)$) rather than multiplicative in $L_t$. We use the
+linear version: $\E[L_{t+1} - L_t \mid \mathcal F_t] \le -\eta_0$ for
+$L_t > L^*$, giving the **arithmetic** hitting-time bound
+$\E[T_{\mathrm{conv}}] \le L_0/\eta_0$ instead of the
+**geometric** Karimi bound. This is sufficient for the T2 polynomial-rate
+statement and avoids requiring the multiplicative (PL) form.
 
-**Decision for THIS proof.**
-- **Path B (Toeplitz):** PL is not needed. Drop the digest's relevance.
-- **Path A (postulated potential):** PL is the cleanest hypothesis to give
-  a linear / $1/T$ rate. But PL's $\mu$ is invisible from inference
-  observations (it requires knowing $F$); so an Assumption stating "the
-  implicit potential is PL with constant $\mu$" fails the sellability test
-  (ii) — not testable from inference-time observations alone.
+## Constants tracked
 
-**Recommendation.** Avoid PL in the main route. If a Path-A "optimization
-view" appendix is included for headline value, state PL as Assumption A2'
-(secondary) marked with `\todo{verify: PL with respect to a postulated $F$;
-practitioners cannot directly observe $\mu$}`.
+- $\eta = \lambda_0\alpha(d) - \lambda_c \alpha(d) = (\lambda_0 - \lambda_c) \alpha(d)$
+  — the drift gap to criticality.
+- $L_0$ — initial loss (bounded by $L^*(Q)$ by snowball event).
+- $\E[T_{\mathrm{conv}}] \le L_0 / \eta = O(L_0 / ((\lambda_0-\lambda_c)\alpha(d)))$.
+
+In our absolute-scale parametrization with $\alpha(d) = \alpha_0\sqrt{d/d_0}$,
+this gives $T_{\mathrm{conv}} = O(1/((\lambda_0-\lambda_c)\sqrt d))$
+in absolute time units, which polynomial-time in $d$ (in fact decreasing
+with $d$).
+
+## Verification
+
+Karimi et al. 2016 Theorem 1 and Theorem 4 statements verified against
+the arXiv version (1608.04636). Our application uses the linear
+(additive-drift) form, which is a direct specialization of the
+Foster-Lyapunov criterion (see `.proof-research/lyapunov.md`). The
+multiplicative (PL) form is invoked only by analogy in the T2 proof
+exposition.

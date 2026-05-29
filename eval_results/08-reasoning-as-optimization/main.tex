@@ -11,6 +11,13 @@
 \usepackage{aliascnt}
 \usepackage{mathtools}
 
+% Tables (symbol table at top of preliminaries)
+\usepackage{booktabs}
+
+% TikZ (dependency graph in section 00)
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+
 % Colour (for the \todo marker)
 \usepackage{xcolor}
 
@@ -27,8 +34,8 @@
 % Macros and theorem environments
 \input{macros}
 
-\title{Anchored attention converges in polynomial time:\\
-       a convergence theorem for a single layer/head of a reasoning model}
+\title{Reasoning as noisy Riemannian SGD on the LayerNorm sphere:\\
+       a phase-transition theory of single-token decoding}
 \author{}
 \date{}
 
@@ -36,20 +43,28 @@
 
 \maketitle
 
-% No abstract / introduction per the skill's scope.
+% No abstract / introduction per the skill's scope (formal content only).
+% Section chain (clean-slate rewrite): preliminaries + assumptions, then
+% the leaf geometry/concentration lemmas (03-07, 10), the two-sided logit
+% bounds (08, 09, 12), the loss-to-margin bridge (11), and the three
+% results R1 (13), R2 (14), R3' (15), with cited externals in 99.
 
 \input{sections/01-preliminaries}
 \input{sections/02-assumptions}
-\input{sections/03-lemma-softmax-running-average}
-\input{sections/04-lemma-gradient-form}
-\input{sections/05-lemma-smoothness}
-\input{sections/06-lemma-descent-inequality}
-\input{sections/07-lemma-telescoping}
-\input{sections/08-lemma-logit-margin-decoding}
-\input{sections/09-lemma-expectation-to-failure}
-\input{sections/10-main-theorem}
-\input{sections/11-lower-bound}
-\input{sections/13-discussion}
+\input{sections/03-lemma-running-average}
+\input{sections/04-lemma-riem-gradient}
+\input{sections/05-lemma-orthogonality}
+\input{sections/06-lemma-quadratic-variation}
+\input{sections/07-lemma-retraction-stability}
+\input{sections/08-lemma-incorrect-max}
+\input{sections/09-lemma-signal-floor}
+\input{sections/10-lemma-azuma}
+\input{sections/11-lemma-loss-to-margin}
+\input{sections/12-lemma-incorrect-max-lower}
+\input{sections/13-theorem-R1-phase-transition}
+\input{sections/14-theorem-R2-critical-window}
+\input{sections/15-theorem-R3prime-cone}
+\input{sections/99-auxiliary}
 
 \bibliographystyle{plainnat}
 \bibliography{refs}

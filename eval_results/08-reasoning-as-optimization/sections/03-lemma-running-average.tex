@@ -1,0 +1,84 @@
+\section{The un-retracted iterate as a running weighted average}
+\label{sec:running_average}
+
+\begin{lemma}[Running-average representation of the un-retracted iterate]
+\label{lem:running_average}
+Consider the SGDM dynamics of \Cref{def:dynamics} with step
+$\alpha\in(0,1]$ and the convention $V_0\coloneqq x_0$. For every horizon
+$T\ge1$ the un-retracted iterate admits the convex-combination
+representation
+\begin{align}\label{eq:running_average}
+   \tilde x_T \;=\; \sum_{k=0}^{T} w_{T,k}\, V_k,
+   \qquad
+   w_{T,k}\ge0,
+   \qquad
+   \sum_{k=0}^{T} w_{T,k} = 1,
+\end{align}
+where the weights are the attention (softmax) weights
+$w_{T,k}=e^{s_{T,k}}/\sum_{j=0}^{T}e^{s_{T,j}}$ of the head, with scores
+$s_{T,k}\coloneqq\inner{q}{k_k}$ satisfying $\abs{s_{T,k}}\le S$
+(\Cref{ass:bounded_architecture}(4)). Consequently the on-sphere iterate is
+the exact rescaling of this convex combination,
+\begin{align}\label{eq:onsphere_direction}
+   x_T \;=\; \sqrt d\,\frac{\tilde x_T}{\norm{\tilde x_T}_2}
+   \;=\; \sqrt d\,\frac{\sum_{k=0}^{T}w_{T,k}V_k}{\bigl\|\sum_{k=0}^{T}w_{T,k}V_k\bigr\|_2}
+   \qquad (\text{assuming }\tilde x_T\neq0),
+\end{align}
+the initial weight obeys $w_{T,0}\le\max_{0\le k\le T}w_{T,k}\le e^{2S}/T$
+(so $w_{T,0}=O(1/T)$), and $\tau\coloneqq T^{-1}\sum_{t=1}^{T}w_{T,t}\le1/T$.
+The convex-combination identity $\sum_k w_{T,k}=1$ holds for the
+un-retracted iterate $\tilde x_T$ only.
+\end{lemma}
+
+\begin{proof}
+The proof has two parts: the softmax representation (an algebraic identity)
+and the initial-weight decay (a consequence of \Cref{lem:quad_variation}).
+
+\smallskip\noindent\textbf{Softmax-average representation.} A single
+attention head at the decoding position computes a softmax-weighted average
+of the value vectors it attends to, including the residual self-term
+$V_0=x_0$ (\cite{vaswani2017attention}): with scores
+$s_{T,k}=\inner{q}{k_k}$ for $k=0,\dots,T$,
+\begin{align*}
+   \tilde x_T \;=\; \sum_{k=0}^{T} w_{T,k}\,V_k,
+   \qquad
+   w_{T,k} \;=\; \frac{e^{s_{T,k}}}{\sum_{j=0}^{T} e^{s_{T,j}}}.
+\end{align*}
+Each $w_{T,k}>0$ as a ratio of positive exponentials, and
+$\sum_{k=0}^{T} w_{T,k}=1$ because the numerators sum to the denominator;
+this is \Cref{eq:running_average}. The EMA recurrence
+$\tilde x_t=(1-\alpha)x_{t-1}+\alpha V_t$ of \Cref{def:dynamics} is the
+recency specialisation in which the score increments are constant
+($s_{T,k}-s_{T,k-1}=\log\frac{1-\alpha}{\alpha}\cdot(\cdots)$); the
+representation above is exact and does not depend on that specialisation.
+Since $\tilde x_T$ is a nonnegative combination of the $V_k$ and
+$\sum_k w_{T,k}=1$, the on-sphere retraction
+$x_T=\sqrt d\,\tilde x_T/\norm{\tilde x_T}_2$ is the exact rescaling
+\Cref{eq:onsphere_direction} (the scalar $\norm{\tilde x_T}_2$ is the only
+thing the retraction changes; the direction is that of the convex
+combination).
+
+\smallskip\noindent\textbf{Initial-weight decay.} The weight $w_{T,0}$ is
+one of the $T+1$ softmax weights, hence is at most the maximal weight,
+which \Cref{lem:quad_variation} (applied with the same bounded scores
+$\abs{s_{T,k}}\le S$, now over the $T+1$ indices $k=0,\dots,T$) bounds by
+$\max_{0\le k\le T}w_{T,k}\le e^{2S}/(T+1)\le e^{2S}/T$. Hence
+$w_{T,0}=O(1/T)$, and the initial state washes out as $T\to\infty$. The
+average-weight bound $\tau=T^{-1}\sum_{t=1}^{T}w_{T,t}\le T^{-1}\cdot1=1/T$
+is immediate from $\sum_t w_{T,t}\le1$. This completes the proof.
+\end{proof}
+
+\begin{remark}[The identity is for $\tilde x_T$, never $x_T$]
+\label{rem:running_average_untransformed}
+\Cref{lem:running_average} is the \emph{only} source of the
+convex-combination identity in the paper, and it applies strictly to the
+un-retracted iterate $\tilde x_T$. The retracted iterate
+$x_T=\sqrt d\,\tilde x_T/\norm{\tilde x_T}$ does \emph{not} inherit
+$\sum_k w_{T,k}=1$ (it has norm $\sqrt d$, not the norm of a convex
+combination of the $V_k$); the passage from $\tilde x_T$ to $x_T$ is the
+exact rescaling \Cref{eq:onsphere_direction}, whose effect on a fixed-row
+logit is the work of \Cref{lem:retraction_stability}. Downstream,
+\Cref{lem:signal_floor} and \Cref{lem:incorrect_max} establish their bounds
+on $\tilde x_T$ using \Cref{eq:running_average}, and only then transfer to
+$x_T$.
+\end{remark}

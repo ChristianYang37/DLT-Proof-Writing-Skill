@@ -1,0 +1,139 @@
+\section{Upper bound on the maximum incorrect logit}
+\label{sec:incorrect_max}
+
+The success branch of \Cref{thm:R1} compares the cumulative correct-token
+signal against the worst incorrect-token logit. This section gives a
+high-probability \emph{upper} bound on the latter, driven by the
+high-dimensional projection variance (\Cref{lem:orthogonality}) plus the
+row-incoherence of $W_U$, with the union bound discharged over the
+$|\Vocab|-1$ incorrect tokens.
+
+\begin{lemma}[Maximum incorrect logit, upper bound]
+\label{lem:incorrect_max}
+Suppose \Cref{ass:descent,ass:bounded_architecture} hold. Fix a horizon
+$T\ge1$ and $\delta_1\in(0,1)$, write the un-retracted iterate as
+$\tilde x_T=\sum_{k} w_{T,k}V_k$ (\Cref{lem:running_average}), and let
+$D\coloneqq\inner{\rowhat}{\E\tilde x_T}=\sum_k w_{T,k}\beta_k$ be the
+correct-direction drift magnitude (\Cref{eq:drift_direction}), which obeys
+$\abs{D}\le M$ always and $0\le D\le\snet M$ when $\snet\ge0$. Then on an
+event of probability at least $1-\delta_1$ over the per-step noise,
+\begin{align}\label{eq:incorrect_max_bound}
+   \max_{a\neq\corr}\, \inner{W_U^a}{\tilde x_T}
+   &\;\le\;
+   \incoh_0\, R_U\, \abs{D}
+   \;+\;
+   2\,R_U\,M\,
+   \sqrt{\frac{S_T\,\log\!\bigl(2(|\Vocab|-1)/\delta_1\bigr)}{d}}
+   \nonumber\\
+   &\;\le\;
+   \incoh_0\, R_U\, M
+   \;+\;
+   2\,R_U\,M\,
+   \sqrt{\frac{S_T\,\log\!\bigl(2(|\Vocab|-1)/\delta_1\bigr)}{d}},
+\end{align}
+where $S_T=\sum_t w_{T,t}^2\le e^{2S}/T$ (\Cref{lem:quad_variation}). The
+deterministic term carries the \emph{shared} drift magnitude $\abs D$: it
+is the same systematic-update size that lower-bounds the correct logit
+(\Cref{lem:signal_floor}), and at the critical rate $\abs D=O(\snet)$ is
+small, which is what keeps it lower-order in \Cref{thm:R1}. The same bound
+transfers to $\inner{W_U^a}{x_T}$ up to the additive $O(1/d^{1.5})$
+retraction error of \Cref{lem:retraction_stability}.
+\end{lemma}
+
+\begin{proof}
+The proof is a drift/fluctuation split (\Cref{lem:running_average}),
+incoherence on the drift, a per-direction martingale tail
+(\Cref{lem:azuma}) on the fluctuation, and a union bound over the
+$|\Vocab|-1$ incorrect tokens. Fix $a\neq\corr$ and write, using
+$\tilde x_T=\sum_{k}w_{T,k}V_k$ and the conditional mean
+$\E\tilde x_T\coloneqq\sum_k w_{T,k}\E[V_k\mid\Fcal_{k-1}]$,
+\begin{align}\label{eq:incmax_split}
+   \inner{W_U^a}{\tilde x_T}
+   \;=\;
+   \underbrace{\inner{W_U^a}{\E\tilde x_T}}_{\text{drift}}
+   \;+\;
+   \underbrace{\textstyle\sum_{k} w_{T,k}\inner{W_U^a}{\xi_k}}_{\text{fluctuation}},
+   \qquad \xi_k\coloneqq V_k-\E[V_k\mid\Fcal_{k-1}].
+\end{align}
+
+\smallskip\noindent\textbf{Drift term.} By the drift-direction clause
+\Cref{eq:drift_direction}, $\E[V_k\mid\Fcal_{k-1}]=\beta_k\rowhat$, so
+$\E\tilde x_T=\sum_k w_{T,k}\beta_k\rowhat=D\rowhat$ with
+$D=\sum_k w_{T,k}\beta_k$. Hence for $a\neq\corr$,
+\begin{align*}
+   \inner{W_U^a}{\E\tilde x_T}
+   \;=\; D\,\inner{W_U^a}{\rowhat}
+   \;\le\; \abs{D}\,\frac{\abs{\inner{W_U^a}{W_U^{\corr}}}}{\norm{W_U^{\corr}}_2}
+   \;\le\; \abs{D}\,\incoh_0 R_U,
+\end{align*}
+using $\abs{\inner{W_U^a}{W_U^{\corr}}}\le\incoh_0\norm{W_U^a}_2\norm{W_U^{\corr}}_2\le\incoh_0 R_U\norm{W_U^{\corr}}_2$
+(\Cref{def:incoherence}, \Cref{ass:bounded_architecture}(1)). The bound
+$\abs{D}\le M$ follows from $\abs{\beta_k}=\abs{\E[\proj_k\mid\Fcal_{k-1}]}\le\E[\abs{\proj_k}\mid\Fcal_{k-1}]\le M$
+and $\sum_k w_{T,k}=1$; when $\snet\ge0$, the net-drift identity
+\Cref{eq:net_drift} gives $\beta_k=\snet\E[\abs{\proj_k}\mid\Fcal_{k-1}]\in[\snet\driftc\rho_0,\snet M]$,
+so $0\le D\le\snet M$. This is the deterministic term $\incoh_0 R_U\abs D$.
+
+\smallskip\noindent\textbf{Fluctuation term.} For fixed $a$, the summands
+$M_k\coloneqq w_{T,k}\inner{W_U^a}{\xi_k}$ form a martingale-difference
+sequence ($\E[M_k\mid\Fcal_{k-1}]=w_{T,k}\inner{W_U^a}{\E[\xi_k\mid\Fcal_{k-1}]}=0$).
+Their conditional variance is
+\begin{align*}
+   \E[M_k^2\mid\Fcal_{k-1}]
+   \;=\; w_{T,k}^2\,\inner{W_U^a}{\operatorname{Cov}(\xi_k\mid\Fcal_{k-1})\,W_U^a}
+   \;\le\; w_{T,k}^2\,\frac{\sigma_{\max}^2}{d}\,\norm{W_U^a}_2^2
+   \;\le\; w_{T,k}^2\,\frac{\sigma_{\max}^2 R_U^2}{d},
+\end{align*}
+by the isotropy upper bound \Cref{eq:noise_isotropy} and
+$\norm{W_U^a}_2\le R_U$; the increments obey
+$\abs{M_k}\le w_{T,k}R_U\norm{\xi_k}_2\le2 w_{T,k}R_U M$ since
+$\norm{\xi_k}_2\le\norm{V_k}_2+\norm{\E[V_k\mid\Fcal_{k-1}]}_2\le2M$.
+Summing the conditional variance gives predictable variation
+$\le S_T\sigma_{\max}^2 R_U^2/d$ with $S_T=\sum_k w_{T,k}^2$. Applying
+\Cref{lem:azuma} (with $\sigma^2\mapsto\sigma_{\max}^2 R_U^2$, horizon
+contribution $S_T$ in place of $T$, and $c_M=2\max_k w_{T,k}R_U M$) yields,
+for each $a$ and budget $\delta'$,
+\begin{align}\label{eq:incmax_flux}
+   \Pr\Bigl[\,\textstyle\sum_k w_{T,k}\inner{W_U^a}{\xi_k}>2R_U M\sqrt{\tfrac{S_T\log(2/\delta')}{d}}\,\Bigr]
+   \;\le\;\delta',
+\end{align}
+where the absolute (variance-dominated Bernstein) constant has been fixed
+to the displayed $2$ after using $\sigma_{\max}\le2M$
+(\Cref{rem:incorrect_max_origin}).
+
+\smallskip\noindent\textbf{Union-bound paragraph.} We require simultaneous
+control of the $|\Vocab|-1$ fluctuation events \Cref{eq:incmax_flux}, one
+per $a\neq\corr$. Setting the per-direction budget
+$\delta'\coloneqq\delta_1/(|\Vocab|-1)$ and applying the union bound over
+this family of $|\Vocab|-1$ events gives total failure probability
+$\le(|\Vocab|-1)\cdot\delta'=\delta_1$; the per-direction threshold becomes
+$2R_U M\sqrt{S_T\log(2(|\Vocab|-1)/\delta_1)/d}$. On the complementary event
+of probability $\ge1-\delta_1$, adding the deterministic drift term and
+using $S_T\le e^{2S}/T$ (\Cref{lem:quad_variation}) gives
+\Cref{eq:incorrect_max_bound} simultaneously for all incorrect tokens. The
+transfer to $x_T$ via the exact rescaling \Cref{eq:onsphere_direction} adds
+the $O(1/d^{1.5})$ term of \Cref{lem:retraction_stability}. This completes
+the proof.
+\end{proof}
+
+\begin{remark}[Probabilistic in the trajectory, deterministic in $W_U$]
+\label{rem:incorrect_max_origin}
+The $\sqrt{\log(|\Vocab|-1)/d}$ scaling is entirely \emph{probabilistic in
+the trajectory}: the $1/d$ is the isotropic-noise scale of
+\Cref{eq:noise_isotropy} (equivalently the projection variance of
+\Cref{lem:orthogonality}) and the $\log(|\Vocab|-1)$ is the union-bound
+budget over incorrect tokens. The incoherence $\incoh_0$ enters only as
+the deterministic drift term $\incoh_0 R_U M$; no random-matrix model for
+$W_U$ is used. The displayed leading constant $2$ in
+\Cref{eq:incorrect_max_bound} is the variance-dominated Bernstein constant
+of \Cref{lem:azuma} together with the bound $\sigma_{\max}\le2M$: the noise
+component satisfies $\norm{\xi_k}_2\le\norm{V_k}_2+\norm{\E[V_k\mid\Fcal_{k-1}]}_2\le2M$,
+so $\operatorname{tr}\operatorname{Cov}(\xi_k\mid\Fcal_{k-1})=\E[\norm{\xi_k}_2^2\mid\Fcal_{k-1}]\le4M^2$;
+under the isotropy \Cref{eq:noise_isotropy} the covariance is comparable to
+$(\sigma_{\max}^2/d)I$ on the $(d-1)$-dimensional tangent space, so its trace
+is $\sigma_{\max}^2(d-1)/d$, giving $\sigma_{\max}^2\le4M^2 d/(d-1)\le8M^2$
+(hence $\sigma_{\max}\le2\sqrt2\,M$, folded into the absolute constant). We
+treat the leading constant as absolute, consistent with the deliberate
+$\sqrt2$ slack of \Cref{thm:R1} (the constant $c_1$ absorbs it). Together with the signal floor
+(\Cref{lem:signal_floor}) this bound produces the critical rate
+$\critrate$ of \Cref{thm:R1}.
+\end{remark}

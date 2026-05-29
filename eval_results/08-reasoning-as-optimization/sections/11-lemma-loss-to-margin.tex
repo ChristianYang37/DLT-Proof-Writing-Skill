@@ -1,0 +1,52 @@
+\section{Loss-to-margin bridge}
+\label{sec:loss_to_margin}
+
+The signal analysis controls the loss $\loss(x_T;Q)$; the decoder checks
+margin positivity $\Margin(x_T;Q)>0$. The next lemma bridges the two for
+the single-token answer set: a loss below $\log 2$ forces a positive
+logit margin.
+
+\begin{lemma}[Loss-to-margin bridge, single-token case]
+\label{lem:loss_to_margin}
+For every $x\in\R^d$ and every question $Q$ with answer set
+$\Acal=\{\corr\}$, if
+\begin{align}\label{eq:loss_to_margin_hyp}
+   \loss(x;Q) \;<\; \Lstar \;=\; \log 2,
+\end{align}
+then $\Margin(x;Q)>0$, equivalently $\Dec(x)=\corr$.
+\end{lemma}
+
+\begin{proof}
+The proof is a pigeonhole on the softmax probabilities, in two steps.
+
+\smallskip\noindent\textbf{Step 1 ($p_{\corr}>1/2$).} By \Cref{def:loss},
+$\loss(x;Q)=-\log p_{\corr}$, so the hypothesis $\loss(x;Q)<\log2$ reads
+$-\log p_{\corr}<\log2$, i.e.\ $p_{\corr}>1/2$.
+
+\smallskip\noindent\textbf{Step 2 (margin sign).} The probabilities sum to
+$1$, so the total incorrect mass is $\sum_{a\neq\corr}p_a=1-p_{\corr}<1/2$.
+In particular, for every single $a\neq\corr$,
+$p_a\le\sum_{b\neq\corr}p_b=1-p_{\corr}<1/2<p_{\corr}$, hence
+$\max_{a\neq\corr}p_a<p_{\corr}$. The softmax map
+$z\mapsto e^z/\sum_b e^{z_b}$ is strictly increasing in each coordinate
+$z_a=\inner{W_U^a}{x}$ with the others fixed, and shares its argmax with
+the logits; therefore $\max_{a\neq\corr}p_a<p_{\corr}$ is equivalent to
+$\max_{a\neq\corr}\inner{W_U^a}{x}<\inner{W_U^{\corr}}{x}$, i.e.\
+$\Margin(x;Q)=\inner{W_U^{\corr}}{x}-\max_{a\neq\corr}\inner{W_U^a}{x}>0$.
+By \Cref{def:decoder} this is exactly $\Dec(x)=\corr$. This completes the
+proof.
+\end{proof}
+
+\begin{remark}[Why $\log 2$, and the one-sided direction]
+\label{rem:loss_to_margin_direction}
+The threshold $\log 2$ is the singleton-answer specialisation of the
+general decode threshold $\log(1+1/|\Acal|)$: for $|\Acal|=1$ a positive
+margin requires the single correct mass to exceed the total incorrect
+mass, i.e.\ $p_{\corr}>1/2$, i.e.\ $\loss<\log 2$. The bridge is
+one-sided ($\loss<\log 2\Rightarrow\Margin>0$, not conversely): a positive
+margin only requires the top correct logit to beat the top incorrect
+logit, while a small loss penalises the whole distribution. The success
+branch of \Cref{thm:R1} uses only the forward direction, cleanly
+separating the Lyapunov ($\loss$) analysis from the operational
+($\Margin$) success event.
+\end{remark}

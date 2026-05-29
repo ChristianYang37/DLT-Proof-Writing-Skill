@@ -1,0 +1,82 @@
+\section{Bounded scores imply bounded softmax quadratic variation}
+\label{sec:quad_variation}
+
+The softmax-weight quadratic variation $S_T=\sum_t w_{T,t}^2$ controls
+the horizon dependence of every martingale bound in the paper. The
+trivial range $S_T\in[1/T,1]$ is too loose at the upper end to recover
+the headline scaling; the next lemma supplies a deterministic upper bound
+$S_T\le e^{2S}/T$ under the bounded-score regime, with the $e^{2S}$
+prefactor explicit. This is the $1/\sqrt T$ half of the noise scale (the
+$1/\sqrt d$ half is \Cref{lem:orthogonality}).
+
+\begin{lemma}[Bounded scores $\Rightarrow$ bounded quadratic variation]
+\label{lem:quad_variation}
+Suppose the scaled dot-product scores satisfy $\abs{\inner{q}{k_t}}\le S$
+for every $1\le t\le T$, with $S\ge0$ deterministic
+(\Cref{ass:bounded_architecture}(4)). Then for every horizon $T\ge1$ the
+running-average weights $(w_{T,t})_{1\le t\le T}$ of
+\Cref{lem:running_average} satisfy
+\begin{align}\label{eq:max_weight}
+   \max_{1\le t\le T} w_{T,t}
+   \;\le\;
+   \frac{1}{1+(T-1)\,e^{-2S}}
+   \;\le\;
+   \frac{e^{2S}}{T},
+\end{align}
+and consequently
+\begin{align}\label{eq:ST_bound}
+   S_T \;\coloneqq\; \sum_{t=1}^{T} w_{T,t}^2
+   \;\le\;
+   \Bigl(\max_{1\le t\le T} w_{T,t}\Bigr)\cdot\sum_{t=1}^{T} w_{T,t}
+   \;\le\;
+   \frac{e^{2S}}{T}.
+\end{align}
+\end{lemma}
+
+\begin{proof}
+The bound \Cref{eq:max_weight} on the maximal weight is a denominator
+estimate that uses \emph{only} the bounded scores, not the normalisation
+$\sum_k w_{T,k}=1$; the quadratic-variation bound \Cref{eq:ST_bound} then
+folds in the normalisation. (So \Cref{eq:max_weight} may be invoked by
+\Cref{lem:running_average} without circularity.)
+
+\smallskip\noindent\textbf{Maximal weight \Cref{eq:max_weight}.} Let
+$t^\star\in\arg\max_t w_{T,t}$ and write $w_{T,t}=e^{s_t}/\sum_{j} e^{s_j}$
+with $s_j=\inner{q}{k_j}$. For every index $j$ in the (length-$T$) sum,
+$\abs{s_j-s_{t^\star}}\le\abs{s_j}+\abs{s_{t^\star}}\le2S$, so
+$e^{s_j}\ge e^{s_{t^\star}}e^{-2S}$; summing the $T$ terms,
+\begin{align*}
+   \sum_{j=1}^{T} e^{s_j}
+   \;\ge\; e^{s_{t^\star}} + (T-1)\,e^{s_{t^\star}}e^{-2S}
+   \;=\; e^{s_{t^\star}}\bigl(1+(T-1)e^{-2S}\bigr),
+\end{align*}
+where we retained the $j=t^\star$ term exactly and bounded the other $T-1$
+terms below. Dividing, $w_{T,t^\star}=e^{s_{t^\star}}/\sum_j e^{s_j}\le1/(1+(T-1)e^{-2S})$,
+the first inequality of \Cref{eq:max_weight}. Since $e^{-2S}\le1$ we have
+$1+(T-1)e^{-2S}\ge e^{-2S}+(T-1)e^{-2S}=Te^{-2S}$, giving the second
+inequality $w_{T,t^\star}\le e^{2S}/T$.
+
+\smallskip\noindent\textbf{Quadratic variation \Cref{eq:ST_bound}.} Using
+$w_{T,t}\le\max_t w_{T,t}$ inside the sum and then
+$\sum_t w_{T,t}=1$ (\Cref{lem:running_average}),
+\begin{align*}
+   S_T \;=\; \sum_{t=1}^{T} w_{T,t}^2
+   \;\le\; \Bigl(\max_{1\le t\le T} w_{T,t}\Bigr)\sum_{t=1}^{T} w_{T,t}
+   \;\le\; \frac{e^{2S}}{T}\cdot1
+   \;=\; \frac{e^{2S}}{T}.
+\end{align*}
+This completes the proof.
+\end{proof}
+
+\begin{remark}[Tightness and the vacuous regime]
+\label{rem:quad_variation_tightness}
+\Cref{eq:ST_bound} is tight up to $e^{2S}$ in the uniform-attention
+regime ($w_{T,t}=1/T$ gives $S_T=1/T$). The prefactor $e^{2S}$ isolates
+the architectural cost of a wider score range; in the bounded-score
+regime $S=O(1)$ of \Cref{ass:bounded_architecture}(4) it is $\Theta(1)$
+in $d$, so the headline $1/\sqrt{T_{\max}d}$ scaling of \Cref{thm:R1}
+carries an absolute prefactor. Under raw bounded-entry parametrisations
+where $S$ may grow like $\sqrt d$ (\Cref{rem:architecture_realism}), the
+bound degrades to $S_T\le e^{\Theta(\sqrt d)}/T$ and is vacuous — this is
+the failure mode flagged in \Cref{ass:bounded_architecture}.
+\end{remark}

@@ -1,0 +1,66 @@
+\section{High-dimensional orthogonality}
+\label{sec:orthogonality}
+
+\begin{lemma}[Projection variance and concentration on the sphere]
+\label{lem:orthogonality}
+Let $u\in\R^d$ be uniformly distributed on the sphere $S^{d-1}$ and let
+$e\in\R^d$ be any deterministic unit vector. Then
+\begin{align}\label{eq:orthogonality_variance}
+   \E\inner{e}{u}^2 \;=\; \frac1d,
+\end{align}
+and for every $t\in[0,c'\sqrt d\,]$ with $c'\in(0,1)$ an absolute
+constant,
+\begin{align}\label{eq:orthogonality_tail}
+   \Pr\!\left[\, \abs{\inner{e}{u}} \;>\; \frac{t}{\sqrt d} \,\right]
+   \;\le\; 2\exp(-c\,t^2),
+\end{align}
+for an absolute constant $c>0$. Moreover $\inner{e}{u}$ obeys a matching
+small-ball (anti-concentration) lower bound: for $t$ in a bounded range,
+$\Pr[\inner{e}{u}>t/\sqrt d]\ge c''\exp(-C''t^2)$ for absolute constants
+$c'',C''>0$.
+\end{lemma}
+
+\begin{proof}[Proof of \Cref{lem:orthogonality}]
+The proof is three named facts about the uniform measure on $S^{d-1}$, two
+of them direct from \cite{vershynin2018}.
+
+\smallskip\noindent\textbf{Variance \Cref{eq:orthogonality_variance}.} By
+rotational invariance of the uniform measure, $\E[uu^\top]$ commutes with
+every orthogonal matrix, hence is a scalar multiple of the identity,
+$\E[uu^\top]=\lambda I$; taking traces, $1=\E\norm{u}_2^2=\lambda d$, so
+$\lambda=1/d$ and $\E\inner{e}{u}^2=e^\top\E[uu^\top]e=\norm{e}_2^2/d=1/d$.
+
+\smallskip\noindent\textbf{Upper tail \Cref{eq:orthogonality_tail}.} The
+linear form $\inner{e}{u}$ of a uniform point on $S^{d-1}$ is sub-Gaussian
+with variance proxy of order $1/d$: \cite{vershynin2018}, Theorem~3.4.6
+(concentration of Lipschitz functions on the sphere; $u\mapsto\inner{e}{u}$
+is $1$-Lipschitz) gives $\Pr[\abs{\inner{e}{u}}>r]\le2\exp(-c d r^2)$ for an
+absolute $c>0$; substituting $r=t/\sqrt d$ yields
+$\Pr[\abs{\inner{e}{u}}>t/\sqrt d]\le2\exp(-c t^2)$, valid for
+$t\in[0,c'\sqrt d]$.
+
+\smallskip\noindent\textbf{Small-ball lower bound.} The exact density of
+$\inner{e}{u}$ is $f(r)=c_d(1-r^2)^{(d-3)/2}$ on $[-1,1]$ with
+$c_d=\Theta(\sqrt d)$ (the projection of the uniform sphere measure; see
+\cite{vershynin2018}, Section~3.4). For $r=t/\sqrt d$ with $t$ in a bounded
+range, $(1-r^2)^{(d-3)/2}=\exp\bigl(\tfrac{d-3}{2}\log(1-t^2/d)\bigr)\ge\exp(-C''t^2)$
+for large $d$, so integrating $f$ over $[t/\sqrt d,\,2t/\sqrt d]$ (an
+interval of length $t/\sqrt d$) gives
+$\Pr[\inner{e}{u}>t/\sqrt d]\ge c''\exp(-C''t^2)$ for absolute constants
+$c'',C''>0$. This is the spreading estimate feeding the anti-concentration
+argument of \Cref{lem:incorrect_max_lower}. This completes the proof.
+\end{proof}
+
+\begin{remark}[The structural role of $1/d$, and that we do not use L\'evy for $1/\sqrt T$]
+\label{rem:orthogonality_structural}
+\Cref{eq:orthogonality_variance} is the quantitative form of ``random
+vectors are nearly orthogonal in high dimension''. It is the sole source
+of the $1/d$ factor in the per-step noise variance proxy
+$\E[M_t^2\mid\Fcal_{t-1}]\le\sigma^2/d$ used by \Cref{lem:azuma}, and
+hence of the $1/\sqrt d$ half of the noise scale. The complementary
+$1/\sqrt{T}$ half comes from the softmax quadratic variation
+$S_T\le e^{2S}/T$ (\Cref{lem:quad_variation}), \emph{not} from a
+sphere concentration-of-measure (L\'evy) argument: the high-dimensional
+spreading here governs single-direction projection variance, while the
+horizon dependence is purely the running-average weight structure.
+\end{remark}

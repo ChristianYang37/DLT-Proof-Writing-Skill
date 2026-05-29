@@ -1,76 +1,91 @@
-# Review iteration 2 — self-conducted peer review
+# Review iteration 2 — re-review after iteration-1 fixes
+
+(Author-agent reviewer mode, re-reading the files changed in iteration 1:
+sections/07, 08, 12, 14, plus a fresh end-to-end pass. Same reviewer
+template; the goal is to confirm the iteration-1 fixes are sound and detect
+any regression.)
 
 ## Summary
-
-After iteration 1's fixes, the proof skeleton is clean: `lem:T_polynomial`
-now separates the score-margin condition from the time-horizon
-explicitly, the main theorem's union-bound paragraph is uncluttered,
-and the per-layer extension acknowledges per-(layer, head) targets.
-The headline statement is unchanged. Residual exposition issues remain
-in the proof of `lem:anchor_count_lb`.
+Unchanged contribution (see iteration 1). The changes since iteration 1:
+(i) R2 now applies Berry--Esseen to the FIXED-direction correct-token logit
+martingale and pins the incorrect side as a threshold on $\Ecal_{\mathrm{inc}}$
+between lem:incorrect_max (upper) and lem:incorrect_max_lower (lower);
+(ii) lemma 12 states the exceedance-covariance bound explicitly, valid
+exactly in the Gaussian limit (Slepian) and asymptotically otherwise, with a
+\todo{verify} on the non-asymptotic version and Sudakov as the fallback;
+(iii) lemma 12 uses a tunable threshold constant $\kappa$ removing the
+dependence on the numerical small-ball constant $C''$; (iv) the
+$\sigma_{\max}\le2\sqrt2 M$ link is made explicit via a trace argument;
+(v) the retraction lemma analyses the operationally-exact single-LayerNorm
+iterate $\bar x_T$, for which there is no accumulated retraction error.
 
 ## Strengths
-
-- The two-role separation between the $\Delta$ hypothesis and the
-  $T$ horizon in the new `lem:T_polynomial` is the right move; the
-  remark `rem:T_polynomial_remark` explains the load-bearing structure
-  cleanly.
-- The union-bound paragraph in `thm:main_convergence_hp` is now
-  minimal and discharges the $1 - \delta$ headline via the single
-  Azuma event.
-- The per-layer extension correctly notes the $\log(LH)$ cost.
+- The R2 fix is a genuine improvement: the fixed-direction martingale has a
+  data-independent terminal functional, so Hall--Heyde applies cleanly; the
+  incorrect side is handled deterministically on the good event. This is the
+  standard and correct way to get a Gaussian CDF for a max-type margin.
+- The $\kappa$-tunable threshold (lem 12) is a clean removal of a numerical
+  constant dependence; the proof no longer asserts $C''\le1/4$.
+- The retraction reframing (operational iterate $=$ single normalization) is
+  honest and removes the accumulation question, while still recording the
+  per-step-retraction alternative and its $O(T_{\max}/d)$ caveat.
 
 ## Weaknesses
-
-### Weakness #6 (severity: minor)
-**Claim:** The proof of `lem:anchor_count_lb` is overlong. Step 2
-states the Azuma bound at $u = p_0 T / 4$ and obtains
-$\exp(-p_0^2 T / 32)$, then Step 4 says "we use the slightly more
-generous bound $T \ge 32 / p_0^2 \cdot \log(1/\delta_1)$" but then
-also says "to match the lemma's stated hypothesis we tighten Step 2"
-and re-derives with $u = p_0 T / 2$. The reader walks through two
-different choices of $u$ for the same lemma. The cleaner pattern is
-to pick the tight form up front.
-**Evidence:** sections/06-lemma-anchor-count.tex:43--99
-**Severity:** minor
-**Verdict:** REAL-nonblocking. The proof is correct but reads as
-"author thinks aloud". Cost to clean: ≤ 20 LaTeX lines.
-**Rebuttal / fix-plan:** Rewrite the proof to apply Azuma directly at
-$u = p_0 T / 2$ and obtain $\exp(-p_0^2 T / 8)$ in one shot.
-
-### Weakness #7 (severity: minor)
-**Claim:** The proof of `lem:softmax_running_average` Step 1 is
-slightly circular: it uses "the last equality used
-$s_{j-1} x_{j-1} = \sum_{k=1}^{j-1} e^{\inner{q}{k_k}} V_k$
-from \Cref{eq:cumulative_softmax} at index $j-1$ (and the base case
-$s_0 x_0 = 0$)". \Cref{eq:cumulative_softmax} is the *definition* of
-$x_j$, so the proof is using the definition at $j-1$, which is fine
-but the "base case $s_0 x_0 = 0$" should be the convention introduced
-in the lemma's preamble. Adding "(by the convention $x_0 = 0$, $s_0 = 0$
-in the lemma statement)" would close the loop.
-**Evidence:** sections/03-lemma-softmax-running-average.tex:35--37
-**Severity:** minor
-**Verdict:** REAL-nonblocking, fixable in ≤ 1 line.
-**Rebuttal / fix-plan:** Edit to add the convention reminder.
-
-### Weakness #8 (severity: style)
-**Claim:** The footnote in \Cref{ass:anchor_set_accuracy} introduces
-the dependence of $V(\cdot)$ on the trajectory through positional
-embeddings and prior context, but the assumption itself never makes
-the trajectory dependence explicit — $V_k = V(a_k)$ is treated as if
-it depends only on the token. The footnote's hedge ("we assume this
-dependence is mild enough") is fine but could be moved into a remark
-for legibility.
-**Evidence:** sections/02-assumptions.tex:24--28
-**Severity:** style
-**Verdict:** INTENTIONAL. The footnote is the right place for this
-nuance; promoting to a remark would over-emphasize a technical point.
+- **W3' (major, carried over, now flagged).** The non-asymptotic
+  exceedance-covariance bound eq:antic_cov for the finite-$T_{\max}$
+  sub-Gaussian projections is not established non-asymptotically; it is exact
+  only in the Gaussian limit (Slepian). Evidence:
+  sections/12-lemma-incorrect-max-lower.tex:86--100. Severity: major, but now
+  carries a \todo{verify} and a recorded Sudakov fallback (INTENTIONAL
+  surfacing rather than a silent gap). This is the single residual.
 
 ## Questions for the author
-
-(None this iteration.)
+- Q1. Would you prefer the failure branch of R1/R2 to be re-derived via
+  Sudakov minoration (which avoids the exceedance-covariance bound entirely
+  at the cost of a less explicit constant), making the \todo{verify}
+  unnecessary? This is a constant-vs-rigour trade-off for your decision.
 
 ## Verdict
+accept-with-minor-revisions
 
-`accept-with-minor-revisions`. Apply Weakness #6 and #7 fixes, then
-the proof is at acceptance quality.
+---
+
+## Verification (Component 2) and fixes (Component 3)
+
+### Weakness #W3' (major) — non-asymptotic exceedance-covariance bound
+**Verdict:** INTENTIONAL (residual surfaced as \todo).
+**Rebuttal / fix-plan:** This is a genuinely delicate step (anti-concentration
+for a max of weakly-correlated, only-asymptotically-Gaussian variables). It is
+NOT silently asserted: eq:antic_cov is stated, its Gaussian-limit justification
+(Slepian) is given, the Berry--Esseen transfer is noted, a \todo{verify} marks
+the non-asymptotic gap, and Sudakov minoration is recorded as the fallback that
+sidesteps it. The Paley--Zygmund consequence is independently script-verified
+(CHECK 6). Per the honesty protocol this is the correct disposition: surface,
+do not hand-wave. Fixing it fully requires either (a) a non-asymptotic
+correlation-comparison lemma for sub-Gaussian exceedances, or (b) switching the
+failure branch to Sudakov minoration — both are user-level decisions (the
+former is research, the latter changes the explicit constant). No further
+auto-fix applied; surfaced in the final report.
+
+### Re-check of iteration-1 fixes (no regression)
+- W1 (R2 data-dependent terminal): resolved; fixed-direction martingale,
+  re-read sections/14:74--112, sound. No regression.
+- W2 ($o(\cdot)$): resolved by W1 fix; now $(1+o(1))$ explicit.
+- W4 ($C''$): resolved; $\kappa$ tunable, re-read sections/12:41--55, sound.
+- W5 ($\sigma_{\max}$): resolved; trace argument, sections/08 remark, sound.
+- W6 (retraction accumulation): resolved; operational iterate framing,
+  sections/07:96--110, sound.
+- $\kappa$ propagated to the R2 threshold-pinning line (sections/14:90) for
+  consistency.
+
+**Fixes applied this iteration:** $\kappa$-consistency in R2 (1 line). No new
+substantive fixes; the single residual is INTENTIONAL (the \todo W3').
+
+## Loop termination
+Iteration 2 produced exactly ONE weakness (W3'), which is the SAME issue as
+iteration-1 W3, now verified INTENTIONAL with a \todo and a recorded fallback.
+No new actionable REAL-blocking weakness. Per review-loop.md Component 4
+gate (4) "no fixes applied this iteration" (only a 1-line consistency tweak;
+the sole weakness is INTENTIONAL), the loop terminates at
+accept-with-minor-revisions. The residual \todo{verify} is surfaced to the
+user as the one item needing human judgement.

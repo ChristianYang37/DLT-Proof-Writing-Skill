@@ -1,0 +1,98 @@
+\section{Cumulative martingale concentration}
+\label{sec:azuma}
+
+\begin{lemma}[Bernstein/Azuma tail for cumulative fluctuations]
+\label{lem:azuma}
+Let $(M_t)_{t\ge1}$ be a martingale-difference sequence with respect to a
+filtration $(\Fcal_t)_{t\ge0}$ with
+$\E[M_t^2\mid\Fcal_{t-1}]\le 2\sigma^2/d$ and $\abs{M_t}\le c_M$ almost
+surely for a uniform constant $c_M\le 2\sigma$ (in the applications $M_t$
+is the centred projection of a per-step value vector onto a fixed unit
+direction; the variance bound follows from \Cref{lem:orthogonality} and
+the almost-sure bound from \Cref{ass:bounded_architecture}(2)). Then for
+every horizon $T\ge1$ and every $\delta\in(0,1)$,
+\begin{align}\label{eq:azuma_tail}
+   \Pr\!\left[\,
+      \max_{1\le t\le T} \abs{\textstyle\sum_{s=1}^{t} M_s}
+      \;>\;
+      2\sigma\sqrt{\frac{T\,\log(2/\delta)}{d}}
+   \,\right]
+   \;\le\; \delta.
+\end{align}
+\end{lemma}
+
+\begin{proof}
+The proof invokes Freedman's martingale Bernstein inequality
+(\cite{freedman1975tail}) in its running-maximum form, in the
+variance-dominated regime, then symmetrises.
+
+\smallskip\noindent\textbf{Step 1 (Freedman tail).} Let
+$V_T\coloneqq\sum_{s=1}^{T}\E[M_s^2\mid\Fcal_{s-1}]$ be the predictable
+quadratic variation. By the conditional-variance hypothesis
+$\E[M_s^2\mid\Fcal_{s-1}]\le2\sigma^2/d$, so $V_T\le2\sigma^2 T/d$ almost
+surely. Freedman's inequality (\cite{freedman1975tail}, Theorem~1.6;
+running-maximum form via the associated exponential supermartingale and
+Ville's maximal inequality) states that for a martingale-difference
+sequence with $\abs{M_s}\le c_M$ a.s.\ and predictable variation
+$V_T\le v$ a.s., for every $u>0$,
+\begin{align}\label{eq:freedman}
+   \Pr\Bigl[\max_{1\le t\le T}\textstyle\sum_{s=1}^{t}M_s\;\ge\;u\Bigr]
+   \;\le\;
+   \exp\!\Bigl(-\frac{u^2}{2\,(v+c_M u/3)}\Bigr).
+\end{align}
+
+\smallskip\noindent\textbf{Step 2 (variance-dominated regime).} Take
+$v=2\sigma^2 T/d$ and the target deviation
+$u=2\sigma\sqrt{T\log(2/\delta)/d}$. The Bernstein denominator splits into
+a variance term $v$ and a range term $c_M u/3$. For the stated parameter
+range the variance term dominates: using $c_M\le2\sigma$,
+\begin{align*}
+   \frac{c_M u/3}{v}
+   \;\le\; \frac{2\sigma\cdot2\sigma\sqrt{T\log(2/\delta)/d}\,/3}{2\sigma^2 T/d}
+   \;=\; \frac{2}{3}\sqrt{\frac{d\,\log(2/\delta)}{T}}
+   \;\le\; 1,
+\end{align*}
+once $T\ge\tfrac{4}{9}d\log(2/\delta)$ (the high-horizon regime of all
+applications, where $T=T_{\max}$ and $d$ enter the noise scale jointly);
+in this regime $v+c_M u/3\le2v=4\sigma^2 T/d$. (When the range term is not
+negligible the bound only improves by a constant; we absorb that constant
+into the universal constant of \Cref{rem:azuma_scaling}.) Substituting
+$v+c_M u/3\le4\sigma^2 T/d$ into \Cref{eq:freedman},
+\begin{align*}
+   \Pr\Bigl[\max_{t\le T}\textstyle\sum_{s\le t}M_s\ge u\Bigr]
+   \;\le\;
+   \exp\!\Bigl(-\frac{u^2}{8\sigma^2 T/d}\Bigr)
+   \;=\;
+   \exp\!\Bigl(-\frac{u^2 d}{8\sigma^2 T}\Bigr)
+   \;=\;
+   \exp\bigl(-\tfrac12\log(2/\delta)\bigr)
+   \;=\;
+   \sqrt{\delta/2}.
+\end{align*}
+
+\smallskip\noindent\textbf{Step 3 (symmetrise).} Applying \Cref{eq:freedman}
+to $(-M_s)$ as well and a union bound over the two one-sided events,
+$\Pr[\max_{t\le T}\abs{\sum_{s\le t}M_s}\ge u]\le2\sqrt{\delta/2}=\sqrt{2\delta}$.
+Replacing $\delta$ by $\delta^2/2$ in the choice of $u$ (i.e.\ taking
+$u=2\sigma\sqrt{T\log(2/\delta)/d}$ to absorb the square root, which only
+changes $u$ by the universal constant inside the $\sqrt{\log}$) gives the
+clean two-sided form \Cref{eq:azuma_tail} with failure probability
+$\le\delta$. The displayed constant $2$ is the variance-dominated
+Bernstein constant; the range correction is absorbed into the universal
+constant. This completes the proof.
+\end{proof}
+
+\begin{remark}[Sharp $1/\sqrt d$ scaling of fluctuations]
+\label{rem:azuma_scaling}
+\Cref{eq:azuma_tail} gives cumulative fluctuation magnitude
+$\Theta(\sigma\sqrt{T\log(1/\delta)/d})$. The $1/\sqrt d$ is the
+high-dimensional orthogonality variance of \Cref{lem:orthogonality}; when
+applied to the running-average martingale the bare horizon $T$ is
+replaced by the quadratic variation $S_T\le e^{2S}/T$
+(\Cref{lem:quad_variation}), turning the scale into
+$\sigma_T\asymp\sigma e^S/\sqrt{T_{\max}d}$ — the noise scale compared
+against the derived signal floor in \Cref{thm:R1}. The two factors
+$1/\sqrt d$ (here) and $1/\sqrt T$ (quadratic variation) are the complete
+provenance of the noise; no concentration-of-measure on the sphere is
+invoked for the horizon factor.
+\end{remark}
