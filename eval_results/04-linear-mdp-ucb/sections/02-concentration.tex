@@ -1,0 +1,144 @@
+\section{Concentration and the successful event}\label{sec:concentration}
+
+We first bound the magnitude of the ridge weights produced by LSVI-UCB, then
+use a self-normalized concentration argument to define a high-probability event
+on which least-squares value iteration tracks the Bellman backup.
+
+\begin{lemma}[Bounded weights]\label{lem:weight-bound}
+Under \Cref{ass:linear-mdp} with $\lambda=1$, for every $(k,h)\in[K]\times[H]$
+the LSVI-UCB weight $w_h^k$ of Eq.~\eqref{eq:weight-def} satisfies
+$\norm{w_h^k}\le 2H\sqrt{dk}$.
+\end{lemma}
+
+\begin{proof}
+We bound $|v^\top w_h^k|$ for an arbitrary unit vector $v$ and take the
+supremum. Writing $\featmap_h^\tau:=\featmap(x_h^\tau,a_h^\tau)$ and
+$y_h^\tau:=r_h(x_h^\tau,a_h^\tau)+V_{h+1}^k(x_{h+1}^\tau)\in[0,H]$,
+\begin{align*}
+|v^\top w_h^k|
+&\;=\; \Big| \sum_{\tau=1}^{k-1} v^\top (\Gram_h^k)^{-1}\featmap_h^\tau\, y_h^\tau \Big| \\
+&\;\le\; H \sum_{\tau=1}^{k-1} \big| v^\top (\Gram_h^k)^{-1}\featmap_h^\tau \big| \\
+&\;\le\; H \Big( \sum_{\tau=1}^{k-1} v^\top (\Gram_h^k)^{-1} v \Big)^{1/2} \Big( \sum_{\tau=1}^{k-1} (\featmap_h^\tau)^\top (\Gram_h^k)^{-1}\featmap_h^\tau \Big)^{1/2} \\
+&\;\le\; H \cdot \norm{v} \cdot \big( dk \big)^{1/2}
+\;=\; H\sqrt{dk},
+\end{align*}
+where the first step is Eq.~\eqref{eq:weight-def}, the second uses
+$|y_h^\tau|\le H$ and the triangle inequality, the third is the Cauchy--Schwarz
+inequality in the inner product $\langle u,u'\rangle_{(\Gram_h^k)^{-1}}=u^\top
+(\Gram_h^k)^{-1}u'$, and the fourth uses $v^\top(\Gram_h^k)^{-1}v\le
+\norm{v}^2/\lambda=\norm{v}^2$ (since $\lambda_{\min}(\Gram_h^k)\ge\lambda=1$)
+together with $\sum_{\tau=1}^{k-1}(\featmap_h^\tau)^\top(\Gram_h^k)^{-1}
+\featmap_h^\tau\le d$ (\Cref{lem:trace-bound}) and $\norm{v}=1$ (so the first
+factor is $(\sum_{\tau=1}^{k-1}\norm{v}^2)^{1/2}=\sqrt{k-1}\le\sqrt k$). Taking the
+supremum over $\norm{v}=1$ and using $\norm{w_h^k}=\sup_{\norm{v}=1}|v^\top
+w_h^k|$ gives $\norm{w_h^k}\le H\sqrt{dk}\le 2H\sqrt{dk}$. This completes the
+proof.
+\end{proof}
+
+The core statistical guarantee is the following self-normalized bound on the
+fluctuation of the empirical Bellman backup. We define the successful event
+$\Ev$ here; all later derivations are carried out on $\Ev$.
+
+\begin{lemma}[Self-normalized concentration; successful event]\label{lem:concentration}
+Suppose \Cref{ass:linear-mdp} holds and $\lambda=1$. There exist universal
+constants $C_\beta>0$ and $C>0$ such that, setting
+$\beta=C_\beta\,dH\sqrt{\iota}$ with $\iota=\log(2dT/\delta)$, the event
+\begin{align}\label{eq:event-def}
+\Ev \;:=\; \bigg\{
+\forall (k,h)\in[K]\times[H]:\;
+\Big\| \sum_{\tau=1}^{k-1} \featmap_h^\tau \big[\, V_{h+1}^k(x_{h+1}^\tau) - (\Pop_h V_{h+1}^k)(x_h^\tau,a_h^\tau) \,\big] \Big\|_{(\Gram_h^k)^{-1}}
+\;\le\; C\, dH\sqrt{\iota}
+\bigg\}.
+\end{align}
+satisfies $\Prob[\Ev]\ge 1-\delta/2$.
+\end{lemma}
+
+\begin{proof}
+The argument is the self-normalized tail bound for vector-valued martingales of
+\cite{abbasi2011improved}, combined with a covering-number union bound over the
+class of value functions $V_{h+1}^k$ can equal; we record its structure and the
+constant accounting.
+
+Fix $(k,h)$ and abbreviate $\featmap_h^\tau:=\featmap(x_h^\tau,a_h^\tau)$. For a
+\emph{fixed} function $V:\St\to[0,H]$, the increments
+$\varepsilon_h^\tau(V):= V(x_{h+1}^\tau) - (\Pop_h V)(x_h^\tau,a_h^\tau)$ form a
+martingale-difference sequence with respect to $\{\mathcal F_{\tau,h}\}$ with
+$\E[\varepsilon_h^\tau(V)\mid\mathcal F_{\tau,h-1}]=0$ and
+$|\varepsilon_h^\tau(V)|\le H$, hence conditionally $H$-sub-Gaussian; the
+regressors $\featmap_h^\tau$ are $\mathcal F_{\tau,h-1}$-measurable, hence
+$\{\mathcal F_{\tau,h-1}\}$-predictable, so the hypotheses of
+\Cref{lem:self-normalized} are met. By the
+self-normalized bound of \cite{abbasi2011improved} (recorded in
+\Cref{lem:self-normalized}), for any fixed $V$ and any $\delta'\in(0,1)$, with
+probability at least $1-\delta'$,
+\begin{align}
+\Big\| \sum_{\tau=1}^{k-1} \featmap_h^\tau\, \varepsilon_h^\tau(V) \Big\|_{(\Gram_h^k)^{-1}}^2
+&\;\le\; 2H^2 \log\!\bigg( \frac{\det(\Gram_h^k)^{1/2}\det(\lambda I)^{-1/2}}{\delta'} \bigg) \notag \\
+&\;\le\; 2H^2 \Big( \tfrac{d}{2}\log\tfrac{\lambda+k}{\lambda} + \log\tfrac{1}{\delta'} \Big), \label{eq:sn-fixed}
+\end{align}
+where the first step is \Cref{lem:self-normalized} with $\sigma=H$ and the
+second bounds $\det(\Gram_h^k)\le(\lambda+k)^d$ (the eigenvalues of $\Gram_h^k$
+sum to at most $\lambda d+k$, so their product is at most $(\lambda+k/d)^d\le
+(\lambda+k)^d$ by AM--GM) and $\det(\lambda I)=\lambda^d$.
+
+The function $V_{h+1}^k$ in Eq.~\eqref{eq:event-def} is \emph{not} fixed: it
+depends on the data through $(w_{h+1}^k,\Gram_{h+1}^k)$. By
+Eq.~\eqref{eq:Q-def} and Eq.~\eqref{eq:V-def} together with
+\Cref{lem:weight-bound}, every such
+$V_{h+1}^k$ lies in the parametric class
+\begin{align*}
+\Vsp \;:=\; \Big\{\, x\mapsto \min\big\{\max_a \big[\, \inner{w}{\featmap(x,a)} + \beta\,\Mnorm{\featmap(x,a)}{A^{-1}} \,\big],\,H\big\} : \norm{w}\le 2H\sqrt{dK},\; A\succeq I \,\Big\}.
+\end{align*}
+Let $\Vsp_\epsilon$ be a minimal $\epsilon$-cover of $\Vsp$ in the supremum
+norm. A volumetric estimate over the parameters $(w,A)$ (\cite{jin2020provably},
+Lemma D.6) gives
+\begin{align}\label{eq:cover}
+\log|\Vsp_\epsilon| \;\le\; C_1\, d^2 \log\!\big( 1 + \tfrac{HdK}{\epsilon\lambda} \big) .
+\end{align}
+Apply Eq.~\eqref{eq:sn-fixed} with $\delta'=\delta/(2HK|\Vsp_\epsilon|)$ and
+union-bound over $\Vsp_\epsilon$ and over all $(k,h)$, so that the fixed-$V$
+bound holds simultaneously for every $\bar V\in\Vsp_\epsilon$. The realized
+$V_{h+1}^k\in\Vsp$ need not lie in $\Vsp_\epsilon$, so we transfer to its nearest
+cover element $\bar V$ with $\norm{V_{h+1}^k-\bar V}_\infty\le\epsilon$: since
+$\varepsilon_h^\tau$ is $1$-Lipschitz in $V$ under $\norm{\cdot}_\infty$ and
+$\Mnorm{\sum_\tau\featmap_h^\tau\cdot}{(\Gram_h^k)^{-1}}$ is a seminorm, the
+discretization correction is additive,
+\begin{align*}
+\Big\| \sum_{\tau=1}^{k-1} \featmap_h^\tau\, \varepsilon_h^\tau(V_{h+1}^k) \Big\|_{(\Gram_h^k)^{-1}}
+\;\le\; \Big\| \sum_{\tau=1}^{k-1} \featmap_h^\tau\, \varepsilon_h^\tau(\bar V) \Big\|_{(\Gram_h^k)^{-1}}
+\;+\; 2\epsilon\sqrt{k}\,,
+\end{align*}
+the second term bounding $\Mnorm{\sum_\tau\featmap_h^\tau\,[\varepsilon_h^\tau
+(V_{h+1}^k)-\varepsilon_h^\tau(\bar V)]}{(\Gram_h^k)^{-1}}\le 2\epsilon
+(\sum_\tau(\featmap_h^\tau)^\top(\Gram_h^k)^{-1}\featmap_h^\tau)^{1/2}\le
+2\epsilon\sqrt{d}\le 2\epsilon\sqrt k$ via Cauchy--Schwarz and
+\Cref{lem:trace-bound}. With $\epsilon=dH/K$ this correction is at most
+$2dH\sqrt K/K\le 2dH$, lower order than the radius below. Hence, with
+probability at least $1-\delta/2$, simultaneously for all $(k,h)$,
+\begin{align*}
+\Big\| \sum_{\tau=1}^{k-1} \featmap_h^\tau\, \varepsilon_h^\tau(V_{h+1}^k) \Big\|_{(\Gram_h^k)^{-1}}^2
+&\;\le\; 2\cdot 2H^2\Big( \tfrac{d}{2}\log(\lambda+k) + \log\tfrac{1}{\delta'} \Big) + 2(2dH)^2 \\
+&\;\le\; 2H^2\Big( \tfrac{d}{2}\,\iota + C_2\, d^2\,\iota \Big) \\
+&\;\le\; C^2 d^2 H^2 \iota,
+\end{align*}
+where the first inequality applies Eq.~\eqref{eq:sn-fixed} to $\bar V$ together
+with the additive correction above (using $(a+b)^2\le2a^2+2b^2$), the second
+substitutes
+$\log(1/\delta')\le C_2 d^2\iota$ from Eq.~\eqref{eq:cover} (with $\iota=
+\log(2dT/\delta)$ absorbing the polynomial arguments $\log(1+HdK/(\epsilon
+\lambda))\lesssim\iota$), and the last collects the dominant $d^2$ term into a
+single universal $C^2$. Taking square roots yields Eq.~\eqref{eq:event-def} with
+radius $C\,dH\sqrt{\iota}$, where $C$ denotes this fixed event-radius constant
+(the same $C$ that reappears in \Cref{lem:recursion}); choosing $C_\beta\ge C+4$
+in $\beta=C_\beta dH\sqrt{\iota}$ (the stronger of the two floors $C_\beta\ge C$
+here and $C_\beta\ge C+4$ in \Cref{lem:recursion}) makes $\beta$ dominate this
+fluctuation. The constant $C_\beta$ is thus a universal constant---independent of
+$d,H,K,T,\delta$---whose existence and $dH\sqrt{\iota}$ scaling are exactly the
+exploration-bonus normalization of \cite{jin2020provably} (their Theorem~3.1,
+$\beta=c\,dH\sqrt{\iota}$): the constant is fixed only implicitly, by the
+self-consistency requirement that $\beta$ exceed the event radius $C\,dH\sqrt{\iota}$
+(equivalently their union-bound balance $c'\sqrt{\log 2+\log(c_\beta+1)}\le
+c_\beta\sqrt{\log 2}$), and admits no closed-form numeric value; only the rate
+factors $dH\sqrt{\iota}$ are pinned. Hence $\Prob[\Ev]\ge 1-\delta/2$. This
+completes the proof.
+\end{proof}

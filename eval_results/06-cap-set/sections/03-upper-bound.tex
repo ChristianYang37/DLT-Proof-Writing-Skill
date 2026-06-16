@@ -1,0 +1,75 @@
+\section{Upper bound on the slice rank}\label{sec:upper}
+
+We now bound the slice rank of the constraint tensor. Define
+$T:(\F_3^n)^3\to\F_3$ by $T(x,y,z):=\one[x+y+z=0]$, the indicator that the three
+points sum to zero.
+
+\begin{lemma}[Upper bound]\label{lem:upper}
+The tensor $T(x,y,z)=\one[x+y+z=0]$ on $(\F_3^n)^3$ admits the polynomial
+representation
+\begin{align}\label{eq:T-poly}
+T(x,y,z)\;=\;\prod_{i=1}^{n}\bigl(1-(x_i+y_i+z_i)^2\bigr),
+\end{align}
+a reduced polynomial of total degree $2n$, and its slice rank satisfies
+$\sr(T)\le 3M_n$, where $M_n$ is as in \Cref{def:monomial-space}.
+\end{lemma}
+
+\begin{proof}
+The proof has two parts: the polynomial identity Eq.~\eqref{eq:T-poly}, then the slice
+decomposition obtained by grouping monomials according to their lowest-degree block
+of variables.
+
+\smallskip\noindent
+\textbf{Step 1: the polynomial identity.}
+For $u\in\F_3$, $\ u^2=1$ if $u\ne 0$ and $u^2=0$ if $u=0$, so $1-u^2=\one[u=0]$.
+Applying this coordinatewise with $u=x_i+y_i+z_i$,
+\begin{align*}
+\prod_{i=1}^{n}\bigl(1-(x_i+y_i+z_i)^2\bigr)
+\;\overset{(a)}{=}\;\prod_{i=1}^{n}\one[x_i+y_i+z_i=0]
+\;\overset{(b)}{=}\;\one[x+y+z=0]
+\;\overset{(c)}{=}\;T(x,y,z),
+\end{align*}
+where (a) is $1-u^2=\one[u=0]$ per coordinate, (b) is that a product of indicators is
+the indicator of the intersection, and (c) is the definition of $T$. Each of the $n$
+factors has degree $2$, so the product is reduced of total degree $2n$.
+
+\smallskip\noindent
+\textbf{Step 2: monomial grouping.}
+Expand Eq.~\eqref{eq:T-poly} into reduced monomials,
+\begin{align}\label{eq:T-expand}
+T(x,y,z)\;=\;\sum_{(a,b,c)}\gamma_{a,b,c}\,x^a y^b z^c,
+\qquad a,b,c\in\{0,1,2\}^n,\ \ \deeg(x^a)+\deeg(y^b)+\deeg(z^c)\le 2n,
+\end{align}
+the total-degree bound being inherited from Step~1. Since the three block-degrees of
+each monomial sum to $\le 2n$, their minimum is $\le 2n/3$:
+\begin{align}\label{eq:min-degree}
+\min\set{\deeg(x^a),\,\deeg(y^b),\,\deeg(z^c)}\;\le\;\frac{2n}{3}.
+\end{align}
+Assign each monomial to the block attaining a degree $\le 2n/3$ (ties broken by the
+order $x\prec y\prec z$) and collect class by class:
+\begin{align}\label{eq:three-groups}
+T(x,y,z)
+&\;=\;\underbrace{\sum_{\deeg(x^a)\le 2n/3}x^a\,p_a(y,z)}_{=:~T_1}
+\;+\;\underbrace{\sum_{\deeg(y^b)\le 2n/3}y^b\,q_b(x,z)}_{=:~T_2}
+\;+\;\underbrace{\sum_{\deeg(z^c)\le 2n/3}z^c\,r_c(x,y)}_{=:~T_3},
+\end{align}
+where $p_a,q_b,r_c$ collect the remaining factors; by Eq.~\eqref{eq:min-degree} each
+monomial lands in exactly one class, so Eq.~\eqref{eq:three-groups} is an identity.
+Each summand $x^a\,p_a(y,z)$ is a slice in the first coordinate (Eq.~\eqref{eq:slice}
+with $f=x^a$), and the monomials $x^a$ with $\deeg(x^a)\le 2n/3$ number exactly
+$M_n=\dim V_{\le 2n/3}$ (\Cref{def:monomial-space}); thus $\sr(T_1)\le M_n$, and
+likewise $\sr(T_2),\sr(T_3)\le M_n$. By subadditivity \Cref{lem:slice-rank-def:sub},
+\begin{align*}
+\sr(T)\;\le\;\sr(T_1)+\sr(T_2)+\sr(T_3)\;\le\;3M_n,
+\end{align*}
+which is the claim. This completes the proof.
+\end{proof}
+
+\begin{remark}[Where the threshold $2n/3$ comes from]\label{rem:threshold}
+The exponent $2n/3$ in \Cref{def:monomial-space} is exactly $d/3$ for the degree
+$d=2n$ of $T$: with three variable blocks summing to degree $\le d$, the minimum
+block-degree is $\le d/3$, which is the bound Eq.~\eqref{eq:min-degree}. This is the
+slice-rank ($3$-tensor) analogue of the Croot–Lev–Pach matrix bound
+$\rank\le 2M_{d/2}$ \cite{crootlevpach2017}, where two variable blocks force a
+minimum of $\le d/2$.
+\end{remark}

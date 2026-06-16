@@ -17,7 +17,7 @@
         {"text": "all in-prose \\eqref uses are prefixed with Eq.~", "type": "script"},
         {"text": "no fabricated citations (every \\cite resolves in the .bib if one is created)", "type": "script"},
         {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method", "type": "script"},
-        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists with the Summary/Strengths/Weaknesses/Questions/Verdict schema", "type": "script"}
+        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists recording the five-reviewer panel — five 0–10 scores (3 correctness + math-taste + derivation-integrity) and merged, verified weaknesses", "type": "script"}
       ]
     },
     {
@@ -38,7 +38,7 @@
         {"text": "experiments-plan.md has no fabricated results — the Results section is blank or absent, no invented numerical values, no fitted slopes", "type": "qualitative"},
         {"text": "experiments-plan.md design meets ICML/NeurIPS/ICLR rigor minimum: ≥5 seeds explicitly listed, at least one baseline, at least one ablation, pre-registered success criteria stated", "type": "qualitative"},
         {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method", "type": "script"},
-        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists with the Summary/Strengths/Weaknesses/Questions/Verdict schema", "type": "script"}
+        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists recording the five-reviewer panel — five 0–10 scores (3 correctness + math-taste + derivation-integrity) and merged, verified weaknesses", "type": "script"}
       ]
     },
     {
@@ -55,7 +55,7 @@
         {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script"},
         {"text": "no \"by a standard argument\" or \"it is clear that\" filler phrases", "type": "qualitative"},
         {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method", "type": "script"},
-        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists with the Summary/Strengths/Weaknesses/Questions/Verdict schema", "type": "script"}
+        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists recording the five-reviewer panel — five 0–10 scores (3 correctness + math-taste + derivation-integrity) and merged, verified weaknesses", "type": "script"}
       ]
     },
     {
@@ -76,7 +76,7 @@
         {"text": "experiments-plan.md has no fabricated results — the Results section is blank or absent, no invented numerical values, no fitted slopes", "type": "qualitative"},
         {"text": "experiments-plan.md design meets ICML/NeurIPS/ICLR rigor minimum: ≥5 seeds explicitly listed, at least one baseline, at least one ablation, pre-registered success criteria stated", "type": "qualitative"},
         {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method", "type": "script"},
-        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists with the Summary/Strengths/Weaknesses/Questions/Verdict schema", "type": "script"}
+        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists recording the five-reviewer panel — five 0–10 scores (3 correctness + math-taste + derivation-integrity) and merged, verified weaknesses", "type": "script"}
       ]
     },
     {
@@ -94,7 +94,7 @@
         {"text": "the final rate exponent is -2s/(2s+d), not approximate", "type": "qualitative"},
         {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script"},
         {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method", "type": "script"},
-        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists with the Summary/Strengths/Weaknesses/Questions/Verdict schema", "type": "script"}
+        {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists recording the five-reviewer panel — five 0–10 scores (3 correctness + math-taste + derivation-integrity) and merged, verified weaknesses", "type": "script"}
       ]
     },
     {

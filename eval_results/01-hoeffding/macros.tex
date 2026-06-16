@@ -1,18 +1,11 @@
-% ============================================================
-% Macros and theorem-environment preamble.
-% ============================================================
+% macros.tex — theorem environments (aliascnt-safe) + math shortcuts.
+% Loaded by main.tex after the \usepackage block.
 
-% --- Math operators / shortcuts ---
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\E}{\mathbb{E}}
-\renewcommand{\Pr}{\mathbb{P}}
-\newcommand{\1}{\mathbf{1}}
-\DeclareMathOperator*{\Var}{Var}
-
-% --- TODO macro (used for verify-flags) ---
-\providecommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
-
-% --- Theorem environments via aliascnt (cleveref-safe) ---
+% ---------------------------------------------------------------------------
+% Theorem-environment preamble (cleveref-safe via aliascnt).
+% Every aliased env shares the `theorem` numbering but keeps a distinct
+% counter NAME, so \crefname keys fire correctly (Lemma X.Y, not Theorem X.Y).
+% ---------------------------------------------------------------------------
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
 
@@ -46,7 +39,7 @@
 \newtheorem{remark}[remark]{Remark}
 \aliascntresetthe{remark}
 
-% --- Cleveref names ---
+% Cleveref names — keyed on the (now distinct) counter names.
 \crefname{theorem}{Theorem}{Theorems}
 \crefname{lemma}{Lemma}{Lemmas}
 \crefname{proposition}{Proposition}{Propositions}
@@ -56,3 +49,23 @@
 \crefname{fact}{Fact}{Facts}
 \crefname{remark}{Remark}{Remarks}
 \crefname{equation}{Eq.}{Eqs.}
+
+% ---------------------------------------------------------------------------
+% Math operators, sets, and shortcuts.
+% ---------------------------------------------------------------------------
+\DeclareMathOperator{\poly}{poly}
+\DeclareMathOperator{\Var}{Var}
+
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\renewcommand{\Pr}{\mathbb{P}}
+\newcommand{\1}{\mathbf{1}}
+\newcommand{\eps}{\varepsilon}
+
+% Norm and inner product.
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
+\newcommand{\abs}[1]{\left| #1 \right|}
+
+% \todo marker (visible, for residual user-decisions / verify flags).
+\newcommand{\todo}[1]{{\color{red}\textbf{[TODO: #1]}}}

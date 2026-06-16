@@ -1,0 +1,56 @@
+\section{The entropy theorem}
+\label{sec:main-thm}
+
+We now lift the per-coordinate \Cref{lem:single-var} to the full vector via the
+chain rule, obtaining the information-theoretic strengthening due to
+Gilmer~\cite{gilmer2022unionclosed} (Theorem~1 therein). The theorem holds for
+an arbitrary distribution on $2^{[n]}$, not only the uniform distribution over a
+union-closed family.
+
+\begin{theorem}[Entropy amplification under small marginals]
+\label{thm:gilmer-entropy}
+Let $A, B$ be independent samples from a common distribution over subsets of
+$[n]$, and suppose $\Pr[i \in A] \le 0.01$ for every $i \in [n]$. Then
+\begin{align*}
+\Ent(A \cup B) \;\ge\; 1.26\,\Ent(A).
+\end{align*}
+\end{theorem}
+
+\begin{proof}
+The strategy is to reveal the coordinates of $A \cup B$ and of $A$ one at a time
+and to show, coordinate by coordinate, that the conditional entropy of the
+$i$-th bit of $A \cup B$ dominates $1.26$ times that of the $i$-th bit of $A$;
+the chain rule then assembles these into the claimed inequality. Fix $i \in [n]$.
+We claim
+\begin{align}
+\Ent\bigl((A \cup B)_i \given (A \cup B)_{<i}\bigr)
+\;\ge\; 1.26\,\Ent(A_i \given A_{<i}). \label{eq:per-coord}
+\end{align}
+To prove Eq.~\eqref{eq:per-coord}, observe first that $(A \cup B)_{<i}$ is a
+deterministic function of the richer history $(A_{<i}, B_{<i})$; hence
+\begin{align}
+\Ent\bigl((A \cup B)_i \given (A \cup B)_{<i}\bigr)
+&\;\overset{(a)}{\ge}\; \Ent\bigl((A \cup B)_i \given A_{<i}, B_{<i}\bigr) \label{eq:coarsen-step} \\
+&\;\overset{(b)}{=}\; \Ent\bigl(A_i \cupbit B_i \given A_{<i}, B_{<i}\bigr) \notag \\
+&\;\overset{(c)}{\ge}\; 1.26\,\Ent(A_i \given A_{<i}), \notag
+\end{align}
+where step $(a)$ is \Cref{lem:cond-mono} applied with $X = (A \cup B)_i$,
+$Y = (A_{<i}, B_{<i})$, and $f(Y) = (A \cup B)_{<i}$; step $(b)$ rewrites the
+$i$-th union bit as the OR $A_i \cupbit B_i$; and step $(c)$ is
+\Cref{lem:single-var} with $C = A_{<i}$, $C' = B_{<i}$, $X = A_i$, $X' = B_i$.
+The hypotheses of \Cref{lem:single-var} are met: $A_{<i}$ and $B_{<i}$ are i.i.d.\
+over a common finite set, $A_i$ is conditionally $\mathrm{Bernoulli}$ given
+$A_{<i}$ (with parameter $p_{A_{<i}} = \Pr[A_i = 1 \given A_{<i}]$), $B_i$ given
+$B_{<i}$ is the independent copy, and the marginal cap holds because
+$\E[A_i] = \Pr[i \in A] \le 0.01$. This establishes Eq.~\eqref{eq:per-coord}.
+
+Summing Eq.~\eqref{eq:per-coord} over $i \in [n]$ and applying the chain rule
+\Cref{fac:chain-rule} to each side,
+\begin{align*}
+\Ent(A \cup B)
+&\;=\; \sum_{i=1}^{n} \Ent\bigl((A \cup B)_i \given (A \cup B)_{<i}\bigr)
+\;\ge\; 1.26 \sum_{i=1}^{n} \Ent(A_i \given A_{<i})
+\;=\; 1.26\,\Ent(A).
+\end{align*}
+This completes the proof.
+\end{proof}

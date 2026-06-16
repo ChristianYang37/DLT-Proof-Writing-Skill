@@ -1,0 +1,105 @@
+\section{Potential lemmas}\label{sec:elliptical}
+
+This section collects the three linear-algebraic and probabilistic facts the
+main proof invokes: a trace bound, the elliptical-potential (log-determinant)
+lemma, and the self-normalized concentration inequality. The first two are
+proved; the third is an external result cited from \cite{abbasi2011improved}.
+
+\begin{lemma}[Trace bound]\label{lem:trace-bound}
+Let $\Gram_t=\lambda I+\sum_{i=1}^t \featmap_i\featmap_i^\top$ with
+$\featmap_i\in\R^d$ and $\lambda>0$. Then $\sum_{i=1}^t \featmap_i^\top
+\Gram_t^{-1}\featmap_i\le d$.
+\end{lemma}
+
+\begin{proof}
+We rewrite the sum as a trace and diagonalize. Let $\sum_{i=1}^t \featmap_i
+\featmap_i^\top=U\,\mathrm{diag}(\sigma_1,\dots,\sigma_d)\,U^\top$ be an
+eigendecomposition, so that $\Gram_t=U\,\mathrm{diag}(\sigma_1+\lambda,\dots,
+\sigma_d+\lambda)\,U^\top$. Then
+\begin{align*}
+\sum_{i=1}^t \featmap_i^\top \Gram_t^{-1}\featmap_i
+&\;=\; \sum_{i=1}^t \mathrm{tr}\!\big( \Gram_t^{-1}\featmap_i\featmap_i^\top \big)
+\;=\; \mathrm{tr}\!\Big( \Gram_t^{-1}\sum_{i=1}^t \featmap_i\featmap_i^\top \Big)
+\;=\; \sum_{j=1}^d \frac{\sigma_j}{\sigma_j+\lambda}
+\;\le\; d,
+\end{align*}
+where the first step uses $u^\top M u=\mathrm{tr}(Muu^\top)$ and the cyclic
+property of the trace, the second uses linearity of the trace, the third
+substitutes the eigendecomposition (the matrix $\Gram_t^{-1}\sum_i\featmap_i
+\featmap_i^\top$ has eigenvalues $\sigma_j/(\sigma_j+\lambda)$), and the last
+uses $\sigma_j/(\sigma_j+\lambda)\le1$ for each $j$ since $\sigma_j,\lambda\ge0$.
+This completes the proof.
+\end{proof}
+
+\begin{lemma}[Elliptical potential]\label{lem:elliptical}
+Let $\{\featmap_j\}_{j\ge1}\subset\R^d$ satisfy $\norm{\featmap_j}\le1$, let
+$\Gram_0\succeq I$ be positive definite, and set $\Gram_j=\Gram_0+\sum_{i=1}^j
+\featmap_i\featmap_i^\top$. Then for every $t\ge1$,
+\begin{align}\label{eq:elliptical}
+\sum_{j=1}^t \featmap_j^\top \Gram_{j-1}^{-1}\featmap_j
+\;\le\; 2\log\frac{\det\Gram_t}{\det\Gram_0}
+\;\le\; 2d\log\frac{\lambda_{\max}(\Gram_0)+t}{\lambda_{\min}(\Gram_0)}.
+\end{align}
+In particular, if $\Gram_0=\lambda I$ with $\lambda\ge1$, then
+$\sum_{j=1}^t \featmap_j^\top \Gram_{j-1}^{-1}\featmap_j\le 2d\log\frac{\lambda+t}
+{\lambda}$.
+\end{lemma}
+
+\begin{proof}
+We first bound each summand by a logarithm, then telescope the determinants.
+Because $\lambda_{\min}(\Gram_0)\ge1$ and $\norm{\featmap_j}\le1$, the
+Mahalanobis length satisfies
+\begin{align*}
+\featmap_j^\top \Gram_{j-1}^{-1}\featmap_j
+\;\le\; \lambda_{\min}(\Gram_{j-1})^{-1}\norm{\featmap_j}^2
+\;\le\; \lambda_{\min}(\Gram_0)^{-1}\cdot 1
+\;\le\; 1,
+\end{align*}
+where the first step is the Rayleigh bound, the second uses $\Gram_{j-1}
+\succeq\Gram_0$ and $\norm{\featmap_j}\le1$, and the last uses $\lambda_{\min}
+(\Gram_0)\ge1$. Using the matrix-determinant lemma $\det\Gram_j=\det\Gram_{j-1}
+\cdot(1+\featmap_j^\top\Gram_{j-1}^{-1}\featmap_j)$ and the elementary
+inequality $x\le 2\log(1+x)$ valid for $x\in[0,1]$,
+\begin{align*}
+\sum_{j=1}^t \featmap_j^\top \Gram_{j-1}^{-1}\featmap_j
+\;\le\; \sum_{j=1}^t 2\log\!\big( 1 + \featmap_j^\top \Gram_{j-1}^{-1}\featmap_j \big)
+\;=\; 2\sum_{j=1}^t \log\frac{\det\Gram_j}{\det\Gram_{j-1}}
+\;=\; 2\log\frac{\det\Gram_t}{\det\Gram_0},
+\end{align*}
+where the first step applies $x\le2\log(1+x)$ termwise, the second is the
+matrix-determinant lemma, and the third telescopes the logarithm. For the final
+bound, the eigenvalues of $\Gram_t$ sum to $\mathrm{tr}(\Gram_t)\le\mathrm{tr}
+(\Gram_0)+t\le d\,\lambda_{\max}(\Gram_0)+t$, so by the AM--GM inequality
+$\det\Gram_t\le\big((\lambda_{\max}(\Gram_0)+t/d)\big)^d\le(\lambda_{\max}
+(\Gram_0)+t)^d$, while $\det\Gram_0\ge\lambda_{\min}(\Gram_0)^d$; substituting
+gives the right-hand inequality of Eq.~\eqref{eq:elliptical}. The case
+$\Gram_0=\lambda I$ follows by $\lambda_{\max}(\Gram_0)=\lambda_{\min}(\Gram_0)=
+\lambda$. This completes the proof.
+\end{proof}
+
+\begin{remark}\label{rem:elliptical-source}
+\Cref{lem:elliptical} is the elliptical-potential (log-determinant) lemma of
+\cite{abbasi2011improved}; we reproduce the short proof for self-containment.
+The summand uses the \emph{previous-time} matrix $\Gram_{j-1}$, which is exactly
+the structure appearing in the LSVI bonus sum $\sum_k(\featmap_h^k)^\top
+(\Gram_h^k)^{-1}\featmap_h^k$ of \Cref{sec:main}, since $\Gram_h^k$ is built from
+episodes $1,\dots,k-1$.
+\end{remark}
+
+Finally, we restate the self-normalized concentration bound used in
+\Cref{lem:concentration}. It is an external result; we cite it rather than
+reproduce its proof.
+
+\begin{lemma}[Self-normalized bound,~{\cite[Theorem~1]{abbasi2011improved}}]\label{lem:self-normalized}
+Let $\{\mathcal F_\tau\}$ be a filtration and $\{\eta_\tau\}$ a real-valued
+$\{\mathcal F_\tau\}$-adapted sequence that is conditionally $\sigma$-sub-Gaussian:
+$\E[e^{s\eta_\tau}\mid\mathcal F_{\tau-1}]\le e^{s^2\sigma^2/2}$ for all $s\in\R$.
+Let $\{\featmap_\tau\}\subset\R^d$ be $\{\mathcal F_{\tau-1}\}$-predictable, and
+set $\Gram_t=\lambda I+\sum_{\tau=1}^t\featmap_\tau\featmap_\tau^\top$ with
+$\lambda>0$. Then for any $\delta'\in(0,1)$, with probability at least
+$1-\delta'$, simultaneously for all $t\ge0$,
+\begin{align*}
+\Big\| \sum_{\tau=1}^t \featmap_\tau\,\eta_\tau \Big\|_{\Gram_t^{-1}}^2
+\;\le\; 2\sigma^2\log\!\bigg( \frac{\det(\Gram_t)^{1/2}\det(\lambda I)^{-1/2}}{\delta'} \bigg).
+\end{align*}
+\end{lemma}

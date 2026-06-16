@@ -1,0 +1,215 @@
+\section{Fixed-point induction: the iterates stay in the basin}\label{sec:main-induction}
+
+The three preceding lemmas hold each at a fixed configuration. The work of this section is to
+weld them into a statement that holds \emph{simultaneously for all $k$}, by a
+fixed-point / contradiction argument: linear convergence keeps the weights in a ball of radius
+$R$, and staying in that ball keeps the Gram matrix conditioned, which in turn drives the
+linear convergence.
+
+\begin{lemma}[Trajectory stays in the basin]\label{lem:main}
+Fix $\delta \in (0,1)$ and let $R = c\,\delta\lzero/n^2$ be the radius of
+\Cref{lem:gram-stability}. Suppose the following conditions hold:
+\begin{itemize}[leftmargin=2em, itemsep=0.2em]
+    \item the step size $\eta = \kappa\,\lzero / n^2$ for a universal constant $\kappa \le 1/2$;
+    \item the width satisfies
+    \begin{align}\label{eq:width-main}
+    m \;\ge\; C\, \cdot\, \frac{n^6}{\lzero^4\,\delta^3}
+    \qquad\text{for a sufficiently large universal constant } C > 0,
+    \end{align}
+    \item the events of \Cref{lem:init-gram-close} and \Cref{lem:gram-stability} both hold,
+    the initial-residual event of \Cref{lem:init-residual} (used in part~(a) below) holds,
+    together with the flip-count event $\mathcal{E}_4$ of Eq.~\eqref{eq:flip-event-budget}
+    below (a function of $W(0)$ alone); their intersection has probability at least
+    $1 - 4\delta$ over the random initialization.
+\end{itemize}
+Then for every $k \ge 0$,
+\begin{align}
+\norm{ y - u(k) }^2 &\;\le\; \left( 1 - \tfrac{\eta\lzero}{2} \right)^{k} \norm{ y - u(0) }^2,
+\label{eq:main-conv} \\
+\norm{ w_r(k) - w_r(0) } &\;\le\; R \qquad \forall\, r \in [m],
+\label{eq:main-stay} \\
+\lmin\!\left( H(k) \right) &\;\ge\; \tfrac12\lzero .
+\label{eq:main-gram}
+\end{align}
+\end{lemma}
+
+\begin{proof}
+We argue by strong induction on $k$, proving the conjunction
+$P(k)$: ``Eq.~\eqref{eq:main-conv}, Eq.~\eqref{eq:main-stay} and Eq.~\eqref{eq:main-gram} hold at index $k$''. Throughout we
+work on the intersection of the four high-probability events (\Cref{lem:init-gram-close},
+\Cref{lem:gram-stability}, the initial-residual event of \Cref{lem:init-residual}, and the
+flip-count event $\mathcal{E}_4$ of Eq.~\eqref{eq:flip-event-budget}), on which all statements
+below are deterministic.
+
+\smallskip\noindent\textbf{Base case $k = 0$.}
+Eq.~\eqref{eq:main-conv} is an equality at $k=0$; Eq.~\eqref{eq:main-stay} is trivial since
+$w_r(0) - w_r(0) = 0 \le R$; Eq.~\eqref{eq:main-gram} is exactly
+\Cref{lem:init-gram-close}, which gives $\lmin(H(0)) \ge \tfrac34\lzero \ge \tfrac12\lzero$.
+
+\smallskip\noindent\textbf{Inductive step.}
+Assume $P(0), \dots, P(k)$. We first upgrade the stay-in-ball bound to index $k+1$, then use it
+to maintain the Gram floor and the contraction.
+
+\emph{(a) Weight movement at $k+1$.} Summing the one-step movement Eq.~\eqref{eq:move} of
+\Cref{lem:contraction} (whose step-size hypothesis $\eta \le \lzero/(2n^2)$ holds since
+$\kappa \le 1/2$) along $s = 0, \dots, k$, and inserting the inductive convergence
+Eq.~\eqref{eq:main-conv},
+\begin{align}\label{eq:move-sum}
+\norm{ w_r(k+1) - w_r(0) }
+\;\le\; & ~ \sum_{s=0}^{k} \norm{ w_r(s+1) - w_r(s) }
+\;\le\; \sum_{s=0}^{k} \frac{\eta\sqrt{n}}{\sqrt{m}}\, \norm{ y - u(s) } \\
+\;\le\; & ~ \frac{\eta\sqrt{n}}{\sqrt{m}}\, \norm{ y - u(0) }
+\sum_{s=0}^{\infty} \left( 1 - \tfrac{\eta\lzero}{2} \right)^{s/2}
+\;\le\; \frac{\eta\sqrt{n}}{\sqrt{m}}\, \norm{ y - u(0) } \cdot \frac{4}{\eta\lzero} \\
+\;=\; & ~ \frac{4 \sqrt{n}\, \norm{ y - u(0) }}{\sqrt{m}\, \lzero},
+\end{align}
+where the first step is the triangle inequality over the telescoping path, the second applies
+Eq.~\eqref{eq:move} at each $s$, the third inserts Eq.~\eqref{eq:main-conv} and extends the sum
+to infinity, the fourth uses the geometric-series identity and bound
+$\sum_{s\ge0}(1 - \tfrac{\eta\lzero}{2})^{s/2} = \tfrac{1}{1 - \sqrt{1 - \eta\lzero/2}}
+\le \tfrac{4}{\eta\lzero}$ (the equality sums the geometric series with ratio
+$\sqrt{1-\eta\lzero/2}<1$; the inequality uses $1 - \sqrt{1 - x} \ge x/2$ for $x \in [0,1]$ with
+$x = \tfrac{\eta\lzero}{2}$, giving $\tfrac{1}{1-\sqrt{1-x}}\le\tfrac2x=\tfrac{4}{\eta\lzero}$),
+and the last cancels $\eta$. With the initial-residual bound
+$\norm{y - u(0)} \le \sqrt{2n/\delta}$ (\Cref{lem:init-residual}; when the theorem invokes this
+lemma at level $\delta/4$ the bound reads $\sqrt{8n/\delta}$, which only enlarges the constant
+$C$ below and is absorbed into it), the right-hand side is at most
+$4\sqrt{2}\, n / (\sqrt{m\delta}\,\lzero)$, which is $\le R = c\,\delta\lzero/n^2$ precisely when
+$m \ge 32\, n^6 / (c^2 \delta^3 \lzero^4)$; this is Eq.~\eqref{eq:width-main} with
+$C \ge 32/c^2$. Hence Eq.~\eqref{eq:main-stay} holds at $k+1$.
+
+\emph{(b) Gram floor at $k+1$.} Since Eq.~\eqref{eq:main-stay} holds at $k+1$, every neuron
+satisfies $\norm{w_r(k+1) - w_r(0)} \le R$, so \Cref{lem:gram-stability} applies at $W(k+1)$
+and yields $\opnorm{H(k+1) - H(0)} \le \tfrac{\lzero}{4}$; with $\lmin(H(0)) \ge \tfrac34\lzero$
+and Weyl's inequality (\Cref{fac:weyl}) this gives
+\begin{align}\label{eq:gram-floor-kp1}
+\lmin\!\left( H(k+1) \right)
+\;\ge\; & ~ \lmin\!\left( H(0) \right) - \opnorm{ H(k+1) - H(0) }
+\;\ge\; \tfrac34\lzero - \tfrac14\lzero
+\;=\; \tfrac12\lzero,
+\end{align}
+which is Eq.~\eqref{eq:main-gram} at $k+1$.
+
+\emph{(c) Contraction from $k$ to $k+1$.} The Gram floor $\lmin(H(k)) \ge \tfrac12\lzero$
+(Eq.~\eqref{eq:main-gram} at $k$) and the step-size cap meet the hypotheses of
+\Cref{lem:contraction}. It remains to discharge its activation-pattern hypothesis: the
+recursion Eq.~\eqref{eq:resid-vec} is the fixed-pattern linearization, and neuron--input pairs
+that flip over the step contribute a remainder $\varepsilon(k)$. Let
+$\mathcal{S}_k \subseteq [m] \times [n]$ be the set of flipping pairs --- those $(r,i)$ for
+which neuron $r$ changes its activation on input $x_i$ over the step --- and
+$R_{\mathrm{step}} := \tfrac{\eta\sqrt n}{\sqrt m}\norm{y-u(k)}$ the per-step
+movement Eq.~\eqref{eq:move}. A pair $(r,i)$ flips over the step only if
+\begin{align}\label{eq:flip-anchor}
+\abs{w_r(0)^\top x_i}
+\;\le\; & ~ \norm{w_r(k) - w_r(0)} + \norm{w_r(k+1) - w_r(k)}
+\;\le\; R + R_{\mathrm{step}}
+\;\le\; 2R,
+\end{align}
+where the first step is Cauchy--Schwarz, the second uses the inductive stay-in-ball bound
+Eq.~\eqref{eq:main-stay} at $k$ and the movement Eq.~\eqref{eq:move}, and the last uses
+$R_{\mathrm{step}}\le R$ for $m\ge Cn^6/(\lzero^4\delta^3)$. The flip event is thus anchored at
+the \emph{Gaussian} point $w_r(0)\sim\N(0,1)$, so anti-concentration Eq.~\eqref{eq:anti-conc}
+(with $R\mapsto2R$) gives
+\begin{align}\label{eq:flip-count}
+\E\abs{\mathcal{S}_k}
+\;\le\; & ~ \sum_{r=1}^{m} \sum_{i=1}^{n} \Pr\!\left[ \abs{w_r(0)^\top x_i} \le 2R \right]
+\;\le\; \sum_{r=1}^{m} \sum_{i=1}^{n} 2R
+\;=\; 2 n\, m\, R,
+\end{align}
+where the first step writes $\abs{\mathcal{S}_k} = \sum_{r,i}\indic{(r,i)\text{ flips}}$ and
+bounds each flip probability by the anchor event Eq.~\eqref{eq:flip-anchor}, the second
+applies Eq.~\eqref{eq:anti-conc} at radius $2R$, and the last counts the $nm$ terms. The count
+$\abs{\mathcal{S}_k}$ is itself random, so to obtain a per-trajectory bound we control it
+through a single event that does not depend on $k$. Every flipping pair satisfies the
+anchor Eq.~\eqref{eq:flip-anchor}, hence $\mathcal{S}_k \subseteq \mathcal{N}$ for all $k$,
+where $\mathcal{N} := \{(r,i) : \abs{w_r(0)^\top x_i} \le 2R\}$ depends on $W(0)$ alone. By
+the same count as Eq.~\eqref{eq:flip-count}, $\E\abs{\mathcal{N}} \le 2nmR$, so Markov at level
+$\delta/4$ gives the event
+\begin{align}\label{eq:flip-event-budget}
+\mathcal{E}_4 \;:=\; \left\{ \abs{\mathcal{N}} \;\le\; \tfrac{4}{\delta}\,\E\abs{\mathcal{N}}
+\;\le\; \tfrac{8 n m R}{\delta} \right\},
+\qquad \Pr[\mathcal{E}_4^c] \;\le\; \tfrac{\delta}{4},
+\end{align}
+on which $\abs{\mathcal{S}_k} \le 8nmR/\delta$ deterministically and simultaneously for every
+$k$. Each flipping pair $(r,i)$ perturbs the $i$-th coordinate of $u$ by at most
+$\tfrac{1}{\sqrt m}R_{\mathrm{step}}$, so summing the contributions of the at most
+$\abs{\mathcal{S}_k}$ flipping pairs (triangle inequality, no cancellation) across the $n$
+coordinates,
+\begin{align}\label{eq:remainder}
+\norm{ \varepsilon(k) }
+\;\le\; & ~ \frac{\eta\, n}{m} \cdot \abs{ \mathcal{S}_k } \cdot \norm{y - u(k)}
+\;\le\; \frac{\eta\, n}{m} \cdot \frac{8 n m R}{\delta} \cdot \norm{y - u(k)}
+\;\le\; \frac{\eta\, \lzero}{8}\, \norm{ y - u(k) },
+\end{align}
+where the first step aggregates the $\abs{\mathcal{S}_k}$ per-pair perturbations
+$\tfrac{1}{\sqrt m}R_{\mathrm{step}} = \tfrac{\eta\sqrt n}{m}\norm{y-u(k)}$ by the triangle
+inequality within each coordinate and Cauchy--Schwarz over the $n$ coordinates, the second
+inserts the event $\mathcal{E}_4$ from Eq.~\eqref{eq:flip-event-budget}, and the third
+substitutes $R = c\delta\lzero/n^2$ (giving prefactor $8 c\,\eta\,\lzero \le \eta\lzero/8$ for
+$c \le 1/64$, with $n$, $m$ and $\delta$ all cancelling). The aggregation is thus driven by the
+constant $c$ alone, not the width.
+
+The flipping pairs make the exact recursion Eq.~\eqref{eq:resid-vec} hold only up to the
+remainder $\varepsilon(k)$, i.e.\ $y - u(k+1) = (I - \eta H(k))(y - u(k)) + \varepsilon(k)$.
+Combining the contraction Eq.~\eqref{eq:contract-chain} for the linear part with
+Eq.~\eqref{eq:remainder} for the remainder via the triangle inequality,
+\begin{align}\label{eq:contract-kp1}
+\norm{ y - u(k+1) }
+\;\le\; & ~ \norm{ (I - \eta H(k))(y - u(k)) } + \norm{ \varepsilon(k) }
+\;\le\; \left( 1 - \frac{\eta\lzero}{2} \right) \norm{ y - u(k) }
++ \frac{\eta\lzero}{8} \norm{ y - u(k) } \\
+\;=\; & ~ \left( 1 - \frac{3\eta\lzero}{8} \right) \norm{ y - u(k) },
+\end{align}
+where the first step is the triangle inequality on the perturbed recursion, the second bounds
+the linear part by $\norm{I - \eta H(k)}_2 \le 1 - \eta\lzero/2$ (the operator bound from
+Eq.~\eqref{eq:contract-chain}, using $\lmin(H(k)) \ge \tfrac12\lzero$) and the remainder by
+Eq.~\eqref{eq:remainder}. Squaring and using
+$(1 - \tfrac{3\eta\lzero}{8})^2 \le 1 - \tfrac{\eta\lzero}{2}$ --- valid since
+$\tfrac{9}{64}(\eta\lzero)^2 \le \tfrac14\eta\lzero$ for $\eta\lzero \le \tfrac{16}{9}$, which
+holds as $\eta\lzero \le \kappa\lzero^2/n^2 \le \tfrac12$ --- then inserting the inductive
+hypothesis Eq.~\eqref{eq:main-conv} at $k$,
+\begin{align}\label{eq:contract-kp1-sq}
+\norm{ y - u(k+1) }^2
+\;\le\; & ~ \left( 1 - \frac{\eta\lzero}{2} \right) \norm{ y - u(k) }^2
+\;\le\; \left( 1 - \frac{\eta\lzero}{2} \right)^{k+1} \norm{ y - u(0) }^2 .
+\end{align}
+This is Eq.~\eqref{eq:main-conv} at $k+1$.
+
+\smallskip
+Parts (a)--(c) establish $P(k+1)$. By induction, $P(k)$ holds for all $k \ge 0$, which is the
+assertion.
+\end{proof}
+
+\begin{lemma}[Initial residual is bounded]\label{lem:init-residual}
+% lint: ignore R17 — single Markov event on E\|y-u(0)\|^2; the 1-δ budget is discharged in-proof and aggregated into the global union bound in the proof of thm:main.
+Fix $\delta \in (0,1)$. With probability at least $1 - \delta$ over the random initialization,
+$\norm{ y - u(0) } \le \sqrt{2n/\delta}$.
+\end{lemma}
+
+\begin{proof}
+We bound the second moment and apply Markov. Conditioned on $W(0)$, the output weights $a_r$
+are i.i.d.\ $\Unif\{\pm1\}$ and independent across $r$, so $\E[a_r] = 0$ and each
+$u_i(0) = \tfrac{1}{\sqrt m}\sum_r a_r \sigma(w_r(0)^\top x_i)$ is a mean-zero sum, giving
+\begin{align}\label{eq:init-second-moment}
+\E\!\left[ \norm{y - u(0)}^2 \right]
+\;=\; & ~ \sum_{i=1}^{n} \left( y_i^2 + \E\!\left[ u_i(0)^2 \right] \right)
+\;=\; \sum_{i=1}^{n} \left( y_i^2 + \frac{1}{m}\sum_{r=1}^{m} \E\!\left[ \sigma(w_r(0)^\top x_i)^2 \right] \right) \\
+\;\le\; & ~ \sum_{i=1}^{n} \left( 1 + \frac{1}{m}\sum_{r=1}^{m} \E\!\left[ (w_r(0)^\top x_i)^2 \right] \right)
+\;=\; \sum_{i=1}^{n} \left( 1 + 1 \right)
+\;=\; 2n,
+\end{align}
+where the first step expands $\norm{y - u(0)}^2$ and uses $\E[u_i(0)] = 0$ to kill the cross
+term, the second uses independence of the $a_r$ ($\E[a_r a_{r'}] = \indic{r = r'}$) and
+$a_r^2 = 1$, the third uses $\abs{y_i} \le 1$ and $\sigma(z)^2 \le z^2$, and the fourth uses
+$w_r(0)^\top x_i \sim \N(0,1)$ so $\E[(w_r(0)^\top x_i)^2] = 1$. Applying Markov's inequality to
+the nonnegative random variable $\norm{y - u(0)}^2$ at threshold $2n/\delta$,
+\begin{align}\label{eq:init-markov}
+\Pr\!\left[ \norm{y - u(0)}^2 \ge \frac{2n}{\delta} \right]
+\;\le\; & ~ \frac{\delta}{2n}\, \E\!\left[ \norm{y - u(0)}^2 \right]
+\;\le\; \frac{\delta}{2n} \cdot 2n
+\;=\; \delta,
+\end{align}
+where the first step is Markov and the second substitutes Eq.~\eqref{eq:init-second-moment}.
+Taking complements and square roots, $\norm{y - u(0)} \le \sqrt{2n/\delta}$ with probability at
+least $1 - \delta$. This gives the assertion.
+\end{proof}

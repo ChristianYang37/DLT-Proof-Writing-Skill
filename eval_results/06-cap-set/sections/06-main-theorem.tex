@@ -1,0 +1,60 @@
+\section{The cap-set bound}\label{sec:main}
+
+\begin{theorem}[Ellenberg--Gijswijt cap-set bound]\label{thm:cap-set}
+Let $A\subseteq\F_3^n$ be a cap set (\Cref{ass:capset}). Then
+\begin{align*}
+|A|\;\le\;3M_n,
+\end{align*}
+where $M_n=\#\{a\in\{0,1,2\}^n:\sum_{i=1}^n a_i\le 2n/3\}$ as in
+\Cref{def:monomial-space}.
+\end{theorem}
+
+\begin{proof}
+Chain the two-sided slice-rank bounds on $T(x,y,z)=\one[x+y+z=0]$, using $A^3\subseteq(\F_3^n)^3$:
+\begin{align*}
+|A|
+\;\overset{(a)}{=}\;\sr\!\big(T|_{A^3}\big)
+\;\overset{(b)}{\le}\;\sr(T)
+\;\overset{(c)}{\le}\;3M_n,
+\end{align*}
+where (a) is \Cref{lem:lower}, (b) is \Cref{lem:slice-rank-def:restrict}, and (c) is
+\Cref{lem:upper}. This completes the proof.
+\end{proof}
+
+\begin{corollary}[Explicit exponential bound]\label{cor:numerical}
+There is an absolute constant $C>0$ such that every cap set $A\subseteq\F_3^n$
+satisfies
+\begin{align*}
+|A|\;\le\;C\cdot(2.7558)^n,
+\end{align*}
+and in particular $\limsup_{n\to\infty}|A|^{1/n}\le 3\gamma<2.7558$, where
+$3\gamma=\min_{0<t\le1}(1+t+t^2)t^{-2/3}$ as in \Cref{lem:monomial-count}.
+\end{corollary}
+
+\begin{proof}
+Combine the combinatorial bound with the monomial count:
+\begin{align*}
+|A|^{1/n}
+\;\overset{(a)}{\le}\;(3M_n)^{1/n}
+\;=\;3^{1/n}\,M_n^{1/n},
+\end{align*}
+where (a) is \Cref{thm:cap-set}. Taking $\limsup_{n\to\infty}$ and using
+$3^{1/n}\to 1$ together with Eq.~\eqref{eq:gamma-def} of \Cref{lem:monomial-count},
+\begin{align*}
+\limsup_{n\to\infty}|A|^{1/n}
+\;\le\;\Bigl(\lim_{n\to\infty}3^{1/n}\Bigr)\cdot\Bigl(\limsup_{n\to\infty}M_n^{1/n}\Bigr)
+\;\le\;1\cdot 3\gamma\;=\;3\gamma\;<\;2.7558.
+\end{align*}
+Since $\limsup_n|A|^{1/n}<2.7558$, there is an absolute constant $C>0$ with
+$|A|\le C\cdot(2.7558)^n$ for all $n$ (the finitely many $n$ with
+$|A|^{1/n}\ge 2.7558$, if any, are absorbed into $C$, and for large $n$ the bound is
+immediate). This completes the proof.
+\end{proof}
+
+\begin{remark}[Comparison with the literature]\label{rem:literature}
+\Cref{thm:cap-set} is the bound of Ellenberg and Gijswijt \cite{ellenberggijswijt2017},
+obtained from the polynomial method of Croot, Lev, and Pach \cite{crootlevpach2017}
+via the slice-rank formulation of \cite{tao2016slicerank,bccgnsu2017}. The base
+$2.7558$ improved on all prior bounds, which were of the form $3^n/n^{1+\epsilon}$,
+and remains the best known exponential rate for cap sets in $\F_3^n$.
+\end{remark}

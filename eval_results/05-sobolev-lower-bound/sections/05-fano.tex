@@ -1,0 +1,30 @@
+\section{The local Fano inequality}\label{sec:fano}
+
+The final ingredient is the information-theoretic core: Fano's inequality in
+the form that lower-bounds the minimax testing error by the entropy
+$\log M$ minus the mutual information, together with the standard bound of the
+mutual information by the pairwise KL diameter.
+
+\begin{lemma}[Local Fano method, {\cite[Theorem 2.5 and Corollary 2.6]{tsybakov2009introduction}}]\label{lem:fano}
+Let $M\ge 2$ and let $V$ be uniform on $[M]$. Suppose that conditionally on
+$V=k$ the observation $Y$ has law $P_k$. Then for every (possibly randomized)
+test $\psi(Y)$ taking values in $[M]$,
+\begin{align}\label{eq:fano}
+\inf_{\psi}\Pr\!\left[\psi(Y)\ne V\right]
+\;\ge\; 1 - \frac{I(V;Y)+\log 2}{\log M},
+\qquad
+I(V;Y)\;\le\;\frac{1}{M^2}\sum_{k,k'}\KL\!\left(P_{k}\,\middle\|\,P_{k'}\right),
+\end{align}
+where $I(V;Y)$ is the mutual information between $V$ and $Y$. In particular,
+$I(V;Y)\le\max_{k\ne k'}\KL(P_{k}\|P_{k'})$ by bounding the average by the
+maximum.
+\end{lemma}
+
+\begin{remark}\label{rem:fano}
+The two displays in Eq.~\eqref{eq:fano} are the Fano testing inequality and the
+convexity bound
+$I(V;Y)\le \tfrac{1}{M^2}\sum_{k,k'}\KL(P_k\|P_{k'})\le\max_{k\ne k'}\KL(P_k\|P_{k'})$,
+respectively. In \Cref{thm:main} we apply \Cref{lem:fano} with $P_k =
+P_{u_{\tau^{(k)}}}$ and $M$ the packing cardinality of \Cref{lem:vg}; the
+mutual-information bound is supplied by \Cref{lem:kl}.
+\end{remark}

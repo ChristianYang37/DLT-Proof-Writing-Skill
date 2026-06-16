@@ -1,0 +1,142 @@
+\section{Regret bound}\label{sec:main}
+
+We now assemble the pieces into the regret bound. The proof conditions on the
+successful event $\Ev$, unrolls a per-step recursion, and splits the total into
+two named terms $T_1+T_2$ (a bonus sum and a martingale term), closing the
+dominant term with the elliptical-potential lemma.
+
+\begin{theorem}[Sublinear regret of LSVI-UCB]\label{thm:regret}
+Suppose \Cref{ass:linear-mdp} holds. Run LSVI-UCB
+as in Eq.~\eqref{eq:gram-def} through Eq.~\eqref{eq:V-def}, with $\lambda=1$ and
+$\beta=C_\beta\,dH\sqrt{\iota}$, where $\iota=\log(2dT/\delta)$, $T=KH$, and
+$C_\beta$ is the constant of \Cref{lem:concentration,lem:recursion}. Then for any
+$\delta\in(0,1)$, with probability at least $1-\delta$,
+\begin{align}\label{eq:regret-bound}
+\Reg(K) \;\le\; C\, d^{3/2} \sqrt{H^3 T}\;\iota
+\;=\; \Otil\!\big( d^{3/2}\sqrt{H^3 T} \big).
+\end{align}
+for a universal constant $C>0$.
+\end{theorem}
+
+\begin{proof}
+Throughout we condition on the event $\Ev$ of \Cref{lem:concentration}, on which
+all of \Cref{sec:optimism} holds deterministically. Recall $\Ev$ has
+$\Prob[\Ev]\ge1-\delta/2$. Write $\featmap_h^k:=\featmap(x_h^k,a_h^k)$ and define
+the per-step suboptimality and its martingale noise
+\begin{align}\label{eq:delta-def}
+\delta_h^k \;:=\; V_h^k(x_h^k) - V_h^{\pi^k}(x_h^k),
+\qquad
+\zeta_{h+1}^k \;:=\; \E\big[\delta_{h+1}^k \,\big|\, x_h^k,a_h^k\big] - \delta_{h+1}^k .
+\end{align}
+
+\smallskip\noindent\textbf{Step 1: optimism reduces regret to $\sum_k\delta_1^k$.}
+On $\Ev$, \Cref{lem:optimism} gives $V_1^k(x_1^k)\ge V_1^\star(x_1^k)$, so
+\begin{align}\label{eq:regret-to-delta}
+\Reg(K)
+\;=\; \sum_{k=1}^K \big[ V_1^\star(x_1^k) - V_1^{\pi^k}(x_1^k) \big]
+\;\le\; \sum_{k=1}^K \big[ V_1^k(x_1^k) - V_1^{\pi^k}(x_1^k) \big]
+\;=\; \sum_{k=1}^K \delta_1^k,
+\end{align}
+where the first step is the definition Eq.~\eqref{eq:regret-def}, the second
+uses optimism, and the third is Eq.~\eqref{eq:delta-def}.
+
+\smallskip\noindent\textbf{Step 2: per-step recursion.}
+On $\Ev$, applying \Cref{lem:recursion} with $\pi=\pi^k$ at $(x_h^k,a_h^k)$ and
+using $V_h^k(x_h^k)=Q_h^k(x_h^k,a_h^k)$ (greedy action) and $V_h^{\pi^k}(x_h^k)=
+Q_h^{\pi^k}(x_h^k,a_h^k)$,
+\begin{align}
+\delta_h^k
+&\;=\; Q_h^k(x_h^k,a_h^k) - Q_h^{\pi^k}(x_h^k,a_h^k) \notag \\
+&\;\le\; \Pop_h\big(V_{h+1}^k - V_{h+1}^{\pi^k}\big)(x_h^k,a_h^k) + 2\beta\,\Mnorm{\featmap_h^k}{(\Gram_h^k)^{-1}} \notag \\
+&\;=\; \delta_{h+1}^k + \zeta_{h+1}^k + 2\beta\,\Mnorm{\featmap_h^k}{(\Gram_h^k)^{-1}}, \label{eq:per-step}
+\end{align}
+where the first step is Eq.~\eqref{eq:delta-def} with the greedy/optimal action
+identities, the second uses $Q_h^k\le\inner{\featmap}{w_h^k}+\beta\Mnorm{\featmap}
+{(\Gram_h^k)^{-1}}$ from Eq.~\eqref{eq:Q-def} and the recursion
+Eq.~\eqref{eq:recursion} (whose error term $\Delta_h^k$ is at most $\beta
+\Mnorm{\featmap_h^k}{(\Gram_h^k)^{-1}}$, yielding the factor $2\beta$), and the
+third uses $\Pop_h(V_{h+1}^k-V_{h+1}^{\pi^k})(x_h^k,a_h^k)=\E[\delta_{h+1}^k\mid
+x_h^k,a_h^k]=\delta_{h+1}^k+\zeta_{h+1}^k$ by Eq.~\eqref{eq:delta-def}.
+Unrolling Eq.~\eqref{eq:per-step} from $h=1$ to $H$ with $\delta_{H+1}^k=0$,
+\begin{align}\label{eq:unroll}
+\delta_1^k \;\le\; \sum_{h=1}^H \zeta_{h+1}^k + 2\beta\sum_{h=1}^H \Mnorm{\featmap_h^k}{(\Gram_h^k)^{-1}}.
+\end{align}
+
+\smallskip\noindent\textbf{Step 3: two-term decomposition.}
+Summing Eq.~\eqref{eq:unroll} over $k$ and combining with
+Eq.~\eqref{eq:regret-to-delta},
+\begin{align}\label{eq:three-term}
+\Reg(K)
+\;\le\;
+\underbrace{2\beta\sum_{k=1}^K\sum_{h=1}^H \Mnorm{\featmap_h^k}{(\Gram_h^k)^{-1}}}_{\textstyle T_1}
+\;+\;
+\underbrace{\sum_{k=1}^K\sum_{h=1}^H \zeta_{h+1}^k}_{\textstyle T_2},
+\end{align}
+where $T_1$ is the bonus sum, carrying the accumulated confidence width through
+the Gram matrix, and $T_2$ is the martingale term. We bound $T_2$ then $T_1$.
+
+\smallskip\noindent\textbf{Step 4: bound $T_2$ (martingale, Azuma--Hoeffding).}
+By \Cref{rem:filtration}, $V_{h+1}^k$ is determined before the transition at
+episode $k$ is revealed, so $\{\zeta_{h+1}^k\}$ is a martingale-difference
+sequence in the episode-step filtration with $|\zeta_{h+1}^k|\le 2H$ (since
+$0\le\delta_{h+1}^k\le H$). There are $KH=T$ terms, so by the Azuma--Hoeffding
+inequality, with probability at least $1-\delta/2$,
+\begin{align}\label{eq:T3-bound}
+T_2 \;=\; \sum_{k=1}^K\sum_{h=1}^H \zeta_{h+1}^k
+\;\le\; 2H\sqrt{2T\log(2/\delta)}
+\;\le\; 4H\sqrt{T\,\iota},
+\end{align}
+where the first inequality is Azuma--Hoeffding with $N=T$ increments bounded by
+$2H$, and the second uses $\log(2/\delta)\le\iota$ and $\sqrt2\le2$.
+
+\smallskip\noindent\textbf{Step 5: bound $T_1$ (elliptical potential).}
+By the Cauchy--Schwarz inequality applied to the inner sum over $k$, then the
+elliptical-potential lemma,
+\begin{align}
+\sum_{k=1}^K\sum_{h=1}^H \Mnorm{\featmap_h^k}{(\Gram_h^k)^{-1}}
+&\;=\; \sum_{h=1}^H \sum_{k=1}^K \Big( (\featmap_h^k)^\top (\Gram_h^k)^{-1}\featmap_h^k \Big)^{1/2} \notag \\
+&\;\le\; \sum_{h=1}^H \bigg( K \sum_{k=1}^K (\featmap_h^k)^\top (\Gram_h^k)^{-1}\featmap_h^k \bigg)^{1/2} \notag \\
+&\;\le\; \sum_{h=1}^H \big( K\cdot 2d\,\iota \big)^{1/2}
+\;=\; H\sqrt{2dK\,\iota}, \label{eq:bonus-sum}
+\end{align}
+where the first step reorders the double sum, the second is Cauchy--Schwarz
+$\sum_k a_k\le(K\sum_k a_k^2)^{1/2}$ with $a_k=\Mnorm{\featmap_h^k}
+{(\Gram_h^k)^{-1}}$, and the third applies \Cref{lem:elliptical} with
+$\Gram_0=\lambda I=I$ and $t=K$ (note $\Gram_h^k$ is built from episodes
+$1,\dots,k-1$, matching the previous-time structure of the lemma), giving
+$\sum_{k=1}^K(\featmap_h^k)^\top(\Gram_h^k)^{-1}\featmap_h^k\le 2d\log(1+K)\le
+2d\,\iota$. Hence
+\begin{align}\label{eq:T12-bound}
+T_1 \;=\; 2\beta\sum_{k,h}\Mnorm{\featmap_h^k}{(\Gram_h^k)^{-1}}
+\;\le\; 2\beta H\sqrt{2dK\,\iota}
+\;=\; 2 C_\beta dH\sqrt{\iota}\cdot H\sqrt{2dK\,\iota}
+\;\le\; 4 C_\beta\, d^{3/2} H^2 \sqrt{K}\,\iota,
+\end{align}
+where the first equality is the definition of $T_1$, the second substitutes
+Eq.~\eqref{eq:bonus-sum}, the third substitutes $\beta=C_\beta dH\sqrt{\iota}$,
+and the last collects constants using $\sqrt2\le2$.
+
+\smallskip\noindent\textbf{Step 6: combine and convert to $T=KH$.}
+Substituting Eq.~\eqref{eq:T3-bound} and Eq.~\eqref{eq:T12-bound} into
+Eq.~\eqref{eq:three-term}, and using $H^2\sqrt K=\sqrt{H^4 K}=\sqrt{H^3\cdot KH}=\sqrt{H^3 T}$
+together with $H\sqrt{T}\le\sqrt{H^3 T}$
+(as $H\ge1$),
+\begin{align*}
+\Reg(K)
+\;\le\; 4 C_\beta\, d^{3/2} H^2\sqrt{K}\,\iota + 4H\sqrt{T\,\iota}
+\;\le\; 4 C_\beta\, d^{3/2}\sqrt{H^3 T}\,\iota + 4\,d^{3/2}\sqrt{H^3 T}\,\iota
+\;\le\; C\, d^{3/2}\sqrt{H^3 T}\,\iota,
+\end{align*}
+where the first step substitutes the two term bounds, the second rewrites
+$H^2\sqrt K=\sqrt{H^3 T}$ and bounds $H\sqrt{T\iota}\le d^{3/2}\sqrt{H^3 T}\iota$
+(using $d\ge1$, $H\ge1$, $\iota\ge1$), and the last sets $C:=4C_\beta+4$.
+
+\smallskip\noindent\textbf{Step 7: union bound on the failure events.}
+The bound above holds on $\Ev\cap\Ev'$, where $\Ev'$ is the Azuma event of
+Step~4. By \Cref{lem:concentration}, $\Prob[\Ev^c]\le\delta/2$, and by
+Eq.~\eqref{eq:T3-bound}, $\Prob[(\Ev')^c]\le\delta/2$. By a union bound,
+$\Prob[\Ev\cap\Ev']\ge 1-\delta/2-\delta/2=1-\delta$. Therefore
+Eq.~\eqref{eq:regret-bound} holds with probability at least $1-\delta$, which is
+$\Otil(d^{3/2}\sqrt{H^3 T})$ since $\iota=\log(2dT/\delta)$ is logarithmic. This
+completes the proof.
+\end{proof}

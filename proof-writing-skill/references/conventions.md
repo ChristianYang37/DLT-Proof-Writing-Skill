@@ -82,6 +82,17 @@ Place at top of `math_macros.tex` (or whatever the project calls its macros file
 
 Use `\triangleq` to define a shorthand mid-derivation; `\coloneqq` or `\stackrel{\mathrm{def}}{=}` for a top-level definition. Use `\mathsf{}` for fine-grained / problem names (`\mathsf{SETH}`, `\mathsf{AAttC}`).
 
+## Page geometry and spacing (fixed, arXiv-style)
+
+Every project pins the page format explicitly — do not leave it to the `article` class default (whose margins are too wide for a preprint). Use **1-inch margins on US-letter, single line spacing**:
+
+```latex
+\usepackage[letterpaper,margin=1in]{geometry}
+\linespread{1.0}   % single spacing (article default leading); state it explicitly
+```
+
+Load `geometry` early (before `hyperref`). This is the standard arXiv-preprint look and keeps every proof's pagination consistent. Do not switch to `\onehalfspacing` / `\doublespacing` or change the margins per-project.
+
 ## Theorem-environment preamble (cleveref-safe setup)
 
 **The trap.** The textbook `amsthm` pattern with shared numbering is
@@ -97,12 +108,14 @@ Use `\triangleq` to define a shorthand mid-derivation; `\coloneqq` or `\stackrel
 
 This compiles, numbers cleanly (Theorem 1.1, Lemma 1.2, Assumption 1.3, ...), and looks correct. **But cleveref keys its name lookup on the *counter name*, not the environment name.** Because every environment shares the `theorem` counter, every `\Cref{lem:...}` / `\Cref{ass:...}` / `\Cref{fac:...}` renders as **"Theorem X.Y"** — the `\crefname{lemma}{...}`, `\crefname{assumption}{...}` registrations never fire. The bug is silent at compile time and visible only in the PDF.
 
-**The fix.** Use the `aliascnt` package, which creates *aliased counters* that share numbering with `theorem` but are distinct counter names from cleveref's perspective. Canonical template:
+**The fix.** Use the `aliascnt` package, which creates *aliased counters* that share numbering with `theorem` but are distinct counter names from cleveref's perspective. **Load `hyperref` before `cleveref`** so every `\Cref` / `\eqref` / `\cite` renders as a clickable link in the PDF — `cleveref` only handles the *naming* ("Lemma 1.2"), not the hyperlink, and it must be loaded *after* `hyperref` or its links break. Canonical template:
 
 ```latex
 \usepackage{amsthm}
 \usepackage{aliascnt}
-\usepackage[capitalize]{cleveref}
+\usepackage{hyperref}              % load BEFORE cleveref — makes \ref/\Cref/\eqref/\cite clickable
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\usepackage[capitalize]{cleveref}  % MUST come after hyperref, else \Cref hyperlinks break
 
 % Master counter
 \theoremstyle{plain}

@@ -6,7 +6,7 @@ Usage:
                            [--project-root PATH]
                            [--format text|json] [--quiet]
 
-Implements the rule set (16 rules):
+Implements the rule set (18 rules; R20 runs only under --final):
 
     Tier 0 (already-in-conventions, must include):
         R0a  — \\[ ... \\] math display banned (use align*/align)
@@ -36,9 +36,19 @@ Implements the rule set (16 rules):
         R18  — main-entry file (contains \\documentclass) holds a
                theorem-like / proof / abstract environment directly;
                those belong in sections/NN-*.tex via \\input{}
+        R19  — proof body is prose-dominated: display-math chars must be
+               >= prose chars (carry the derivation in align/equation, not
+               in English). Escape hatch: `% lint: ignore R19`.
 
     Tier C (handwave flag, warning-only):
         R16  — "the other case is similar"
+
+    Tier D (submission / desk-reject gate — ONLY runs with --final):
+        R20  — self-containedness: no surviving \\todo{...} invocation, and no
+               reference to an internal research artifact (.proof-research/,
+               runner-log, decisions.md, confidence-trace, sweep-step,
+               grading.json). Backstops the Phase-D desk-reject gate. Off
+               during drafting so \\todo{verify} is tolerated.
 
 R13 / R14 require a project root (auto-detected from input file paths
 unless --project-root given). They are skipped (silently) if no
@@ -978,6 +988,241 @@ def check_R18_main_no_inline_content(text: str, file: str) -> list[Violation]:
 
 
 # ---------------------------------------------------------------------------
+# R19 — proof derivation must be carried in display math, not prose
+# ---------------------------------------------------------------------------
+
+
+# Display-math env names whose chars count as math for the ratio. Inline
+# $...$ also counts as math (formula vs natural-language prose) — see the
+# inline pass in check_R19_math_prose_ratio.
+_R19_DISPLAY_ENV_NAMES = r"align\*?|equation\*?|gather\*?|multline\*?"
+
+# Inline $...$ (single-dollar), avoiding the $$ display delimiters via
+# lookarounds. Counted as math (it is formula, not 语言/natural-language prose).
+_R19_INLINE_MATH_RE = re.compile(r"(?<!\$)\$(?!\$)(?:\\.|[^$\\])*?\$(?!\$)")
+
+# Bold / paragraph headers like \textbf{Bound on $I_1$:} are required prose
+# scaffolding, not derivation — excluded from the prose count.
+_R19_HEADER_RE = re.compile(r"\\textbf\{[^{}]*\}|\\(?:sub)?paragraph\{[^{}]*\}")
+
+# Structural macros whose chars are neither display math nor prose "weight" —
+# excluded so R19 does not penalize required bookkeeping.
+_R19_STRUCTURAL_RE = re.compile(
+    r"\\(?:label|[Cc]ref|ref|eqref|todo|qedhere)\b(?:\{[^{}]*\})?"
+    r"|\\(?:" + CITE_COMMANDS + r")\*?(?:\[[^\]]*\])?\{[^{}]*\}"
+    r"|\\(?:smallskip|medskip|bigskip|noindent)\b"
+)
+
+
+def _r19_mark(mask: list, start: int, end: int) -> None:
+    for i in range(start, end):
+        mask[i] = True
+
+
+def _r19_paragraph_span(body: str, offset: int) -> tuple[int, int]:
+    """[start, end) of the blank-line-delimited paragraph containing `offset`."""
+    start = 0
+    for m in re.finditer(r"\n[ \t]*\n", body):
+        if m.end() <= offset:
+            start = m.end()
+        else:
+            break
+    end = len(body)
+    nxt = re.search(r"\n[ \t]*\n", body[offset:])
+    if nxt:
+        end = offset + nxt.start()
+    return start, end
+
+
+def check_R19_math_prose_ratio(text: str, file: str) -> list[Violation]:
+    """Inside each \\begin{proof}, display-math chars must be >= prose chars.
+
+    Appendix-grade derivations carry the work in display math (align/equation/
+    gather/multline), with prose only annotating WHY each step holds. A proof
+    whose prose outweighs its display math is asserting steps in English — the
+    prime hallucination / proof-by-intimidation surface (see anti-patterns.md
+    §AI-specific failure modes and the derivation-integrity reviewer).
+
+    Counting (per proof, by CHARACTER, over the comment-stripped body) —
+    the dichotomy is FORMULA vs natural-language prose (公式 vs 语言):
+      - MATH     = chars inside align/equation/gather/multline envs, $$..$$,
+                   (defensively) \\[..\\], AND inline $..$ (inline math is
+                   formula, not natural-language prose).
+      - EXCLUDED = the \\begin{proof}[..]/\\end{proof} delimiters,
+                   \\textbf{}/\\paragraph{} headers, structural macros
+                   (\\label, \\Cref, \\cite, \\todo, \\qedhere, spacing), and
+                   the mandatory union-bound paragraph (R17). Counted on
+                   neither side.
+      - PROSE    = everything else (natural-language words).
+    Fires (error) iff MATH < PROSE.
+
+    Escape hatch: `% lint: ignore R19` inside the proof body, or on the line
+    immediately above \\begin{proof}, exempts that proof — for legitimately
+    prose-bound arguments (combinatorial / counting / reduction proofs).
+    """
+    out: list[Violation] = []
+    lines = text.splitlines()
+    envs = find_environments(text)
+
+    for proof in envs:
+        if proof.name not in ("proof", "proof*"):
+            continue
+
+        body_raw = "\n".join(lines[proof.start_line - 1: proof.end_line])
+
+        # Escape hatch: in the body or on the line directly above \begin{proof}.
+        preceding = lines[proof.start_line - 2] if proof.start_line >= 2 else ""
+        if "lint: ignore R19" in body_raw or "lint: ignore R19" in preceding:
+            continue
+
+        # Comment-strip the body (preserve newlines for paragraph detection).
+        body = "\n".join(strip_line_comment(line) for line in body_raw.split("\n"))
+        n = len(body)
+        if n == 0:
+            continue
+
+        math_mask = [False] * n
+        excl_mask = [False] * n
+
+        # MATH: display environments (backreference closes the same env name).
+        for m in re.finditer(
+            rf"\\begin\{{({_R19_DISPLAY_ENV_NAMES})\}}.*?\\end\{{\1\}}",
+            body, re.DOTALL,
+        ):
+            _r19_mark(math_mask, m.start(), m.end())
+        # MATH: $$...$$
+        for m in re.finditer(r"\$\$.*?\$\$", body, re.DOTALL):
+            _r19_mark(math_mask, m.start(), m.end())
+        # MATH: \[...\] (already R0a-banned; counted defensively as math)
+        for m in re.finditer(r"\\\[.*?\\\]", body, re.DOTALL):
+            _r19_mark(math_mask, m.start(), m.end())
+        # MATH: inline $...$ (formula, not prose), where not already display.
+        for m in _R19_INLINE_MATH_RE.finditer(body):
+            if not math_mask[m.start()]:
+                _r19_mark(math_mask, m.start(), m.end())
+
+        # EXCLUDED: \begin{proof}[opt] delimiter + balanced optional bracket.
+        bm = re.match(r"\s*\\begin\{proof\*?\}", body)
+        if bm:
+            end = bm.end()
+            j = end
+            while j < n and body[j] in " \t":
+                j += 1
+            if j < n and body[j] == "[":
+                depth = 0
+                for k in range(j, n):
+                    if body[k] == "[":
+                        depth += 1
+                    elif body[k] == "]":
+                        depth -= 1
+                        if depth == 0:
+                            end = k + 1
+                            break
+            _r19_mark(excl_mask, 0, end)
+        # EXCLUDED: \end{proof} delimiter.
+        for m in re.finditer(r"\\end\{proof\*?\}", body):
+            _r19_mark(excl_mask, m.start(), m.end())
+
+        # EXCLUDED: headers + structural macros.
+        for rgx in (_R19_HEADER_RE, _R19_STRUCTURAL_RE):
+            for m in rgx.finditer(body):
+                _r19_mark(excl_mask, m.start(), m.end())
+
+        # EXCLUDED: the union-bound paragraph(s) (R17-mandated required prose).
+        for m in _UNION_BOUND_RE.finditer(body):
+            ps, pe = _r19_paragraph_span(body, m.start())
+            _r19_mark(excl_mask, ps, pe)
+
+        math_chars = sum(math_mask)
+        prose_chars = sum(
+            1 for i in range(n) if not math_mask[i] and not excl_mask[i]
+        )
+
+        if math_chars < prose_chars:
+            out.append(Violation(
+                rule="R19", severity="error",
+                file=file, line=proof.start_line,
+                match=f"\\begin{{{proof.name}}}",
+                message=(
+                    f"proof is prose-dominated: {math_chars} chars of math "
+                    f"(display + inline) vs {prose_chars} chars of "
+                    f"natural-language prose (excludes the union-bound "
+                    f"paragraph and \\textbf{{}} headers). Appendix-grade "
+                    "proofs carry the derivation in formulas, preferably "
+                    "display blocks (align/equation), with prose only "
+                    "annotating WHY each step holds — asserting steps in prose "
+                    "is the prime hallucination surface (anti-patterns.md "
+                    "§AI-specific failure modes). Convert prose derivation "
+                    "sentences into tagged display steps, or suppress with "
+                    "`% lint: ignore R19 — <reason>` if this proof is "
+                    "legitimately prose-bound (e.g. a combinatorial argument)."
+                ),
+            ))
+    return out
+
+
+# ---------------------------------------------------------------------------
+# R20 — desk-reject self-containedness (final-only): no \todo, no internal refs
+# ---------------------------------------------------------------------------
+
+
+# Internal research-artifact names that must never appear in a submission-grade
+# .tex (they break the "self-contained, anonymous paper" property).
+_R20_INTERNAL_RE = re.compile(
+    r"\.proof-research|runner-log|decisions\.md|confidence-trace|"
+    r"sweep-step|grading\.json"
+)
+
+
+def check_R20_desk_reject_selfcontained(text: str, file: str) -> list[Violation]:
+    """Desk-reject self-containedness — runs ONLY under --final (submission gate).
+
+    A submission-grade paper must be self-contained and todo-free:
+      - no `\\todo{...}` INVOCATION survives (the `\\newcommand{\\todo}` macro
+        DEFINITION is fine — it is a definition, not a marker);
+      - no reference to an internal research artifact (.proof-research/*,
+        runner-log, decisions.md, confidence-trace, sweep-step, grading.json).
+
+    This is the deterministic backstop behind the Phase-D desk-reject gate (the
+    desk-reject reviewer also checks these qualitatively, plus fuzzy author-
+    anonymity). Incremental drafting lint (no --final) skips this rule, so a
+    legitimate `\\todo{verify}` is tolerated while the proof is in progress.
+    """
+    out: list[Violation] = []
+    for lineno, line in enumerate(text.splitlines(), 1):
+        clean = strip_line_comment(line)
+        # \todo{...} invocation — skip macro-definition lines (R15's pattern).
+        if not re.search(r"\\(?:re)?newcommand|\\def\b|\\providecommand", clean):
+            if re.search(r"\\todo\b", clean):
+                out.append(Violation(
+                    rule="R20", severity="error",
+                    file=file, line=lineno,
+                    match=clean.strip()[:60],
+                    message=(
+                        "\\todo marker survives to submission — a desk-reject "
+                        "paper has no open todos. Resolve the step (verify / "
+                        "derive) or restructure to remove it; do not ship a "
+                        "flagged gap. (Drafting lint without --final tolerates "
+                        "\\todo{verify}.)"
+                    ),
+                ))
+        # Internal research-artifact reference (rendered text only).
+        for m in _R20_INTERNAL_RE.finditer(clean):
+            out.append(Violation(
+                rule="R20", severity="error",
+                file=file, line=lineno,
+                match=m.group(),
+                message=(
+                    f"reference to an internal research file ('{m.group()}') "
+                    "breaks self-containment — a submitted paper must not "
+                    "mention .proof-research/, runner-log, decisions.md, or "
+                    "other authoring artifacts. Remove the reference."
+                ),
+            ))
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Driver
 # ---------------------------------------------------------------------------
 
@@ -994,6 +1239,7 @@ PER_FILE_RULES = [
     ("R16", check_R16_other_case_similar),
     ("R17", check_R17_union_bound),
     ("R18", check_R18_main_no_inline_content),
+    ("R19", check_R19_math_prose_ratio),
 ]
 
 
@@ -1018,6 +1264,14 @@ def main() -> int:
         help="Output format (default: text)"
     )
     parser.add_argument("--quiet", action="store_true", help="Suppress excerpt lines and summary")
+    parser.add_argument(
+        "--final", action="store_true",
+        help=(
+            "Submission / desk-reject mode: ALSO run R20 (no \\todo invocation "
+            "survives; no .proof-research/runner-log/decisions.md reference). "
+            "Off by default so incremental drafting tolerates \\todo{verify}."
+        ),
+    )
     args = parser.parse_args()
 
     bib_keys: set[str] = set()
@@ -1062,6 +1316,12 @@ def main() -> int:
     rules_run.append("R15")
     for fp, text in file_contents.items():
         violations.extend(check_R15_bare_constants(text, fp, has_uc))
+
+    # R20 — desk-reject self-containedness (ONLY in --final / submission mode)
+    if args.final:
+        rules_run.append("R20")
+        for fp, text in file_contents.items():
+            violations.extend(check_R20_desk_reject_selfcontained(text, fp))
 
     # Cross-file: R4
     rules_run.append("R4")

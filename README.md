@@ -3,7 +3,7 @@
 > An Agent Skill for drafting rigorous, modular LaTeX proofs in **Deep Learning Theory**, **statistical learning**, **optimization theory**, and **RL theory**. Validated against **5 in-scope DLT proofs + 2 out-of-DLT generalization probes**; **70/70 assertions pass (100%)** under the full workflow.
 
 **🌐 Languages:** **English** · [中文](README.zh.md)
-**📦 Version:** v1.1 (R5 theorem-proof pairing + 2 generalization probes)
+**📦 Version:** v1.2 (Socratic intake · display-math enforcement R19 · five-reviewer scored panel)
 
 [![License: CC BY-NC 4.0](https://img.shields.io/badge/License-CC%20BY--NC%204.0-blue.svg)](LICENSE.md)
 [![Skill: Claude Agent](https://img.shields.io/badge/Skill-Claude%20Agent-orange.svg)](https://platform.claude.com/docs/en/agents-and-tools/agent-skills/overview)
@@ -29,13 +29,15 @@ By using this skill you accept these constraints. The license is non-commercial 
 
 It teaches an AI agent (Claude Code, or any Anthropic-Agent-Skills-compatible runtime) to write appendix-grade mathematical proofs in LaTeX, by:
 
-1. **Enforcing a 4-phase workflow** — Plan → Preliminaries → Statements & Proofs → Confidence Sweep → Peer-Review Loop. Each phase has its own quality gates and reference documents.
+1. **Enforcing a 4-phase workflow** — Plan (incl. a **Socratic intake** that settles the proof's setting & architecture *with you* before any drafting) → Preliminaries → Statements & Proofs → Confidence Sweep → Peer-Review Loop. Each phase has its own quality gates and reference documents.
 2. **Demanding citation honesty** — every `\cite{}` must resolve in `refs.bib` (verified via citation digest), or be replaced with `\todo{verify: ...}`. No fabricated keys.
 3. **Surfacing low-confidence steps** — every derivation step starts at 🔴 `from-memory` and must be upgraded to 🟡 `cross-checked` (digest match) or 🟢 `verified` (independent re-derivation) before shipping.
-4. **Running a bounded peer-review loop** — a reviewer sub-agent writes a formal Summary / Strengths / Weaknesses / Questions / Verdict assessment; the author agent verifies each weakness (REAL-blocking / REAL-nonblocking / PHANTOM / INTENTIONAL); minimum-change fixes are applied; iterate to convergence or a 3-iteration cap.
+4. **Running a bounded peer-review loop with a five-reviewer scored panel** — each iteration spawns five independent sub-agents in parallel (3 correctness lenses + a math-taste reviewer + a derivation-integrity / anti-proof-hacking reviewer), each scoring 0–10; the author agent merges and verifies each weakness (REAL-blocking / REAL-nonblocking / PHANTOM / INTENTIONAL), applies minimum-change fixes, and **accepts only when the mean score > 8 with no unresolved critical** — else iterate to convergence or a 3-iteration cap.
 5. **Outputting clean LaTeX** — one section per `.tex` file, `aliascnt`-safe theorem environments, `Eq.~\eqref{}` discipline, no `\[ ... \]`. **Does not write abstracts, introductions, related work, or conclusions** — that framing remains the human researcher's responsibility.
 6. **Producing experiment plans (when asked)** — a separate `experiments-plan.md`, design-only, with ICML/NeurIPS/ICLR-grade rigor (≥5 seeds, baselines, ablations, pre-registered success criteria). **Never fabricates numerical results.**
 7. **Forbidding "well-known result" handwaves (lint rule R5, v1.1)** — every `\begin{theorem}` / `\begin{lemma}` / `\begin{proposition}` / `\begin{corollary}` / `\begin{claim}` must be paired in the **same `.tex` file** with either an immediate `\begin{proof}` *or* a `\cite{}` inside the optional `[...]` bracket. No third option. Run `proof-writing-skill/scripts/lint.py` to catch violations automatically.
+
+8. **Forcing display-math derivations over prose (lint rule R19, v1.2)** — proofs must carry the derivation in formulas (display blocks + inline math), with prose only annotating *why* each step holds. `lint.py` computes a per-proof character ratio and **errors when natural-language prose outweighs math** (escape hatch `% lint: ignore R19` for legitimately prose-bound combinatorial arguments). This kills the "derive in words" failure mode at the deterministic layer; the Phase-D derivation-integrity reviewer catches the rest.
 
 ---
 
@@ -49,18 +51,18 @@ flowchart TD
     B[Phase B: Preliminaries] --> C
     C[Phase C: Statements and Proofs] --> CC
     CC[Phase C.5: Confidence Sweep] --> D
-    D[Phase D: Peer-Review Loop]
-    D -->|accept-as-is| Out([Deliverable: PDF + traces])
-    D -->|weaknesses remain, iter under 3| D
+    D[Phase D: 5-Reviewer Scored Panel]
+    D -->|mean score over 8, no critical| Out([Deliverable: PDF + traces])
+    D -->|mean under 8 or critical, iter under 3| D
 ```
 
 **Per-phase content** (no styling, plain text — see [`proof-writing-skill/SKILL.md`](proof-writing-skill/SKILL.md) for the full workflow):
 
-- **Phase A — Plan**: read project context · technical reconnaissance (digest advanced tools) · pattern selection · dependency-graph decomposition · TodoWrite
+- **Phase A — Plan**: read project context · **Socratic intake (A.1a — settle setting & architecture with the user, blocking)** · technical reconnaissance (digest advanced tools) · pattern selection · dependency-graph decomposition · TodoWrite
 - **Phase B — Preliminaries**: notation block · macros (with `aliascnt`) · definitions · assumptions · facts
 - **Phase C — Statements and Proofs**: state lemma → per-statement review → write proof → per-proof review · iterate per node in the dependency graph
 - **Phase C.5 — Confidence Sweep**: enumerate every derivation step · tag each `red` (from-memory) initially · upgrade via fast-path (textbook inequality, digest match, lemma-hypothesis match) to `yellow` or `green`, or fire a sub-agent to re-derive
-- **Phase D — Peer-Review Loop**: reviewer sub-agent writes Summary / Strengths / Weaknesses / Questions / Verdict · author verifies each weakness (REAL-blocking / REAL-nonblocking / PHANTOM / INTENTIONAL) · minimum-change fix or rebut · iterate, hard cap 3 rounds
+- **Phase D — Five-Reviewer Scored Panel**: five independent reviewers per iteration (3 correctness lenses + math-taste + derivation-integrity), each scoring 0–10 · author merges + verifies each weakness (REAL-blocking / REAL-nonblocking / PHANTOM / INTENTIONAL) · minimum-change fix or rebut · **accept iff mean > 8 and no unresolved critical** · iterate, hard cap 3 rounds
 
 **Sub-agent architecture:**
 
@@ -70,19 +72,19 @@ flowchart LR
     Main([Main Agent])
     Sub1[Tech-recon sub-agents]
     Sub2[Sweep verifier sub-agents]
-    Sub3[Reviewer sub-agent]
+    Sub3[Reviewer panel x5 per iteration]
     Main -->|Phase A.2| Sub1
     Main -->|Phase C.5 fire-and-forget| Sub2
     Main -->|Phase D each iteration| Sub3
     Sub1 -.->|technique digests| Main
     Sub2 -.->|verification reports| Main
-    Sub3 -.->|review verdicts| Main
+    Sub3 -.->|5 reviews + 0-10 scores| Main
 ```
 
 - **Main agent** orchestrates the workflow, owns the LaTeX source, and decides which sub-agents to spawn.
 - **Tech-recon sub-agents** (Phase A.2): one per advanced tool the proof needs (e.g., matrix Bernstein, Yarotsky gadget, elliptical potential). Each pulls the canonical source and saves a digest to `.proof-research/<tool>.md`.
 - **Sweep verifier sub-agents** (Phase C.5, fire-and-forget): one per `red` derivation step that needs independent re-derivation. Run in background; main agent moves on while they verify.
-- **Reviewer sub-agent** (Phase D, one per loop iteration): reads the compiled PDF + the `.tex` source + the confidence trace, returns a structured peer review. The main agent then verifies each weakness and decides fix / rebut / escalate.
+- **Reviewer panel** (Phase D, **five per loop iteration**, spawned in parallel): three correctness lenses + a math-taste reviewer + a derivation-integrity / anti-proof-hacking reviewer. Each reads the compiled PDF + the `.tex` source + the confidence trace and returns a structured peer review with a 0–10 score. The main agent merges their weaknesses, verifies each, and decides fix / rebut / escalate; it accepts only when the mean score exceeds 8 with no unresolved critical.
 
 ---
 
@@ -110,12 +112,14 @@ DLT-Proof-Writing-Skill/
     ├── SKILL.md                      # main entry — workflow + pointers
     ├── references/                   # loaded on demand by phase
     │   ├── conventions.md            # macros, labels, file structure
-    │   ├── templates.md              # statement + derivation templates
+    │   ├── socratic-intake.md        # Phase A.1a — settle setting+architecture w/ user
+    │   ├── templates.md              # statement + derivation templates (display-first)
     │   ├── technical-research.md     # digest schema for advanced tools
     │   ├── pattern-menu.md           # proof-type → recommended idioms
     │   ├── quality-checks.md         # per-stmt / per-proof / end-to-end checklists
     │   ├── confidence-sweep.md       # Phase C.5 mechanics
-    │   ├── review-loop.md            # Phase D peer-review mechanics
+    │   ├── review-loop.md            # Phase D 5-reviewer panel orchestration
+    │   ├── reviewer-roles.md         # the 5 reviewer role prompts + 0-10 scale
     │   ├── anti-patterns.md          # math / exposition / AI failure modes
     │   └── theory-experiment.md      # experiments-plan.md schema (when applicable)
     ├── agents/                       # sub-agent prompt templates
@@ -123,7 +127,7 @@ DLT-Proof-Writing-Skill/
     │   └── grader.md                 # for eval grading
     ├── scripts/
     │   ├── latexmk-wrapper.py        # compile + structured-JSON output (Phase D gate (a))
-    │   ├── lint.py                   # static lint rules R0a–R18 (Phase D gate (b))
+    │   ├── lint.py                   # static lint rules R0a–R19 (Phase D gate (b))
     │   ├── check_confidence_tags.py  # confidence-sweep coverage (Phase D gate (c))
     │   ├── check_scope.py            # validates .proof-research/scope.md (Phase A.0a)
     │   └── hook_output_guard.py      # PreToolUse hook — blocks compile artifacts outside .output/
@@ -167,6 +171,8 @@ loss with η = O(λ_0 / n²) achieves linear convergence to zero training loss
 provided m ≥ poly(n, 1/λ_0, 1/δ). Use the three-lemma NTK skeleton.
 
 [skill triggers]
+[runs Phase A.1a Socratic intake: confirms norm / regime / tight-vs-poly
+constants with the user, then waits for answers before drafting]
 [runs Phase A: plans, spawns technical-reconnaissance sub-agents for matrix
 concentration, anti-concentration, Weyl perturbation, semi-smoothness]
 [runs Phase B: sets up macros, aliascnt-safe theorem env, λ_0 assumption]
@@ -174,9 +180,9 @@ concentration, anti-concentration, Weyl perturbation, semi-smoothness]
 per-statement and per-proof review]
 [runs Phase C.5: enumerates 32 derivation steps, walks list, upgrades to
 🟢/🟡 via fast-path; flags any 🔴 with \todo{verify:}]
-[runs Phase D: reviewer sub-agent writes Summary/Strengths/Weaknesses/
-Questions/Verdict; author verifies each weakness; minimum-change fixes;
-iterate to convergence — typically 2 rounds]
+[runs Phase D: five-reviewer panel (3 correctness + taste + derivation-integrity)
+each scores 0–10; author merges + verifies each weakness; minimum-change fixes;
+accept at mean > 8 with no critical — typically 2 rounds]
 [delivers main.pdf + sections/*.tex + macros.tex + refs.bib +
 .proof-research/confidence-trace.md + review-iteration-{1,2}.md +
 runner-log.md]
@@ -270,8 +276,8 @@ For every section above I left as `[[ leave blank to delegate ]]`:
 3. Surface ALL proposals together as a single numbered decision list to me
    BEFORE drafting any preliminaries or proof body.
 4. If I do not respond within one turn, choose the most conservative option,
-   mark the relevant step `\todo{user-decision: <option chosen, alternative>}`,
-   and continue. Re-surface it in the Phase D final report.
+   record it in `.proof-research/decisions.md` (NOT as an inline `\todo` in the
+   `.tex`), and continue. Re-surface it in the Phase D final report.
 5. Never treat a blank as license to silently choose the easier path
    (e.g. a weaker target theorem). The conservative default is the
    STRONGER / TIGHTER option, not the more convenient one.
@@ -292,31 +298,33 @@ A bare "all done" is not an acceptable completion message.
 
 ---
 
-## ✅ Eval results (v1.1)
+## ✅ Eval results (v1.2 runs)
+
+> **About these runs.** Evals 1–7 below were **regenerated end-to-end under v1.2** by a multi-agent pipeline (orchestrated as a Workflow): per eval, an author subagent runs Phases A–C.5, then **five genuinely independent reviewer subagents** score the proof 0–10 each round (looped until mean > 8 with no unresolved critical), then an independent grader subagent scores it against the fixed `evals.json` assertions. Every proof passes all three Phase-D gates (lint **0 errors incl. R19**, `compile_ok` with no overfull boxes, confidence-tags coverage). **70/70 assertions pass.** Because the panels are *independent* (not one agent reviewing its own work), the means **discriminate by difficulty**: the clean textbook proof clears at 9.0 in one round, while the hard NTK proof started at **4.2** and needed three real fix rounds to reach 8.2. R19 fired only where expected (math-heavy proofs pass clean; genuinely prose-bound subproofs carry an explicit `% lint: ignore R19`). Eval 8 (blog companion) is unchanged from its earlier single-reviewer run.
 
 ### Core DLT evals
 
 Five hand-graded calibration proofs (evals 1–5) plus the worked-example proof shipped with the [companion blog post on test-time scaling](#) (eval 8). Hand-grading uses the assertion sets in `proof-writing-skill/evals/evals.json`; eval 8 is judged by Phase D gate-passing and review-loop convergence rather than fixed assertions, so it does not contribute to the 70/70 figure below.
 
-| # | Eval | Proof PDF | Verdict | Phase C.5 | Phase D | Detail |
+| # | Eval | Proof PDF | Verdict (panel mean) | Phase C.5 | Phase D | Detail |
 |---|---|---|---|---|---|---|
-| 1 | Hoeffding's inequality | [📄 PDF](eval_results/01-hoeffding/pdf/main.pdf) | accept-as-is | 29 steps · 🟢 26 / 🟡 3 / 🔴 0 | 2 iter | [grading](eval_results/01-hoeffding/grading.json) · [log](eval_results/01-hoeffding/runner-log.md) |
-| 2 | NTK two-layer convergence | [📄 PDF](eval_results/02-ntk-convergence/pdf/main.pdf) | accept-as-is | 32 · 🟢 29 / 🟡 3 / 🔴 0 | 2 iter | [grading](eval_results/02-ntk-convergence/grading.json) · [log](eval_results/02-ntk-convergence/runner-log.md) · [experiments plan](eval_results/02-ntk-convergence/experiments-plan.md) |
-| 3 | VC generalization bound | [📄 PDF](eval_results/03-vc-generalization/pdf/main.pdf) | accept-with-minor | 35 · 🟢 28 / 🟡 7 / 🔴 0 | 2 iter | [grading](eval_results/03-vc-generalization/grading.json) · [log](eval_results/03-vc-generalization/runner-log.md) |
-| 4 | LSVI-UCB regret on Linear MDP | [📄 PDF](eval_results/04-linear-mdp-ucb/pdf/main.pdf) | accept-as-is | 15 · 🟢 10 / 🟡 4 / 🔴 1 | 2 iter | [grading](eval_results/04-linear-mdp-ucb/grading.json) · [log](eval_results/04-linear-mdp-ucb/runner-log.md) · [experiments plan](eval_results/04-linear-mdp-ucb/experiments-plan.md) |
-| 5 | Sobolev minimax lower bound | [📄 PDF](eval_results/05-sobolev-lower-bound/pdf/main.pdf) | accept-as-is | 25 · 🟢 21 / 🟡 4 / 🔴 0 | **3 iter** | [grading](eval_results/05-sobolev-lower-bound/grading.json) · [log](eval_results/05-sobolev-lower-bound/runner-log.md) |
-| 8 | Reasoning as Optimization (test-time scaling) | [📄 PDF](eval_results/08-reasoning-as-optimization/pdf/main.pdf) | accept-with-minor | 52 · 🟢 40 / 🟡 14 / 🔴 0 resolved | **4 iter** | [eval source](eval_results/08-reasoning-as-optimization/) |
+| 1 | Hoeffding's inequality | [📄 PDF](eval_results/01-hoeffding/pdf/main.pdf) | accepted · **9.0**/10 | 15 steps · 🟢 13 / 🟡 2 / 🔴 0 | 1 iter | [grading 9/9](eval_results/01-hoeffding/grading.json) · [log](eval_results/01-hoeffding/runner-log.md) |
+| 2 | NTK two-layer convergence | [📄 PDF](eval_results/02-ntk-convergence/pdf/main.pdf) | accepted · **8.2**/10 | 33 · 🟢 25 / 🟡 8 / 🔴 0 | **3 iter** | [grading 12/12](eval_results/02-ntk-convergence/grading.json) · [log](eval_results/02-ntk-convergence/runner-log.md) · [experiments plan](eval_results/02-ntk-convergence/experiments-plan.md) |
+| 3 | VC generalization bound | [📄 PDF](eval_results/03-vc-generalization/pdf/main.pdf) | accepted · **8.8**/10 | 22 · 🟢 17 / 🟡 5 / 🔴 0 | **3 iter** | [grading 8/8](eval_results/03-vc-generalization/grading.json) · [log](eval_results/03-vc-generalization/runner-log.md) |
+| 4 | LSVI-UCB regret on Linear MDP | [📄 PDF](eval_results/04-linear-mdp-ucb/pdf/main.pdf) | accepted · **8.4**/10 | 50 · 🟢 32 / 🟡 17 / 🔴 1 | 2 iter | [grading 12/12](eval_results/04-linear-mdp-ucb/grading.json) · [log](eval_results/04-linear-mdp-ucb/runner-log.md) · [experiments plan](eval_results/04-linear-mdp-ucb/experiments-plan.md) |
+| 5 | Sobolev minimax lower bound | [📄 PDF](eval_results/05-sobolev-lower-bound/pdf/main.pdf) | accepted · **8.4**/10 | 27 · 🟢 23 / 🟡 4 / 🔴 0 | 2 iter | [grading 9/9](eval_results/05-sobolev-lower-bound/grading.json) · [log](eval_results/05-sobolev-lower-bound/runner-log.md) |
+| 8 | Reasoning as Optimization (test-time scaling) | [📄 PDF](eval_results/08-reasoning-as-optimization/pdf/main.pdf) | accept-with-minor *(v1.1)* | 52 · 🟢 40 / 🟡 14 / 🔴 0 resolved | **4 iter** | [eval source](eval_results/08-reasoning-as-optimization/) |
 
-**Note (R5 retrofit):** the v1.0 lint rule set did not yet include R5 (theorem-proof pairing). When the post-v1.0 R5 rule is applied retroactively to these 5 evals, each shows one structural violation (theorem statement and its proof split across two `.tex` files instead of co-located). The proofs are themselves complete and correct; only the file layout violates R5. See [`eval_results/R5-RETROFIT-NOTE.md`](eval_results/R5-RETROFIT-NOTE.md) for details and the recommended v1.1 layout.
+**Note (R5):** unlike the original v1.0 runs (which split each theorem and its proof across two files), the v1.2 regeneration **co-locates each theorem with its proof in the same `.tex` file**, so all seven evals are now **R5-clean** (lint passes R5 with 0 violations). The historical retrofit note is preserved at [`eval_results/R5-RETROFIT-NOTE.md`](eval_results/R5-RETROFIT-NOTE.md).
 
 ### Extended evals — out-of-DLT generalization probes
 
 Two pure-math probes added in v1.1 to test whether the skill's workflow discipline transfers outside its designed DLT scope. These are NOT representative of the skill's claimed capabilities — see scope caveat below.
 
-| # | Eval | Proof PDF | Verdict | Phase C.5 | Phase D | Detail |
+| # | Eval | Proof PDF | Verdict (panel mean) | Phase C.5 | Phase D | Detail |
 |---|---|---|---|---|---|---|
-| 6 | Ellenberg–Gijswijt cap set bound (additive combinatorics) | [📄 PDF](eval_results/06-cap-set/pdf/main.pdf) | accept-as-is | 20 · 🟢 18 / 🟡 2 / 🔴 0 | **3 iter** | [grading](eval_results/06-cap-set/grading.json) · [log](eval_results/06-cap-set/runner-log.md) |
-| 7 | Gilmer union-closed bound (extremal combinatorics via entropy) | [📄 PDF](eval_results/07-frankl-union-closed/pdf/main.pdf) | accept-as-is | 30 · 🟢 29 / 🟡 1 / 🔴 0 | 2 iter | [grading](eval_results/07-frankl-union-closed/grading.json) · [log](eval_results/07-frankl-union-closed/runner-log.md) |
+| 6 | Ellenberg–Gijswijt cap set bound (additive combinatorics) | [📄 PDF](eval_results/06-cap-set/pdf/main.pdf) | accepted · **8.8**/10 | 20 · 🟢 17 / 🟡 3 / 🔴 0 | 1 iter | [grading 10/10](eval_results/06-cap-set/grading.json) · [log](eval_results/06-cap-set/runner-log.md) |
+| 7 | Gilmer union-closed bound (extremal combinatorics via entropy) | [📄 PDF](eval_results/07-frankl-union-closed/pdf/main.pdf) | accepted · **8.2**/10 | 31 · 🟢 25 / 🟡 6 / 🔴 0 | 1 iter | [grading 10/10](eval_results/07-frankl-union-closed/grading.json) · [log](eval_results/07-frankl-union-closed/runner-log.md) |
 
 Both passing demonstrates that the workflow (Phase C.5 + D + citation digest + R5 pairing) is **not domain-specific**. R5 in particular gets exercised in two flavors: own lemmas + theorems with immediate proof, *and* external CLP/EG/Gilmer theorems via the `\begin{X}[\cite{...}]` form (eval 6's `99-auxiliary.tex` and eval 7's `thm:main` both use this).
 
@@ -324,11 +332,11 @@ Both passing demonstrates that the workflow (Phase C.5 + D + citation digest + R
 
 ### Aggregate (calibration evals 1–7)
 
-**70/70 assertions pass (100%).** See [`eval_results/benchmark.md`](eval_results/benchmark.md) for the full report, including:
-- 2 critical sign errors caught in eval 5 (Sobolev) Phase D iter 1
-- A math error in eval 4's prompt itself (the `√(HT)` vs `√(H³T)` rate)
-- The eval 2 cite-fabrication failure mode from v1.0 that motivated R5
-- The R5 retrofit note for the 5 core evals
+**70/70 assertions pass (100%)** under the v1.2 mean-of-five > 8 gate — every eval accepted in **1–3 panel iterations** (each `.proof-research/review-iteration-*.md` records all five 0–10 scores + the mean). Highlights from the genuine independent-panel runs:
+- **The panel discriminates by difficulty.** The NTK proof (eval 2) opened at mean **4.2** and needed **three** real fix rounds to clear 8.2; the VC proof (eval 3) opened at 7.4 over three rounds; the clean Hoeffding and combinatorics proofs cleared in one. The earlier role-played panels had rated *everything* ~9.0 — independence is what makes the score mean something.
+- **Prompt errors surfaced, not hidden.** Eval 4 proves the correct `√(H³T)` LSVI-UCB rate rather than the prompt's unprovable `√(HT)`, logging the gap as a `user-decision`; eval 5 honestly flags that its "for all `n`" headline holds along the regular-grid subsequence its construction requires.
+- **R19 enforced in practice:** math-heavy proofs carry their derivations in display math; only genuinely prose-bound subproofs (eval 3 Sauer–Shelah ×1, eval 6 ×2) use the `% lint: ignore R19` escape hatch.
+- **Honesty held:** every `\cite` digest-backed (0 fabricated), anti-pattern sweeps clean, residual `\todo{verify}` flagged transparently (eval 2's `1/8` constant, eval 4's `C_β` and its one 🔴 step).
 
 ---
 

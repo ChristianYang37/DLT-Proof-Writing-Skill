@@ -1,137 +1,75 @@
-% ============================================================
-% macros.tex — notation, operators, theorem environments
-% ============================================================
+% macros.tex — symbol macros + theorem-environment setup.
+% Generated for the four Lean-verified results in `.lean-proof/Proof/Proofs/DecodeIff.lean`
+% (`Decode.decode_iff_gradient_separation`, `..._descent_separation_of_neg`,
+% `..._fails_iff_some_competitor`, `..._softmax_residual`). Symbol macros are transcribed
+% verbatim from `.lean-proof/notation-map.md`; the theorem-environment block follows the
+% cleveref-safe \newaliascnt template in references/conventions.md (lint R0c).
 
-% --- Packages assumed loaded in main.tex ---
-% amsmath, amssymb, amsthm, aliascnt, mathtools, cleveref, enumitem, hyperref
+% ---------------------------------------------------------------------------
+% Symbol macros (one per row of the notation map)
+% ---------------------------------------------------------------------------
+\newcommand{\Vocab}{\mathcal{V}}                                  % finite vocabulary
+\newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}         % real inner product
+\newcommand{\norm}[1]{\left\| #1 \right\|}                         % norm
+\newcommand{\Sphere}{\mathcal{S}_r}                                % LayerNorm sphere of radius r
+\newcommand{\loss}{L}                                              % implicit loss
+\newcommand{\grad}{\nabla}                                         % gradient operator
+\newcommand{\xstar}{x^{\star}}                                     % stationary point
+\newcommand{\astar}{a^{\star}}                                     % designated (answer) token
+\newcommand{\Generated}{\mathsf{Gen}}                              % decoder predicate
+\newcommand{\indicator}[1]{\mathbf{1}\!\left[#1\right]}            % one-hot target indicator 1[c = a*]
 
-% --- Math operators / shortcuts ---
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\E}{\mathbb{E}}
-\renewcommand{\Pr}{\mathbb{P}}
-\newcommand{\1}{\mathbf{1}}
-\DeclareMathOperator{\poly}{poly}
-\DeclareMathOperator{\polylog}{polylog}
-\DeclareMathOperator{\softmax}{softmax}
-\DeclareMathOperator{\dec}{decode}
-\DeclareMathOperator{\Correct}{Correct}
+% --- 2nd-layer (bridge + dynamics, sections/04) symbols ---
+\newcommand{\Zpart}{Z}                                            % softmax partition Z = sum_c exp<W_c,x>
+\newcommand{\logit}[1]{\ell_{#1}}                                  % logit ell_c = <W_c, x>
+\newcommand{\optgap}{\Delta}                                      % suboptimality margin Delta = log 2 - L*
+\newcommand{\lossopt}{\loss^{\star}}                              % optimal loss value L*
+\newcommand{\tstar}{t^{\star}}                                    % decode-time threshold t*
+\newcommand{\passat}[1]{\mathrm{pass}@#1}                          % pass@T success rate over a problem distribution
+\newcommand{\smooth}{\beta}                                       % smoothness constant beta
+\newcommand{\stepsize}{\eta}                                      % GD step size eta
 
-% --- Cross-entropy loss notation (clean-slate rewrite, 2026) ---
-% \loss is the cross-entropy loss
-%   L(x;Q) = log sum_{a in V} e^{<W_U^a, x>} - <W_U^{a*}, x>,
-% convex in x; the LayerNorm sphere M_d is the constraint.
-% \cmass is the correct-answer softmax mass pi(x;Q) = softmax(W_U x)_{a*}.
-% This rewrite is SINGLE-TOKEN (n = 1, answer set A = {a*}): W_U is the
-% LITERAL unembedding (linear head) in R^{|V| x d}, and
-% argmax_a <W_U^a, x> IS greedy decoding, so the linear-surrogate decoder
-% and the true decoder coincide. There is NO sequence-level V^n machinery.
-% \Vocab is a macro for the vocabulary set (token alphabet) \mathcal V.
-\newcommand{\loss}{L}
-\newcommand{\cmass}{\pi}
-\newcommand{\Vocab}{\mathcal{V}}
-\newcommand{\corr}{a^{\star}}              % the single correct token a*
+% ---------------------------------------------------------------------------
+% Theorem-environment setup (aliascnt → cleveref-safe shared numbering)
+% ---------------------------------------------------------------------------
+\usepackage{amsthm}
+\usepackage{aliascnt}
+\usepackage[capitalize]{cleveref}
 
-% --- Norm and inner product ---
-\newcommand{\norm}[1]{\left\| #1 \right\|}
-\newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
-\newcommand{\abs}[1]{\left| #1 \right|}
-
-% --- Calligraphic family shorthand ---
-\newcommand{\Acal}{\mathcal{A}}
-\newcommand{\Fcal}{\mathcal{F}}
-\newcommand{\Ecal}{\mathcal{E}}
-\newcommand{\Gcal}{\mathcal{G}}
-
-% --- Clean-slate framework specifics (noisy Riemannian SGD) ---
-% \Dec is the single greedy/argmax decoder D_true = D_lin (n = 1, so
-% they coincide). \snet is REPURPOSED as the net descent rate
-% delta := 2p - 1, the SINGLE behavioral knob from A1; it is no longer
-% a "net effective-token rate". \critrate is the critical rate delta_c
-% derived in R1.
-\newcommand{\Dec}{D_{\mathrm{true}}}        % the true decoder (= argmax = greedy)
-\newcommand{\snet}{\delta}                   % net alignment rate delta := 2p - 1 (A1)
-\newcommand{\critrate}{\delta_{\mathrm{c}}}  % critical rate in R1
-% Sign indicator zeta_k = sign(s_k), s_k = <V_k, \hat W_U^{a*}> the per-step
-% projection onto the UNIT correct-token row (Stage-2 framing correction:
-% stated on the CORRECT direction, NOT on loss descent -grad_R L).
-\newcommand{\descent}{\zeta}
-\newcommand{\rowhat}{\widehat{W}_{U}^{\corr}} % unit correct row W_U^{a*}/||W_U^{a*}||
-\newcommand{\proj}{s}                         % per-step correct-direction projection s_k
-% Cross-entropy / margin objects.
-\newcommand{\beerr}{\epsilon_{\mathrm{BE}}}  % Berry-Esseen rate scale (R2)
-\newcommand{\Lstar}{L^{\!\star}}             % decode threshold (= log 2 for |A|=1)
-\newcommand{\Margin}{M}                      % logit margin M(x;Q)
-\newcommand{\incoh}{\mu}                     % row-incoherence of W_U over the |V| token rows
-% \snorder STAYS the angular margin (scalar order parameter)
-%   m_t = <W_U^{a*}, x_t> / (||W_U^{a*}|| ||x_t||) in [-1, 1].
-\newcommand{\snorder}{m}
-
-% --- Sphere geometry / Riemannian SGD (NEW; Boumal 2023) ---
-% \Sphere is the LayerNorm sphere M_d = { x in R^d : ||x||_2 = sqrt(d) }.
-% \Retr is the normalization retraction R_x(s) = sqrt(d) (x+s)/||x+s||
-% (Boumal Def. 3.47, Example 3.49 eq. 3.32). \rgrad is the Riemannian
-% gradient grad_R L = (I - x x^T / ||x||^2) nabla L (Boumal Sec. 2.4).
-% \Tproj is the tangent-space projector I - x x^T / ||x||^2.
-\newcommand{\Sphere}{\mathcal{M}_d}
-\newcommand{\Retr}{\mathcal{R}}
-\newcommand{\rgrad}{\operatorname{grad}_{\!R}}
-\newcommand{\Tproj}[1]{P_{#1}}              % tangent projector at a point
-% \driftc is the per-step signal-MAGNITUDE constant c in (0,1], part of the
-% behavioral assumption A1 (Stage-2 framing correction: it is ASSUMED on the
-% correct-token direction via the conditional-mean projection floor
-% E[|s_k| | F_{k-1}] >= c rho_0, NOT derived from convexity). Rendered as c_*
-% (NOT the floating universal c) to avoid clashing with the universal-constant
-% convention. Convexity motivates c>0 and p>1/2 (see rem:descent_naming) but
-% does not derive c.
-\newcommand{\driftc}{c_{\star}}
-
-% --- TODO marker (renders as a visible flag in the PDF) ---
-\newcommand{\todo}[1]{\textbf{\color{red}[TODO: #1]}}
-
-% --- Theorem environments (aliascnt template per conventions) ---
-% Master plain-style counter.
+% Master counter.
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
 
+% Aliased plain-style environments.
 \newaliascnt{lemma}{theorem}
 \newtheorem{lemma}[lemma]{Lemma}
 \aliascntresetthe{lemma}
-
-\newaliascnt{proposition}{theorem}
-\newtheorem{proposition}[proposition]{Proposition}
-\aliascntresetthe{proposition}
 
 \newaliascnt{corollary}{theorem}
 \newtheorem{corollary}[corollary]{Corollary}
 \aliascntresetthe{corollary}
 
-% Definition-style.
+\newaliascnt{proposition}{theorem}
+\newtheorem{proposition}[proposition]{Proposition}
+\aliascntresetthe{proposition}
+
+% Aliased definition-style environments.
 \theoremstyle{definition}
 \newaliascnt{definition}{theorem}
 \newtheorem{definition}[definition]{Definition}
 \aliascntresetthe{definition}
 
-\newaliascnt{assumption}{theorem}
-\newtheorem{assumption}[assumption]{Assumption}
-\aliascntresetthe{assumption}
-
-\newaliascnt{fact}{theorem}
-\newtheorem{fact}[fact]{Fact}
-\aliascntresetthe{fact}
-
-% Remark-style.
+% Aliased remark-style environment.
 \theoremstyle{remark}
 \newaliascnt{remark}{theorem}
 \newtheorem{remark}[remark]{Remark}
 \aliascntresetthe{remark}
 
-% Cleveref name registrations.
+% Cleveref names — keyed on the aliascnt counters, so they fire correctly.
 \crefname{theorem}{Theorem}{Theorems}
 \crefname{lemma}{Lemma}{Lemmas}
-\crefname{proposition}{Proposition}{Propositions}
 \crefname{corollary}{Corollary}{Corollaries}
+\crefname{proposition}{Proposition}{Propositions}
 \crefname{definition}{Definition}{Definitions}
-\crefname{assumption}{Assumption}{Assumptions}
-\crefname{fact}{Fact}{Facts}
 \crefname{remark}{Remark}{Remarks}
 \crefname{equation}{Eq.}{Eqs.}

@@ -130,6 +130,8 @@ Pick by chain structure:
 
 Do not mix patterns within a single proof.
 
+**Display-first — the rule all five patterns inherit.** The derivation lives in the display block; prose only annotates *why* each row holds. Every inferential step — every `=`, `\le`, `\ge` that does mathematical work — is a **row inside an `align` / `equation` environment**, never a sentence. Prose is reserved for: the one-line opening strategy, the per-step justifications (trailer / `\tag{}` / legend), and required scaffolding (the union-bound paragraph, `\textbf{}` case headers). A step asserted in a sentence — *"by the definition of $\nabla L$, this equals …"*, *"a short calculation then gives …"* — instead of shown as a row is exactly the prose-derivation that lint **R19** fires on (math chars < prose chars) and the Phase-D **derivation-integrity reviewer** hunts. If a step is too trivial to display, it is trivial enough to fold into an adjacent row's justification; it never becomes a free-standing prose claim. The formulas carry the proof; the words explain the formulas.
+
 ### Trailing-justification block
 
 Write the chain with `& ~` after each relation symbol; close with one comma-list of reasons:
@@ -206,14 +208,18 @@ We decompose the difference as
 We bound each piece in turn.
 
 \smallskip\noindent
-\textbf{Bound on $I_1$.} By \Cref{lem:perturbation_of_neuron}, $\| x^{(H-1)}(k) - x^{(H-1)}(0) \|_2 \le \ldots$, so
+\textbf{Bound on $I_1$:}
 \begin{align*}
-I_1 \;\le\; 3 c_\sigma a_{2,0}^2 c_{x,0}^2 \sqrt{c_\sigma} L^3 g_{c_x}(H) R.
+I_1
+&\;\le\; \big\| x^{(H-1)}(k) - x^{(H-1)}(0) \big\|_2 \cdot \big( \| x_i^{(H-1)}(k) \|_2 + \| x_j^{(H-1)}(0) \|_2 \big) \cdot \tfrac{c_\sigma}{m} \textstyle\sum_r a_r(0)^2 \tag{Cauchy--Schwarz on the inner-product difference} \\
+&\;\le\; 3 c_\sigma a_{2,0}^2 c_{x,0}^2 \sqrt{c_\sigma} L^3 g_{c_x}(H) R. \tag{by \Cref{lem:perturbation_of_neuron} and \Cref{ass:init_scale}}
 \end{align*}
 
 \smallskip\noindent
-\textbf{Bound on $I_2$.} \ldots
+\textbf{Bound on $I_2$:} \ldots
 ```
+
+The lemma that powers each piece is cited *inside* the display via `\tag{}`, not in a prose preamble — the bound is derived row by row, never asserted. The `\textbf{Bound on $I_k$:}` header is scaffolding (R19 excludes it from the prose count); the work stays in the `align`.
 
 ### Successful-event conditioning (probabilistic / RL proofs)
 
@@ -236,7 +242,7 @@ On $\mathcal{E}$, we prove the claim by induction on $h$, downward from $h = H+1
 \end{proof}
 ```
 
-This pattern lets all subsequent algebra read as deterministic. The cost is paid once, at the top.
+This pattern lets all subsequent algebra read as deterministic. The cost is paid once, at the top. The `On $\mathcal{E}$, we prove the claim by induction …` line is the one-sentence strategy, **not** the derivation: the inductive body that follows is still display-first — each inductive step is an `align` row with its justification, and a multi-step induction with its own machinery should be promoted to a named lemma rather than narrated in prose.
 
 ---
 

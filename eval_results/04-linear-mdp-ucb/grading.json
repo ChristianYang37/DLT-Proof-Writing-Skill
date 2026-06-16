@@ -1,27 +1,97 @@
 {
   "eval_id": 4,
   "eval_name": "linear-mdp-ucb-regret",
-  "version": "v2-full-workflow",
-  "graded_at": "2026-05-14T17:00:00+08:00",
-  "grader": "main-agent (hand-grade per agents/grader.md)",
+  "graded_at": "2026-06-09T04:54:36Z",
   "assertions": [
-    {"text": "successful event 𝓔 is defined explicitly with its component events and its probability lower-bounded via union bound", "type": "qualitative", "passed": true, "evidence": "runner-log: lemmas weight_bound + cover + concentration build the good event 𝓔 with Pr[𝓔] ≥ 1-δ via union bound", "notes": ""},
-    {"text": "main derivation is conducted \"on event 𝓔\" — derivations after the event definition are treated as deterministic", "type": "qualitative", "passed": true, "evidence": "runner-log: 'successful-event conditioning + T_1+T_2+T_3' organizational pattern", "notes": ""},
-    {"text": "regret is decomposed into named terms (T_1 + T_2 + T_3 or similar)", "type": "qualitative", "passed": true, "evidence": "explicit lem:decomposition for T_1+T_2+T_3 structure", "notes": ""},
-    {"text": "elliptical potential lemma is stated explicitly (not invoked as \"by standard arguments\")", "type": "qualitative", "passed": true, "evidence": "lem:elliptical + lem:T2_bound as named lemmas; bib resolves abbasi-yadkori2011improved", "notes": ""},
-    {"text": "backward induction over h is explicit (states inductive hypothesis at h+1, derives at h)", "type": "qualitative", "passed": true, "evidence": "lem:optimism as separate lemma with explicit backward induction structure", "notes": ""},
-    {"text": "final regret rate carries d^{3/2} √(HT) (or √H T with appropriate d factor) modulo log factors", "type": "qualitative", "passed": true, "evidence": "stated as 𝒪̃(d^{3/2}√(H^3 T)) = 𝒪̃(d^{3/2}H√(HT)). Runner caught a math error in the prompt (prompt's √(HT) is √H short of the algebraically correct √(H^3 T)) and stated the correct form with rem:rate_unpacking acknowledging the prompt's form", "notes": "honest math judgment — assertion's '√H T with appropriate d factor' clause is satisfied"},
-    {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script", "passed": true, "evidence": "compile_ok: True, undef_refs: 0, undef_cites: 0, errors: 0; lint.py with --bib: 0 errors / 0 warnings", "notes": ""},
-    {"text": "experiments-plan.md is produced in output_dir with the schema from theory-experiment.md", "type": "script", "passed": true, "evidence": "experiments-plan.md present; theoretical claim + 2 hypotheses (H1 √T, H2 d^{3/2}) + setup (N=100, A=10, Fourier features) + 10 seeds + 3 baselines + 3 ablations + 4 figures + pre-registered criteria", "notes": "full schema followed"},
-    {"text": "experiments-plan.md has no fabricated results — the Results section is blank or absent, no invented numerical values, no fitted slopes", "type": "qualitative", "passed": true, "evidence": "runner-log: 'Results blank'", "notes": ""},
-    {"text": "experiments-plan.md design meets ICML/NeurIPS/ICLR rigor minimum: ≥5 seeds explicitly listed, at least one baseline, at least one ablation, pre-registered success criteria stated", "type": "qualitative", "passed": true, "evidence": "10 seeds [1..10], 3 baselines (eps-greedy, random, Thompson-style LSVI), 3 ablations (bonus coef / regulariser / horizon), pre-registered slope intervals α̂_T ∈ [0.45,0.55], α̂_d ∈ [1.35,1.65]", "notes": "exceeds minimums; pre-registration tight"},
-    {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢", "type": "script", "passed": true, "evidence": "confidence-trace.md present; 15 steps; final 🟢 10 / 🟡 4 / 🔴 1; one 🔴 (bonus-constant tightness in section 03 line ~90) honestly flagged with \\todo{}", "notes": "honest residual 🔴 → \\todo, not silently absorbed"},
-    {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists", "type": "script", "passed": true, "evidence": "review-iteration-1.md (5 weaknesses; 3 fixes including identity-derivation add + residual-bound typo + unit-vector explicit; 2 INTENTIONAL rejected) + review-iteration-1-verification.md + review-iteration-2.md (2 weaknesses; 1 fix + 1 INTENTIONAL) + review-iteration-2-verification.md — 4 files for 2 iterations because runner saved verification trace separately", "notes": "extra trace discipline (separate verification files); 2 iter to accept-as-is"}
+    {
+      "text": "successful event 𝓔 is defined explicitly with its component events and its probability lower-bounded via union bound",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "02-concentration.tex:46-53 defines `\\Ev := { forall (k,h): ||sum_tau phi[V-P V]||_{(Lambda)^{-1}} <= C dH sqrt(iota) }` and proves `Prob[E] >= 1-delta/2` via covering-number union bound over V_eps and all (k,h) (lines 98-99).",
+      "notes": "Event over all (k,h); probability lower-bounded by union bound over cover and (k,h)."
+    },
+    {
+      "text": "main derivation is conducted \"on event 𝓔\" — derivations after the event definition are treated as deterministic",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "03-optimism.tex:6-7 'Both are deterministic statements on E'; 05-main-theorem.tex:26 'Throughout we condition on the event E ... on which all of Sec optimism holds deterministically.'",
+      "notes": "Optimism/recursion/Step1-5 all explicitly on E; second event E' (Azuma) union-bounded at the end."
+    },
+    {
+      "text": "regret is decomposed into named terms (T_1 + T_2 + T_3 or similar)",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "05-main-theorem.tex:72-78 underbraces `Regret(K) <= [2 beta sum ||phi||]_{T_1} + [sum zeta]_{T_2}`, with T_1 the bonus sum and T_2 the martingale term.",
+      "notes": "Honest two-term named split (T_1+T_2) after iter-1 refactor; assertion says 'or similar', satisfied."
+    },
+    {
+      "text": "elliptical potential lemma is stated explicitly (not invoked as \"by standard arguments\")",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "04-elliptical.tex:34-46 `\\begin{lemma}[Elliptical potential]` with full statement `sum phi^T Lambda_{j-1}^{-1} phi <= 2 log(det L_t/det L_0) <= 2d log((lmax+t)/lmin)` and a complete proof (lines 48-78).",
+      "notes": "Stated and fully proved via matrix-determinant lemma + telescoping; not black-boxed."
+    },
+    {
+      "text": "backward induction over h is explicit (states inductive hypothesis at h+1, derives at h)",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "03-optimism.tex:95-97 'induct on h downward from h=H+1 to h=1 ... inductive hypothesis at step h+1 is V_{h+1}^k(x) >= V_{h+1}^star(x)'; base case h=H+1 (line 99); inductive step derives V_h^k >= V_h^star (lines 102-124).",
+      "notes": "Explicit downward induction with stated IH at h+1, base case, and step at h."
+    },
+    {
+      "text": "final regret rate carries d^{3/2} √(HT) (or √H T with appropriate d factor) modulo log factors",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "05-main-theorem.tex:14-16 `Regret(K) <= C d^{3/2} sqrt(H^3 T) iota = Otil(d^{3/2} sqrt(H^3 T))`.",
+      "notes": "Carries d^{3/2} with an H-factor (correct JYWJ rate d^{3/2} sqrt(H^3 T)); prompt's bare sqrt(HT) flagged as user-decision discrepancy."
+    },
+    {
+      "text": "scripts/latexmk-wrapper.py reports compile_ok=true on the output file",
+      "type": "script",
+      "passed": true,
+      "evidence": "latexmk-wrapper.py on main.tex: {\"compile_ok\": true, ... \"undef_refs\": [], \"undef_cites\": [], \"undef_macros\": [], \"errors\": [], \"warnings_count\": 0}.",
+      "notes": "Compiles cleanly; no undefined refs/cites/macros, 0 errors."
+    },
+    {
+      "text": "experiments-plan.md is produced in output_dir with the schema from theory-experiment.md (Theoretical claim, Empirical hypothesis, Setup, Metrics with verifies-which-theorem mapping, Baselines, Ablations, Plots, Pre-registered success criteria, Reproducibility)",
+      "type": "script",
+      "passed": true,
+      "evidence": "experiments-plan.md headers: 'Theoretical claim' (l7), 'Empirical hypothesis' (l21), 'Setup' (l34), 'Metrics' (l77) with 'Verifies' column (l79-86), 'Baselines' (l90), 'Ablations' (l102), 'Plots and tables' (l118), 'Pre-registered success criteria' (l136), 'Reproducibility statement' (l149).",
+      "notes": "All schema sections present; metrics table maps each metric to a theorem/lemma."
+    },
+    {
+      "text": "experiments-plan.md has no fabricated results — the Results section is blank or absent, no invented numerical values, no fitted slopes",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "experiments-plan.md:162-166 '## Results — Leave this section blank. ... Do NOT populate with imagined numbers, predicted-as-actual values, or placeholder rows.' Slope ranges given are pre-registered success thresholds, not measured fits.",
+      "notes": "Results blank; bracketed slope intervals are pre-registered criteria, not fabricated fitted values."
+    },
+    {
+      "text": "experiments-plan.md design meets ICML/NeurIPS/ICLR rigor minimum: ≥5 seeds explicitly listed, at least one baseline, at least one ablation, pre-registered success criteria stated",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "Seeds '[1,2,3,4,5,6,7,8]' (l68, 8 seeds); Baselines B1/B2/B3 (l90-100); Ablations A1-A4 (l102-116); Pre-registered success criteria with fixed-before-running thresholds (l136-147).",
+      "notes": "8 seeds, 3 baselines, 4 ablations, pre-registered confirm/refute thresholds."
+    },
+    {
+      "text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method",
+      "type": "script",
+      "passed": true,
+      "evidence": ".proof-research/confidence-trace.md exists; 50 steps each with initial/current 🔴/🟡/🟢 tag and 'Verification method' field; summary 'green 31 / yellow 18 / red 1'. One residual 🔴 (C_beta) carries a \\todo.",
+      "notes": "Full 50-step sweep with tags and per-step verification methods."
+    },
+    {
+      "text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists recording the five-reviewer panel — five 0–10 scores (3 correctness + math-taste + derivation-integrity) and merged, verified weaknesses",
+      "type": "script",
+      "passed": true,
+      "evidence": "review-iteration-1.md and -2.md each table R1-R5 (3 correctness lenses + math-taste + derivation-integrity) with 0-10 scores (means 8.00, 8.40) and merged/verified weaknesses with verdicts; iter-2 mean 8.40 > 8 accept gate.",
+      "notes": "Two iterations, full five-reviewer panel each, means > 8, weaknesses merged and verified."
+    }
   ],
   "overall": {
     "passed_count": 12,
     "failed_count": 0,
     "not_verifiable_count": 0,
-    "summary": "Full v2 workflow ran cleanly. Phase C.5: 15 steps, 10🟢/4🟡/1🔴 with the 🔴 honestly \\todo-flagged (bonus-constant tightness). Phase D: 2 iter → accept-as-is, with separate verification trace files per iteration. Experiments-plan exceeds ICML rigor: 10 seeds, 3 baselines, 3 ablations, tight pre-registered slope intervals. **Runner caught a math error in the eval prompt** (prompt said √(HT), correct is √(H^3 T)) and documented the discrepancy in rem:rate_unpacking — same kind of mathematical honesty seen in eval 5. Would pass NeurIPS/ICML/COLT review."
+    "summary": "Strong, near-publication-grade submission. Compiles cleanly (compile_ok=true, 0 undef refs/cites/macros), lint reports 0 errors/0 warnings (R0a/R0b/R12 all clean). The five required structural elements are all present and correct: explicit successful event E with union-bound probability, on-E deterministic derivation, named T_1+T_2 decomposition, fully-proved elliptical-potential lemma, explicit downward backward induction, and the correct d^{3/2} sqrt(H^3 T) JYWJ rate. The runner honestly proves the true rate rather than parroting the prompt's unprovable bare sqrt(HT), logging the discrepancy as a user-decision. experiments-plan.md matches the theory-experiment schema with 8 seeds, 3 baselines, 4 ablations, pre-registered criteria, and a blank Results section. Confidence trace (50 tagged steps) and a genuine two-iteration five-reviewer panel (mean 8.40) ran. Weaknesses are minor and self-disclosed: a symbolic C_beta constant and an imprecise-but-lower-order discretization chain (02-concentration.tex:113-120) the reviewers correctly flag as non-blocking. Would survive a NeurIPS/ICML review."
   }
 }

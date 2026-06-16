@@ -1,0 +1,11 @@
+{
+  "_comment": "Frozen, user-approved Lean statement signatures (Phase B). lean_lint.py --lock (SL1) fails the build if either signature drifts after sign-off. sig_hash = sha256 of the whitespace-normalized signature text (name through ':='), computed via lean_lint.extract_signatures. Faithfulness verdict: FAITHFUL (see .proof-research/faithfulness-review.md).",
+  "statements": {
+    "Decode.decode_iff_gradient_separation": {
+      "sig_hash": "8bb69e7931ce98d5558d4dbe54f556cbc1a4018436543245a6c3a609050ed3c8"
+    },
+    "Decode.decode_iff_descent_separation_of_neg": {
+      "sig_hash": "840444c278e8627667e606804dd52da58f2d7b11dcf0fbd7d47682062efd1d41"
+    }
+  }
+}

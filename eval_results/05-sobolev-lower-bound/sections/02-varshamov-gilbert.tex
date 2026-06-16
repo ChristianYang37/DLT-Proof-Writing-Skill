@@ -1,0 +1,27 @@
+\section{The Varshamov--Gilbert packing}\label{sec:vg}
+
+The first ingredient is a combinatorial packing of the binary hypercube: a
+large set of codewords that are pairwise far apart in Hamming distance. This
+is the classical Varshamov--Gilbert bound, which we quote.
+
+\begin{lemma}[Varshamov--Gilbert, {\cite[Lemma 2.9]{tsybakov2009introduction}}]\label{lem:vg}
+Let $M_0\ge 8$. There exists a set of codewords
+$\{\tau^{(1)},\dots,\tau^{(M)}\}\subseteq\{0,1\}^{M_0}$ with
+\begin{align}\label{eq:vg}
+M \;\ge\; 2^{M_0/8}
+\qquad\text{and}\qquad
+\rhoH\!\left(\tau^{(k)},\tau^{(k')}\right) \;\ge\; \frac{M_0}{8}
+\quad\text{for all } 1\le k< k'\le M.
+\end{align}
+\end{lemma}
+
+\begin{remark}\label{rem:vg}
+We apply \Cref{lem:vg} with $M_0 = m^d$, which satisfies $M_0\ge 8$ for every
+$m\ge 2$ when $d\ge 1$ (and for $m\ge 3$ when $d=1$; we take $m$ large in the
+end, so this is harmless). The two conclusions feed the two sides of the Fano
+bound: the Hamming separation $\rhoH\ge M_0/8$ becomes an $\Ltwo$ separation
+of the hypothesis family in \Cref{lem:bumps}, while the cardinality
+$\log M\ge \tfrac{M_0}{8}\log 2$ becomes the entropy term $\log M$ in the
+denominator of the Fano inequality Eq.~\eqref{eq:fano} used in
+\Cref{thm:main}.
+\end{remark}

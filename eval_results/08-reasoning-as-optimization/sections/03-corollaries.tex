@@ -1,0 +1,157 @@
+\section{Corollaries: descent direction, failure, and cross-entropy}
+\label{sec:corollaries}
+
+\Cref{thm:main} has three immediate consequences, each obtained by an exact rewrite of the
+per-competitor condition $\mu\,\inner{W_{\astar} - W_{b}}{\grad\loss(\xstar)} > 0$: the
+descent-direction reading for a constrained minimum, the contrapositive failure
+characterization, and the cross-entropy instantiation. All three retain exactly the
+hypotheses of \Cref{thm:main} (see \Cref{rem:generalization}); each displayed step carries a
+\verb|% @lx-from:| provenance comment naming the Lean declaration that verifies it.
+
+% ===========================================================================
+% Corollary: descent-direction separation (mu < 0)
+% ===========================================================================
+% @lx-from: cor:neg | kind: named
+\begin{corollary}[Descent-direction separation, $\mu < 0$]
+\label{cor:neg}
+Retain the hypotheses of \Cref{thm:main}, but assume the multiplier is negative, $\mu < 0$
+(the constrained-minimum case). Then $\astar$ is generated at $\xstar$ if and only if the
+descent direction $-\grad\loss(\xstar)$ is strictly better aligned with the answer row than
+with every competitor row:
+\begin{align*}
+\Generated(\astar, \xstar)
+\;\iff\;
+\forall\, b \ne \astar,\quad \inner{W_{\astar} - W_{b}}{-\grad \loss(\xstar)} > 0.
+\end{align*}
+\end{corollary}
+
+\begin{proof}
+% @lx-from: cor:neg.1 | kind: named
+Since $\mu < 0$, in particular $\mu \ne 0$, so \Cref{thm:main} applies with this $\xstar$ and
+$\mu$, giving
+\begin{align*}
+\Generated(\astar, \xstar)
+\;\iff\;
+\forall\, b \ne \astar,\quad \mu\,\inner{W_{\astar} - W_{b}}{\grad \loss(\xstar)} > 0.
+\end{align*}
+
+% @lx-from: cor:neg.2 | kind: arith
+It remains to rewrite the per-competitor condition. Fix $b \ne \astar$ and write
+$v = W_{\astar} - W_{b}$. We show
+\begin{align*}
+\mu\,\inner{v}{\grad \loss(\xstar)} > 0
+\;\iff\;
+\inner{v}{-\grad \loss(\xstar)} > 0.
+\end{align*}
+Because $\mu < 0$, the product $\mu\,\inner{v}{\grad\loss(\xstar)}$ is strictly positive
+exactly when $\inner{v}{\grad\loss(\xstar)} < 0$; and by linearity of the inner product in its
+second argument, $\inner{v}{-\grad\loss(\xstar)} = -\inner{v}{\grad\loss(\xstar)}$, which is
+strictly positive under precisely the same condition $\inner{v}{\grad\loss(\xstar)} < 0$.
+Quantifying this equivalence over all $b \ne \astar$ turns the conclusion of \Cref{thm:main}
+into the descent-direction form, which is the assertion. This completes the proof.
+\end{proof}
+
+% ===========================================================================
+% Corollary: failure characterization (contrapositive)
+% ===========================================================================
+% @lx-from: cor:fail | kind: named
+\begin{corollary}[Failure characterization: decode fails $\iff$ a competitor wins]
+\label{cor:fail}
+Retain the hypotheses of \Cref{thm:main}. Then the designated token $\astar$ is \emph{not}
+generated at $\xstar$ if and only if some competitor $b \ne \astar$ defeats it in signed
+alignment:
+\begin{align*}
+\neg\,\Generated(\astar, \xstar)
+\;\iff\;
+\exists\, b \ne \astar,\quad \mu\,\inner{W_{\astar} - W_{b}}{\grad \loss(\xstar)} \le 0.
+\end{align*}
+\end{corollary}
+
+\begin{proof}
+% @lx-from: cor:fail.1 | kind: arith
+This is the contrapositive of \Cref{thm:main}. Negating both sides of the biconditional
+$\Generated(\astar, \xstar) \iff \forall\, b \ne \astar,\ \mu\,\inner{W_{\astar} - W_{b}}{\grad \loss(\xstar)} > 0$
+and pushing the negation through the universal quantifier and the strict inequality, the
+statement ``for every competitor $b \ne \astar$ the signed alignment is strictly positive''
+fails exactly when there \emph{exists} a competitor $b \ne \astar$ whose signed alignment is
+non-positive, $\mu\,\inner{W_{\astar} - W_{b}}{\grad \loss(\xstar)} \le 0$ (the negation of a
+strict inequality being the corresponding non-strict reverse inequality):
+\begin{align*}
+\neg\,\Generated(\astar, \xstar)
+\;\iff\;
+\exists\, b \ne \astar,\quad \mu\,\inner{W_{\astar} - W_{b}}{\grad \loss(\xstar)} \le 0,
+\end{align*}
+which is the assertion. This completes the proof.
+\end{proof}
+
+\begin{remark}[Tightness of the failure boundary]
+\label{rem:fail-tight}
+Because \Cref{cor:fail} is an equivalence, it is sharp: decoding fails \emph{precisely} when a
+single competitor row meets or beats the answer row in $\mu$-signed alignment with the
+gradient. The witness $b$ is exactly the token that wins instead of $\astar$, so the criterion
+not only detects failure but names the offending competitor.
+\end{remark}
+
+% ===========================================================================
+% Corollary: cross-entropy / softmax-residual instantiation
+% ===========================================================================
+% @lx-from: cor:ce | kind: named
+\begin{corollary}[Cross-entropy instantiation: softmax-residual separation]
+\label{cor:ce}
+Retain the hypotheses of \Cref{thm:main}, and suppose in addition that the gradient has the
+single-token cross-entropy form of \Cref{rem:ce-setup}, with softmax vector $p$ and one-hot
+target at $\astar$:
+\begin{align*}
+\grad \loss(\xstar) \;=\; \sum_{c} \bigl(p_c - \indicator{c = \astar}\bigr)\, W_c .
+\end{align*}
+Then $\astar$ is generated at $\xstar$ if and only if, for every competitor $b \ne \astar$,
+the $\mu$-signed softmax-residual separation score is strictly positive:
+\begin{align*}
+\Generated(\astar, \xstar)
+\;\iff\;
+\forall\, b \ne \astar,\quad
+\mu \sum_{c} \bigl(p_c - \indicator{c = \astar}\bigr)
+   \bigl(\inner{W_{\astar}}{W_c} - \inner{W_{b}}{W_c}\bigr) > 0.
+\end{align*}
+\end{corollary}
+
+\begin{proof}
+% @lx-from: cor:ce.1 | kind: arith
+Fix a competitor $b \ne \astar$. Substituting the cross-entropy gradient and expanding the
+inner product over the vocabulary sum gives the identity
+\begin{align*}
+\inner{W_{\astar} - W_{b}}{\grad \loss(\xstar)}
+\;=\;
+\sum_{c} \bigl(p_c - \indicator{c = \astar}\bigr)
+   \bigl(\inner{W_{\astar}}{W_c} - \inner{W_{b}}{W_c}\bigr).
+\end{align*}
+Indeed, distributing the inner product across the sum, pulling each scalar
+$p_c - \indicator{c = \astar}$ out of the second argument, and expanding the gap row
+$\inner{W_{\astar} - W_{b}}{W_c} = \inner{W_{\astar}}{W_c} - \inner{W_{b}}{W_c}$ termwise
+yields the right-hand side.
+
+% @lx-from: cor:ce.2 | kind: named
+By \Cref{thm:main}, $\Generated(\astar, \xstar)$ holds iff
+$\mu\,\inner{W_{\astar} - W_{b}}{\grad \loss(\xstar)} > 0$ for every $b \ne \astar$. Rewriting
+each per-competitor alignment by the identity just established, under the universal quantifier
+over $b \ne \astar$, gives
+\begin{align*}
+\Generated(\astar, \xstar)
+\;\iff\;
+\forall\, b \ne \astar,\quad
+\mu \sum_{c} \bigl(p_c - \indicator{c = \astar}\bigr)
+   \bigl(\inner{W_{\astar}}{W_c} - \inner{W_{b}}{W_c}\bigr) > 0,
+\end{align*}
+which is the assertion. This completes the proof.
+\end{proof}
+
+\begin{remark}[Reading the cross-entropy criterion]
+\label{rem:ce-reading}
+The separation score is a Gram-matrix-weighted residual: $\inner{W_{\astar}}{W_c} - \inner{W_{b}}{W_c}$
+compares how the answer row and the competitor row each align with row $W_c$, weighted by the
+softmax residual $p_c - \indicator{c = \astar}$ (``predicted minus target''). Decoding succeeds
+exactly when this weighted comparison is $\mu$-signed positive against every competitor, i.e.
+when the cross-entropy residual pushes the answer row ahead in the unembedding geometry. No
+differentiation of the softmax is performed; the residual gradient form is the only added
+hypothesis.
+\end{remark}

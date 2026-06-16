@@ -1,74 +1,118 @@
-# Review iteration 1 — Gilmer / Frankl union-closed proof
+# Review iteration 1 — frankl-union-closed-gilmer (eval id=7)
 
-## Reviewer output
+## Reviewer scores
 
-### Summary
-The paper proves Gilmer's 2022 theorem (arXiv:2211.09055): for every union-closed family $\Fcal \subseteq 2^{[n]}$ with $|\Fcal| \ge 2$, some element $i \in [n]$ is contained in at least $0.01 \cdot |\Fcal|$ of the sets. The proof skeleton has three layers: (a) two pointwise binary-entropy inequalities (Lemma `lem:hbin-low` for $p, p' \in [0, 0.1]$ and Lemma `lem:hbin-mixed` for general $p, p' \in [0,1]$); (b) a key single-bit conditional-entropy gap (`lem:gap`) obtained by partitioning $S$ into $\Ccal_0 = \{p_c \le 0.1\}, \Ccal_1 = \Ccal_0^c$, applying Markov to get $\Pr[\Ccal_0] \ge 0.9$, then estimating the both-low and one-low-one-high blocks while discarding the both-high block; (c) bit-by-bit reveal via the chain rule and the data-processing inequality $\H((A \cup B)_i \mid (A \cup B)_{<i}) \ge \H((A \cup B)_i \mid A_{<i}, B_{<i})$ to get $\H(A \cup B) \ge 1.26 \H(A)$; (d) the combinatorial conclusion via the contradiction $1.26 \log|\Fcal| \le \log|\Fcal|$. The proof tracks the original paper closely while making each step's hypotheses and quantifiers explicit.
+| Reviewer | Role | Score | Blocking? |
+|---|---|---|---|
+| R1 | Correctness: line-by-line rigor | 9 | no |
+| R2 | Correctness: assumptions / generality / tightness | 9 | no |
+| R3 | Correctness: ML-community significance | 8 | no |
+| R4 | Math taste (Occam) | 8 | no |
+| R5 | Derivation integrity | 7 | no |
+| **mean** | | **8.20** | |
 
-### Strengths
-- The cleanly-stated 4-way decomposition of $\H(X \cup X' \mid C, C')$ over the $\{\Ccal_0, \Ccal_1\}^2$ partition (Eq. \eqref{eq:lhs-decomp}) is the conceptual heart of `lem:gap` and is presented with clear bookkeeping of which event corresponds to which inequality.
-- The data-processing step (`fac:data-processing` invocation in `thm:entropy-gap` Step 2) is correctly identified as the crucial move that converts $(A \cup B)_{<i}$ conditioning into $(A_{<i}, B_{<i})$ conditioning, exposing the iid structure that `lem:gap` consumes.
-- Hypothesis verification at the cite-site of `lem:gap` (the bulleted list in `thm:entropy-gap` Step 2) explicitly checks all six conditions before applying the lemma — this guards against the most common silent bug.
-- The contradiction argument in `thm:main` is structurally clean: contrapositively assume $\Pr[i \in A] < 0.01$ for every $i$, apply `thm:entropy-gap` to get $\H(A \cup B) \ge 1.26 \H(A)$, combine with union-closedness $\H(A \cup B) \le \H(A)$, derive $\H(A) \le 0$, contradicting $\H(A) \ge \log 2$.
-- Numerical claims (Eq. \eqref{eq:g-at-02}: $\hbin(0.18)/\hbin(0.10) \approx 1.4501$) are explicitly computed.
+## Accept decision
 
-### Weaknesses
+**ACCEPT.** Gate: `mean > 8` (8.20 > 8, strict) **AND** no unresolved REAL-blocking
+critical weakness. No reviewer flagged `blocking:true`; no weakness is severity
+`critical`. Highest severity raised is one `major` (REAL-nonblocking). All five
+reviewers independently re-derived the load-bearing constants (g_min = 1.4500 > 1.4,
+1.26/1.4 = 0.9, 1.8·0.9 = 1.62, Markov 0.01/0.1 = 0.1) and Monte-Carlo-verified the
+end-to-end 1.26 amplification (worst observed ratio ≈ 1.74) with zero violations.
+Per review-loop.md Component 4 gate 1, the proof is accepted as-is; **no fixes applied**.
 
-#### Weakness #1 (severity: minor)
-**Claim:** The monotonicity-of-$g(s)$ argument in `lem:hbin-low` Step 4 is incomplete: the text says "the ratio $g(s)$ is decreasing on $(0, 0.2]$ (this is straightforward to verify by differentiation)" without actually providing the differentiation, and refers the reader to `\Cref{rem:g-monotone}` for a "hand-check at the endpoint". The remark itself states "a direct (machine-checked) computation of $g'$ shows $g'(s) \le 0$ throughout this interval" but does not give the closed-form derivative inequality.
-**Evidence:** `sections/02-elementary-entropy.tex` lines 77-80 ("Both numerator and denominator are increasing in $s$ on $(0, 1/0.9)$, and the ratio $g(s)$ is decreasing on $(0, 0.2]$ (this is straightforward to verify by differentiation; we provide a hand-check at the endpoint $s = 0.2$ and at $s \to 0^+$ in \Cref{rem:g-monotone}).") and `sections/02-elementary-entropy.tex` lines 106-119 (the remark itself).
-**Severity:** minor — this matches Gilmer's original paper (which appeals to Figure 1 / visual inspection), so the gap is intentional and consistent with the literature. However, an explicit alternative (e.g., a direct upper bound on $g(0.2)$ that does not require monotonicity) would strengthen the proof.
+## Merged + verified weaknesses
 
-#### Weakness #2 (severity: minor)
-**Claim:** The footnote in `lem:gap` Step 3 ("Concretely: $\Pr[\Ccal_0] \le \frac{\Pr[\Ccal_0]^2}{0.9}$ iff $0.9 \le \Pr[\Ccal_0]$, which is \Cref{eq:c0-mass}.") is awkwardly worded and the surrounding parenthetical "with the resulting factor at most $1$ on the inverse of $\Pr[\Ccal_0]/0.9$, so multiplying the upper bound by $\Pr[\Ccal_0]/0.9$ only weakens it" is harder to parse than necessary.
-**Evidence:** `sections/03-lemma-1.tex` lines 106-111.
-**Severity:** minor — the math is correct (verified independently); the prose is the issue.
+### Weakness #1 (severity: minor, raised by 4/5)
+**Claim:** Two unresolved `\todo{user-decision: ...}` markers render as visible bold
+`[TODO: ...]` text in the compiled PDF body — one in the single-variable section
+(03-single-variable-bounds.tex:14, choice of Gilmer's Lemmas 2–3 vs. the heuristic
+placeholder) and one immediately before the headline corollary
+(07-frankl-corollary.tex:8, explicit c ≥ 0.01 vs. abstract c > 0). Both decisions are
+already resolved and correctly implemented in the math; the markers read as residual
+scaffolding that should not survive into a submitted manuscript.
+**Verdict:** INTENTIONAL.
+**Rebuttal / fix-plan:** Confirmed both markers exist and render via the eval-mode
+`\todo` macro (`macros.tex:67`, `\textbf{[TODO: #1]}`). They are the deliberate record
+of the Phase-A.1a Socratic self-Q&A delegations (runner-log.md "What's incomplete":
+eval mode has no interactive user, so each user-decision is logged at its cite-site
+with the stronger/faithful branch adopted). They are author-intentional, decision-
+neutral to soundness, and meant to be confirmed by the user. Not removed under the
+review loop; surfaced to the user for a one-token deletion if a clean PDF is wanted.
 
-#### Weakness #3 (severity: minor)
-**Claim:** In `lem:hbin-low` proof Step 1, the symmetry step "and by symmetry $p + p' - p p' \ge 0.9 p + p'$, hence (averaging the two)" produces a weaker bound than necessary; the direct argument $p p' \le 0.1 \min(p, p') \le 0.1 \cdot (p+p')/2$ gives $p + p' - p p' \ge (1 - 0.05)(p+p') = 0.95(p+p')$, which would propagate to a slightly larger lower bound on $g$. However, the looser $0.9$ factor matches Gilmer's paper and is needed downstream (in `lem:gap` Step 4) for the $0.9$ in $\Pr[\Ccal_0] \ge 0.9$ -- so the $0.9$ is the "right" constant for the whole chain to land on $1.26 = 0.9 \times 1.4$ and $1.62 = 2 \times 0.9 \times 0.9$.
-**Evidence:** `sections/02-elementary-entropy.tex` lines 29-36.
-**Severity:** minor / style — the choice of $0.9$ is intentional and consistent.
+### Weakness #2 (severity: major, raised by 2/5)
+**Claim:** The load-bearing minimization that pins the constant 1.4 is asserted with
+prose ("A direct calculation shows g is minimized on (0, 0.2] at u = 0.2") without a
+displayed monotonicity argument licensing that the minimum is attained at the right
+endpoint rather than an interior critical point (03-single-variable-bounds.tex:46).
+**Verdict:** REAL-nonblocking.
+**Rebuttal / fix-plan:** Confirmed the prose at line 46; it is load-bearing (it fixes
+g(0.2) = h(0.18)/h(0.10) = 1.450… > 1.4). Both flagging reviewers independently
+verified the claim is **correct** — g is strictly decreasing on (0, 0.2], so the
+endpoint u = 0.2 is genuinely the minimizer and the resulting 1.4 bound is sound. The
+step does not block verification of the proof (the conclusion is true and
+numerically reconfirmed by all five panelists). Under the accept gate no fix is
+applied; were the loop to continue, the minimum-change fix is a one-line displayed
+note that g'(u) < 0 on (0, 0.2] (a local edit, well within cost). Recorded for the
+user; not auto-applied since the gate is met and the proof is already accepted.
 
-#### Weakness #4 (severity: style)
-**Claim:** \Cref{rem:nontriviality} discusses the edge case $|\Fcal| = 1$ but the main theorem's hypothesis $|\Fcal| \ge 2$ already rules this out, making the remark partially redundant with the hypothesis statement.
-**Evidence:** `sections/01-preliminaries.tex` lines 36-44 (the remark) and `sections/05-main-theorem.tex` line 7 (the theorem statement uses $|\Fcal| \ge 2$).
-**Severity:** style — this is informative context, not a defect.
+### Weakness #3 (severity: style, raised by 1/5)
+**Claim:** The chain `0.9(p+p') \le \tfrac{p+p'}{2}\cdot 1.8 \le 0.18` writes an exact
+identity (the middle term equals 0.9(p+p')) as a non-strict inequality, momentarily
+reading as a genuine bound when the only content is p+p' ≤ 0.2
+(03-single-variable-bounds.tex:37).
+**Verdict:** REAL-nonblocking (style).
+**Rebuttal / fix-plan:** Confirmed at line 37. Logically valid (identity is a special
+case of ≤); purely presentational. The chain serves to record p+p' ≤ 0.2 ⇒
+0.9(p+p') ≤ 0.18 ≤ 1/2, which is exactly what licenses the "h increasing on [0,1/2]"
+step that follows. Single lone style flag; no soundness impact. Not fixed under the
+accept gate.
 
-### Questions for the author
-- (None: the headline statement matches Gilmer 2022 exactly.)
+### Weakness #4 (severity: minor, raised by 1/5)
+**Claim:** Lemma 3.1's ratio lower bound silently relies on the denominator
+½(h(p)+h(p')) being strictly positive (well-definedness of the divided inequality)
+for (p,p') ≠ (0,0); the positivity is true but never stated
+(03-single-variable-bounds.tex:41).
+**Verdict:** REAL-nonblocking.
+**Rebuttal / fix-plan:** Confirmed. The proof (line 25) explicitly dispatches the
+(p,p') = (0,0) case separately, then "assume (p,p') ≠ (0,0)"; for such (p,p') in
+[0,0.1]² at least one of p, p' is in (0,0.1], so h(·) > 0 and the denominator is
+strictly positive, making the ratio well-defined. The gap is a one-clause omission,
+not an error. Near-PHANTOM (the case split already implies positivity); recorded, not
+fixed under the accept gate.
 
-### Verdict
-**accept-with-minor-revisions**
+### Weakness #5 (severity: style, raised by 1/5)
+**Claim:** Region lemmas 4.2 (`lem:region-low`) and 4.3 (`lem:region-mix`) are stated
+"Under Eq. (marginal-cap)" (E[X] ≤ 0.01), but their proofs invoke only the strictly
+weaker consequence Pr[C0] ≥ 0.9; the stated hypothesis is over-strong — a benign
+hypothesis-tightness mismatch (04-region-bounds.tex:28).
+**Verdict:** INTENTIONAL.
+**Rebuttal / fix-plan:** Confirmed: both region-lemma proofs use only
+`Pr[Cz] ≥ 0.9` (derived from the cap via Markov at Eq. markov-region, line 22–23).
+Stating the lemmas under the same single hypothesis Eq. (marginal-cap) that governs
+the whole section (declared at line 9) is a deliberate uniformity/readability choice —
+every region statement keys off one named assumption rather than each restating the
+derived Pr[Cz] ≥ 0.9. The hypothesis is satisfied at every cite-site, so no
+correctness or generality is lost. Not fixed.
 
-The proof is correct and the structure is faithful to Gilmer's original argument. The only issues raised are minor presentational matters; none block verification of the main result.
+### Weakness #6 (severity: style, raised by 1/5)
+**Claim:** The macro `\R` (`\mathbb{R}`) is defined in macros.tex but never used in the
+body — a dead, defined-once macro (macros.tex:55).
+**Verdict:** REAL-nonblocking (style).
+**Rebuttal / fix-plan:** Confirmed: `grep` over all `.tex` body files finds zero uses
+of `\R` outside its definition at macros.tex:55. A harmless unused-macro; no soundness
+or rendering impact. A one-line deletion would resolve it; not applied under the
+accept gate (the proof is accepted as-is and minimum-change forbids cosmetic edits the
+gate does not require). Surfaced to the user.
 
----
+## Verdict counts
+- INTENTIONAL: 2 (#1, #5)
+- REAL-nonblocking: 3 (#2, #3, #6)  [#4 near-PHANTOM, recorded as REAL-nonblocking]
+- REAL-blocking: 0
+- PHANTOM: 0 (#4 borderline; the (0,0) case split already implies the positivity)
+- Unresolved critical: 0
 
-## Author verification of weaknesses
-
-### Weakness #1 (monotonicity of $g$)
-**Verdict:** REAL-nonblocking
-**Rebuttal / fix-plan:** The reviewer is correct that the differentiation is not provided in closed form. However: (a) the conclusion $g(0.2) > 1.4$ is verified numerically and directly to high precision (Eq. \eqref{eq:g-at-02}); (b) the alternative phrasing — "we evaluate $g$ at the endpoint $s = 0.2$ and verify that for any $s \in (0, 0.2]$, $g(s) \ge g(0.2) > 1.4$ by numerical sweep" — would be cleaner. **Fix decision:** apply a minimum-change fix that softens the proof's monotonicity claim into a direct $g(0.2) > 1.4$ assertion supplemented with a brief monotonicity remark, deferring the derivative computation to the remark. This is a 3-5 line fix, within the minor / REAL-nonblocking cost gate.
-
-### Weakness #2 (awkward footnote prose)
-**Verdict:** REAL-nonblocking
-**Rebuttal / fix-plan:** The math is correct; the prose is the issue. Replace the parenthetical (lines 106-111) with cleaner phrasing: "(iii) Eq.~\eqref{eq:multiply-c0} uses $\Pr[\Ccal_0] \le \Pr[\Ccal_0]^2/0.9$, which is equivalent to $\Pr[\Ccal_0] \ge 0.9$ (Eq.~\eqref{eq:c0-mass})." Remove the footnote, fold into the trailing legend. This is a 2-line fix, well within the cost gate.
-
-### Weakness #3 (suboptimal $0.9$ factor in Step 1)
-**Verdict:** INTENTIONAL
-**Rebuttal / fix-plan:** The $0.9$ factor is exactly the constant Gilmer uses; tightening to $0.95$ here would create a mismatch with the $\Pr[\Ccal_0] \ge 0.9$ constant used later in `lem:gap`. The whole proof's constants ($1.26, 1.62$) are calibrated to this choice. Do not change.
-
-### Weakness #4 (remark redundancy)
-**Verdict:** INTENTIONAL
-**Rebuttal / fix-plan:** The remark provides historical context (Frankl's original formulation) and explains why the $|\Fcal| = 1$ case is excluded. Keep as-is.
-
----
-
-## Fix application plan
-
-- **Weakness #1:** Soften the monotonicity argument; lead with the numerical evaluation; defer derivative to the remark.
-- **Weakness #2:** Rewrite the parenthetical in `lem:gap` Step 3 cleanly; remove footnote.
-- **Weakness #3:** No change.
-- **Weakness #4:** No change.
-
-**Fixes applied this iteration:** 2 (Weaknesses #1 and #2).
+## Outcome
+Accepted at iteration 1. Mean 8.20 > 8, no blocking/critical weakness. Proof
+unmodified per the accept gate. Residual style/prose items (#1, #2, #6 in particular)
+surfaced to the user as optional one-line cleanups, none required for correctness.

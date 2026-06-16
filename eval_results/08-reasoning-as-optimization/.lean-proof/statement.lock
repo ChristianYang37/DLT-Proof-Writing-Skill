@@ -1,0 +1,20 @@
+{
+  "_comment": "Frozen, user-approved Lean statement signatures (Phase B). lean_lint.py --lock (SL1) fails the build if any signature drifts after sign-off. sig_hash = sha256 of the whitespace-normalized signature text (name through ':='), computed via lean_lint.extract_signatures. The first two theorems are carried over BYTE-FOR-BYTE from 08-reasoning-iff (already user-approved; hashes unchanged). The next two theorems are corollaries of the main iff (a De Morgan dual and a cross-entropy specialization); faithfulness verdict for both: FAITHFUL (see .proof-research/faithfulness-review.md, section 'New signatures'). The fifth theorem (loss_below_log2_decodes) is the 2nd-layer loss-to-margin BRIDGE: cross-entropy below log 2 ⟹ greedy decode; faithfulness verdict FAITHFUL (see .proof-research/faithfulness-review.md, section 'NEW (5)').",
+  "statements": {
+    "Decode.decode_iff_gradient_separation": {
+      "sig_hash": "8bb69e7931ce98d5558d4dbe54f556cbc1a4018436543245a6c3a609050ed3c8"
+    },
+    "Decode.decode_iff_descent_separation_of_neg": {
+      "sig_hash": "840444c278e8627667e606804dd52da58f2d7b11dcf0fbd7d47682062efd1d41"
+    },
+    "Decode.decode_fails_iff_some_competitor": {
+      "sig_hash": "af56302bbf07dcab4814d75bd8852ee06b07ab7eb8ce9b47e19b813dff1bc6a4"
+    },
+    "Decode.decode_iff_softmax_residual": {
+      "sig_hash": "1f389d02f9303bef07b894fbc47b957356f03ac522757e2bdaef4afd7cd19516"
+    },
+    "Decode.loss_below_log2_decodes": {
+      "sig_hash": "3eef8334ad80696856e0efed47a87ce9f7d9b43c5e9f1267d18f9630bdb700f9"
+    }
+  }
+}

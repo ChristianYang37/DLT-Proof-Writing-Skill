@@ -1,0 +1,24 @@
+% main.tex — preamble + macro/section \input chain only.
+% Per references/conventions.md: this file is short and stable; it holds NO
+% theorem, lemma, proof, definition, remark, abstract, or prose content
+% (lint R18). All formal content lives in sections/NN-*.tex and is pulled in
+% below via \input{}.
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}   % sane 1in margins (default article margins are too wide)
+\usepackage{microtype}               % subtle spacing/justification polish
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{enumitem}
+
+% Symbol macros + theorem-environment setup (also loads amsthm/aliascnt/cleveref).
+\input{macros}
+
+\begin{document}
+
+\input{sections/01-preliminaries}
+\input{sections/02-theorem-decode-iff}
+
+\end{document}

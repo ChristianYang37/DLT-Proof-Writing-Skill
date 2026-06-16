@@ -1,72 +1,29 @@
+% main.tex — preamble + macro/section \input chain only.
+% Per references/conventions.md: this file is short and stable; it holds NO
+% theorem, lemma, proof, definition, remark, abstract, or prose content
+% (lint R18). All formal content lives in sections/NN-*.tex and is pulled in
+% below via \input{}.
 \documentclass[11pt]{article}
 
-% Geometry / typography
-\usepackage[margin=1in]{geometry}
-\usepackage{microtype}
-
-% Math
+\usepackage[T1]{fontenc}
+\usepackage[margin=1in]{geometry}   % sane 1in margins (default article margins are too wide)
+\usepackage{microtype}               % subtle spacing/justification polish
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage{amsthm}
-\usepackage{aliascnt}
 \usepackage{mathtools}
-
-% Tables (symbol table at top of preliminaries)
-\usepackage{booktabs}
-
-% TikZ (dependency graph in section 00)
-\usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
-
-% Colour (for the \todo marker)
-\usepackage{xcolor}
-
-% Cross-references (hyperref must be loaded BEFORE cleveref)
-\usepackage{hyperref}
-\usepackage[capitalize,noabbrev]{cleveref}
-
-% Enumerate
 \usepackage{enumitem}
 
-% Bibliography
-\usepackage[numbers,square]{natbib}
-
-% Macros and theorem environments
+% Symbol macros + theorem-environment setup (also loads amsthm/aliascnt/cleveref).
 \input{macros}
-
-\title{Reasoning as noisy Riemannian SGD on the LayerNorm sphere:\\
-       a phase-transition theory of single-token decoding}
-\author{}
-\date{}
 
 \begin{document}
 
-\maketitle
-
-% No abstract / introduction per the skill's scope (formal content only).
-% Section chain (clean-slate rewrite): preliminaries + assumptions, then
-% the leaf geometry/concentration lemmas (03-07, 10), the two-sided logit
-% bounds (08, 09, 12), the loss-to-margin bridge (11), and the three
-% results R1 (13), R2 (14), R3' (15), with cited externals in 99.
-
 \input{sections/01-preliminaries}
-\input{sections/02-assumptions}
-\input{sections/03-lemma-running-average}
-\input{sections/04-lemma-riem-gradient}
-\input{sections/05-lemma-orthogonality}
-\input{sections/06-lemma-quadratic-variation}
-\input{sections/07-lemma-retraction-stability}
-\input{sections/08-lemma-incorrect-max}
-\input{sections/09-lemma-signal-floor}
-\input{sections/10-lemma-azuma}
-\input{sections/11-lemma-loss-to-margin}
-\input{sections/12-lemma-incorrect-max-lower}
-\input{sections/13-theorem-R1-phase-transition}
-\input{sections/14-theorem-R2-critical-window}
-\input{sections/15-theorem-R3prime-cone}
-\input{sections/99-auxiliary}
+\input{sections/02-theorem-decode-iff}
+\input{sections/03-corollaries}
+\input{sections/04-bridge-and-dynamics}
 
-\bibliographystyle{plainnat}
+\bibliographystyle{plain}
 \bibliography{refs}
 
 \end{document}

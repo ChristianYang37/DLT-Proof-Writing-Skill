@@ -1,92 +1,56 @@
-\section{Notation, definitions, and basic information-theoretic facts}
+\section{Preliminaries}
 \label{sec:prelim}
 
-We collect the notation, the formal setup, and the standard
-information-theoretic facts that the rest of the proof invokes.
+Throughout, $\log$ denotes the base-$2$ logarithm, so entropies are measured in
+bits. We work over a finite universe $[n] = \{1,\dots,n\}$ and identify a subset
+$A \subseteq [n]$ with its indicator vector $(A_1,\dots,A_n) \in \{0,1\}^n$,
+where $A_i = 1$ iff $i \in A$. For a sequence we write $A_{<i} = (A_1,\dots,A_{i-1})$.
+For two bits we write $A_i \cupbit B_i \coloneqq \max(A_i, B_i)$, so that the
+indicator of $A \cup B$ at coordinate $i$ is $(A \cup B)_i = A_i \cupbit B_i$.
 
-\paragraph{Notation.}
-We work over a fixed finite universe $[n] := \{1, 2, \dots, n\}$ for some $n \ge 1$.
-Subsets of $[n]$ are identified with their indicator vectors in $\{0,1\}^n$
-via $A \leftrightarrow (A_1, \dots, A_n)$ where $A_i = \1\{i \in A\}$.
-We write $\log$ for the base-$2$ logarithm throughout, and adopt the
-convention $0 \log 0 = 0$.
-For a discrete random variable $X$ taking values in a finite set $\mathcal{X}$,
-$\H(X) := -\sum_{x \in \mathcal{X}} \Pr[X=x] \log \Pr[X=x]$ is its (Shannon) entropy,
-and $\H(X \mid Y) := \E_Y[\H(X \mid Y = y)]$ is its conditional entropy.
-Mutual information is $\Iinfo(X;Y) := \H(X) - \H(X \mid Y)$.
-For two Bernoulli random variables $X, X' \in \{0,1\}$,
-$X \cup X' := \max(X, X')$, which is also the indicator of the event that at
-least one of $X, X'$ equals $1$.
-For two subsets $A, B \subseteq [n]$, $A \cup B$ is the usual set union,
-and its indicator vector is $((A \cup B)_1, \dots, (A \cup B)_n)$ where
-$(A \cup B)_i = A_i \cup B_i = \max(A_i, B_i)$.
-Throughout, $c, C, C_1, \dots$ denote universal positive constants whose
-values may change from line to line.
+Throughout, the displayed numerical constants ($0.01$, $0.1$, $1.26$, $1.4$,
+$1.62$) are the explicit unoptimized values from Gilmer's argument and are not
+universal constants in the floating sense; we therefore do not invoke the
+universal-constant convention and track each value explicitly. The single bound
+constant we name, $c$, is fixed to the value $0.01$ in \Cref{thm:gilmer-frankl}.
+% lint: ignore R15 — the only bare $c$ is the named threshold fixed to 0.01 in thm:gilmer-frankl; declared here.
 
-\paragraph{Binary entropy.}
-The \emph{binary entropy function} is
-\begin{align*}
-\hbin(p) \;:=\; -p \log p - (1-p) \log (1-p), \qquad p \in [0,1],
-\end{align*}
-with $\hbin(0) := 0 =: \hbin(1)$. We will use repeatedly that $\hbin$ is
-continuous, $\hbin(0) = \hbin(1) = 0$, $\hbin(1/2) = 1$, $\hbin$ is concave
-on $[0,1]$, and for $X \sim \Bern(p)$, $\H(X) = \hbin(p)$.
-
-\begin{definition}[Union-closed family]\label{def:union-closed}
-A family $\Fcal \subseteq 2^{[n]}$ of subsets of $[n]$ is \emph{union-closed}
-if for every $A, B \in \Fcal$, the set $A \cup B$ also belongs to $\Fcal$.
+\begin{definition}[Union-closed family]
+\label{def:union-closed}
+A family $\F \subseteq 2^{[n]}$ is \emph{union-closed} if $A \cup B \in \F$ for
+all $A, B \in \F$.
 \end{definition}
 
-\begin{remark}\label{rem:nontriviality}
-We focus on union-closed families $\Fcal$ with $|\Fcal| \ge 2$; the case
-$\Fcal = \{\varnothing\}$ is degenerate (the universe of an empty set has no
-element to be ``abundant'' in), and the case $\Fcal = \varnothing$ is vacuous.
-Frankl's original formulation~\cite{frankl1995extremal} required only
-$\Fcal \ne \{\varnothing\}$; our slightly stronger $|\Fcal| \ge 2$ avoids the
-edge case while changing nothing substantive (a union-closed family with
-$|\Fcal| = 1$ contains a single set $A$, and if $A = \varnothing$ then there is
-no element to abundance-test; if $A \ne \varnothing$ then any $i \in A$ is in
-$100\% \ge 1\%$ of the sets, so the bound holds trivially).
-\end{remark}
-
-The following four facts about Shannon entropy are standard and stated
-without proof; we cite Cover and Thomas~\cite{cover2006elements}.
-
-\begin{fact}[Chain rule, {\cite[Theorem 2.5.1]{cover2006elements}}]\label{fac:chain-rule}
-For discrete random variables $X_1, \dots, X_n$ taking values in finite sets,
+\begin{definition}[Binary entropy]
+\label{def:binary-entropy}
+The \emph{binary-entropy function} $\hb \colon [0,1] \to [0,1]$ is
 \begin{align*}
-\H(X_1, \dots, X_n) \;=\; \sum_{i=1}^{n} \H(X_i \mid X_1, \dots, X_{i-1}),
+\hb(p) \;\coloneqq\; -\,p \log p \;-\; (1-p)\log(1-p),
 \end{align*}
-with the convention that $\H(X_1 \mid X_{<1}) = \H(X_1)$.
+with the convention $0 \log 0 = 0$, so $\hb(0) = \hb(1) = 0$. For a random
+variable $Z$ on a finite set we write $\Ent(Z)$ for its Shannon entropy, and
+$\Ent(X \given Y)$ for the conditional entropy. For a single bit $X$ with
+$\Pr[X=1] = p$ we have $\Ent(X) = \hb(p)$.
+\end{definition}
+
+We record the information-theoretic facts the proof uses; all are standard
+(see Cover and Thomas \cite{coverthomas2006}).
+
+\begin{fact}[Information-theoretic toolkit, \cite{coverthomas2006}]
+\label{fac:entropy-facts}
+Let $X, Y, Z$ and $X_1,\dots,X_n$ be random variables on finite sets. Then:
+\begin{enumerate}[label=\textup{(\roman*)}, ref=\ref*{fac:entropy-facts}(\roman*)]
+\item\label{fac:max-entropy}
+  \emph{(Maximum entropy.)} If $Z$ takes values in a finite set $\mathcal S$
+  then $\Ent(Z) \le \log|\mathcal S|$, with equality iff $Z$ is uniform on
+  $\mathcal S$.
+\item\label{fac:chain-rule}
+  \emph{(Chain rule.)} $\Ent(X_1,\dots,X_n) = \sum_{i=1}^{n} \Ent(X_i \given X_{<i})$.
+\item\label{fac:data-processing}
+  \emph{(Data processing.)} If $X \to Y \to Z$ is a Markov chain then
+  $\Info(X;Z) \le \Info(X;Y)$, where $\Info(\cdot\,;\cdot)$ is the mutual
+  information.
+\item\label{fac:concavity}
+  \emph{(Concavity.)} The binary-entropy function $\hb$ is concave on $[0,1]$.
+\end{enumerate}
 \end{fact}
-
-\begin{fact}[Data-processing for entropy, {\cite[Theorem 2.8.1]{cover2006elements}}]\label{fac:data-processing}
-Let $X, Y$ be discrete random variables and let $f$ be any (measurable)
-function defined on the range of $Y$. Then
-\begin{align*}
-\H(X \mid Y) \;\le\; \H(X \mid f(Y)).
-\end{align*}
-\end{fact}
-
-\begin{fact}[Uniform maximizes entropy, {\cite[Theorem 2.6.4]{cover2006elements}}]\label{fac:uniform-max}
-For a discrete random variable $X$ supported on a finite set $\mathcal{X}$,
-$\H(X) \le \log |\mathcal{X}|$, with equality if and only if $X$ is uniform on $\mathcal{X}$.
-\end{fact}
-
-\begin{fact}[Concavity of binary entropy]\label{fac:hbin-concave}
-The binary entropy function $\hbin : [0,1] \to [0, 1]$ is concave.
-Equivalently, for any $p, p' \in [0,1]$ and $\lambda \in [0,1]$,
-$\hbin(\lambda p + (1-\lambda) p') \ge \lambda \hbin(p) + (1-\lambda) \hbin(p')$.
-\end{fact}
-
-\begin{remark}\label{rem:hbin-concave}
-\Cref{fac:hbin-concave} is immediate from $\hbin''(p) = -\frac{1}{(\ln 2)\, p (1-p)} < 0$ for $p \in (0,1)$,
-together with the boundary values $\hbin(0) = \hbin(1) = 0$.
-\end{remark}
-
-\paragraph{Bernoulli unions.}
-We will use the following identity throughout without further comment:
-if $X \sim \Bern(p)$ and $X' \sim \Bern(p')$ are independent, then
-$X \cup X' = \max(X, X') \sim \Bern(p + p' - p p')$, since
-$\Pr[\max(X, X') = 0] = \Pr[X=0]\Pr[X'=0] = (1-p)(1-p')$.
-In particular, $\H(X \cup X') = \hbin(p + p' - p p')$.

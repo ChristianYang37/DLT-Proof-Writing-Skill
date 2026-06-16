@@ -15,7 +15,7 @@ For **every** assertion in `eval.assertions`, determine `passed: true | false | 
 
 ### Step 1 — Read runner output
 
-Read `<output_dir>/runner-log.md` first to understand the runner's self-reported state. Then read `main.tex`, `macros.tex`, and every file under `sections/`. If the runner produced `.proof-research/` digests, skim them.
+Read `<output_dir>/runner-log.md` first to understand the runner's self-reported state. Then read `main.tex`, `macros.tex`, and every file under `sections/`. If the runner produced `.proof-research/` digests, skim them. Each `.proof-research/review-iteration-<N>.md` should now contain **five** reviews with 0–10 scores and a mean — sanity-check that the runner actually ran the full panel (a log claiming acceptance with fewer than five scored reviews, or a mean ≤ 8, is a gaming signal worth a note).
 
 If `<output_dir>/` is empty or missing critical files, the runner failed: mark every assertion `passed: null` with `notes: "runner produced no output"` and stop.
 

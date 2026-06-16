@@ -1,0 +1,87 @@
+\section{Preliminaries: Hoeffding's lemma}
+\label{sec:hoeffding-lemma}
+
+Throughout, $c, C, C_1, C_2, \ldots$ denote universal positive constants whose
+values may change from line to line and depend only on quantities specified in
+each statement's hypotheses. We write $\Pr[\cdot]$ for probability and
+$\E[\cdot]$ for expectation. For a real random variable $Y$, its
+\emph{moment generating function} (MGF) is $\lambda \mapsto \E[e^{\lambda Y}]$,
+defined for all $\lambda \in \R$ whenever $Y$ is bounded.
+
+The single auxiliary ingredient is Hoeffding's lemma: a bounded, centered
+random variable has a sub-Gaussian MGF with the sharp variance proxy
+$(b-a)^2/4$. The leading constant $2$ in the final tail bound is a direct
+consequence of the constant $1/8$ below.
+
+\begin{lemma}[Hoeffding's lemma]\label{lem:hoeffding}
+Let $Y$ be a random variable with $\E[Y] = 0$ and $Y \in [a, b]$ almost surely,
+where $a < b$. Then for every $\lambda \in \R$,
+\begin{align}\label{eq:hoeffding-lemma}
+\E\!\left[ e^{\lambda Y} \right] \;\le\; \exp\!\left( \frac{\lambda^2 (b - a)^2}{8} \right).
+\end{align}
+\end{lemma}
+
+\begin{proof}
+Fix $\lambda \in \R$ and let $\psi(\lambda) := \log \E[e^{\lambda Y}]$ be the
+cumulant generating function of $Y$; since $Y$ is bounded, $\E[e^{\lambda Y}]$ is
+finite and $\psi$ is infinitely differentiable on $\R$, with derivatives
+obtained by differentiating under the expectation. We compute the first two
+derivatives and bound the second.
+
+\smallskip\noindent\textbf{Step 1 (boundary values).}
+\begin{align}
+\psi(0) &\;=\; \log \E[e^{0}] \;=\; \log 1 \;=\; 0, \label{eq:psi-zero} \\
+\psi'(\lambda) &\;=\; \frac{\E[Y e^{\lambda Y}]}{\E[e^{\lambda Y}]},
+  \qquad\text{so}\qquad \psi'(0) \;=\; \frac{\E[Y]}{\E[1]} \;=\; 0, \label{eq:psi-prime}
+\end{align}
+where the first line uses $\E[e^0]=1$, and the second differentiates
+$\psi=\log\E[e^{\lambda Y}]$ and then sets $\lambda=0$ using $\E[Y]=0$.
+
+\smallskip\noindent\textbf{Step 2 (the second derivative is a variance).}
+Define, for each fixed $\lambda$, the tilted law $Q_\lambda$ under which $Y$ has
+density proportional to $e^{\lambda Y}$ with respect to its original law. Then
+\begin{align}
+\psi''(\lambda)
+&\;=\; \frac{\E[Y^2 e^{\lambda Y}]}{\E[e^{\lambda Y}]}
+       - \left( \frac{\E[Y e^{\lambda Y}]}{\E[e^{\lambda Y}]} \right)^{\!2} \notag \\
+&\;=\; \E_{Q_\lambda}[Y^2] - \big( \E_{Q_\lambda}[Y] \big)^2
+   \;=\; \Var_{Q_\lambda}(Y), \label{eq:psi-second}
+\end{align}
+where the first step is the quotient rule applied to $\psi'$ in
+Eq.~\eqref{eq:psi-prime}, and the second step rewrites each ratio as an
+expectation under $Q_\lambda$ and recognises the difference as a variance.
+
+\smallskip\noindent\textbf{Step 3 (variance of a bounded variable).}
+Under $Q_\lambda$ the variable $Y$ still takes values in $[a,b]$, since tilting
+only reweights the original law and does not enlarge the support. Writing
+$m := (a+b)/2$ for the midpoint, the variance is controlled by the second moment
+about $m$:
+\begin{align}
+\Var_{Q_\lambda}(Y)
+&\;=\; \E_{Q_\lambda}\!\big[(Y - \E_{Q_\lambda} Y)^2\big]
+   \;\le\; \E_{Q_\lambda}\!\big[(Y - m)^2\big] \notag \\
+&\;\le\; \left( \frac{b - a}{2} \right)^{\!2}
+   \;=\; \frac{(b - a)^2}{4}, \label{eq:var-bound}
+\end{align}
+where the first step is the definition of variance, the second uses that the
+mean minimises the mean-square deviation (so replacing $\E_{Q_\lambda} Y$ by the
+fixed $m$ only increases the value), and the third uses the pointwise bound
+$|Y - m| \le (b-a)/2$, valid because $Y \in [a,b]$.
+
+\smallskip\noindent\textbf{Step 4 (Taylor expansion).}
+By Taylor's theorem with Lagrange remainder, there exists $\xi$ between $0$ and
+$\lambda$ such that
+\begin{align}
+\psi(\lambda)
+&\;=\; \psi(0) + \lambda\,\psi'(0) + \frac{\lambda^2}{2}\,\psi''(\xi) \notag \\
+&\;=\; \frac{\lambda^2}{2}\,\psi''(\xi)
+   \;\le\; \frac{\lambda^2}{2} \cdot \frac{(b - a)^2}{4}
+   \;=\; \frac{\lambda^2 (b - a)^2}{8}, \label{eq:psi-taylor}
+\end{align}
+where the first step is the second-order Taylor expansion of $\psi$ about $0$,
+the second substitutes $\psi(0) = \psi'(0) = 0$ from
+Eq.~\eqref{eq:psi-zero} and Eq.~\eqref{eq:psi-prime}, and the inequality combines
+Eq.~\eqref{eq:psi-second} with the variance bound in
+Eq.~\eqref{eq:var-bound}. Exponentiating both sides yields
+Eq.~\eqref{eq:hoeffding-lemma}. This completes the proof.
+\end{proof}

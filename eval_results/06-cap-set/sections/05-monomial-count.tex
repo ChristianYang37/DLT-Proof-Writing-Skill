@@ -1,0 +1,78 @@
+\section{Counting low-degree monomials}\label{sec:count}
+
+To convert the bound $|A|\le 3M_n$ into an explicit exponential bound we estimate
+$M_n$. The estimate is a one-line Cramér (large-deviation) bound on the coefficients
+of $(1+x+x^2)^n$.
+
+\begin{lemma}[Monomial count]\label{lem:monomial-count}
+Let $M_n=\#\{a\in\{0,1,2\}^n:\sum_{i=1}^n a_i\le 2n/3\}$ as in
+\Cref{def:monomial-space}. Then for every real $t\in(0,1]$,
+\begin{align}\label{eq:Mn-bound}
+M_n\;\le\;t^{-2n/3}\,(1+t+t^2)^n,
+\end{align}
+and consequently
+\begin{align}\label{eq:gamma-def}
+\limsup_{n\to\infty} M_n^{1/n}\;\le\;\min_{0<t\le 1}\frac{1+t+t^2}{t^{2/3}}\;=:\;3\gamma,
+\qquad 3\gamma<2.7558.
+\end{align}
+\end{lemma}
+
+\begin{proof}
+Encode the count as the coefficient sum of a generating polynomial, then apply a
+Markov/Chernoff shift.
+
+\smallskip\noindent
+\textbf{Step 1: generating function and Chernoff shift.}
+Since each coordinate $a_i$ ranges over $\{0,1,2\}$ independently, the number of
+$a\in\{0,1,2\}^n$ with $\sum_i a_i=s$ equals the coefficient
+$[u^s](1+u+u^2)^n$ (the term $u^{a_i}$ contributes from each of the $n$ factors).
+Hence
+\begin{align}\label{eq:Mn-coeff}
+M_n\;=\;\sum_{s=0}^{\lfloor 2n/3\rfloor}\,[u^s]\,(1+u+u^2)^n.
+\end{align}
+Fix $t\in(0,1]$. For every $s\le 2n/3$ we have $t^{\,s-2n/3}\ge 1$, because
+$s-2n/3\le 0$ and $0<t\le 1$. Multiplying each term of Eq.~\eqref{eq:Mn-coeff} by this
+factor $\ge 1$ and extending the sum to all $s\ge 0$ only increases it:
+\begin{align*}
+M_n
+&\;\le\;\sum_{s=0}^{\lfloor 2n/3\rfloor}\,[u^s](1+u+u^2)^n\,\cdot\,t^{\,s-2n/3}
+\;\le\;t^{-2n/3}\sum_{s\ge 0}\,[u^s](1+u+u^2)^n\,t^{\,s}
+\;=\;t^{-2n/3}\,(1+t+t^2)^n,
+\end{align*}
+where the first inequality inserts the factors $t^{\,s-2n/3}\ge 1$, the second drops
+the upper limit of summation (all summands are nonnegative since $t>0$) and pulls out
+$t^{-2n/3}$, and the last equality evaluates the generating function at $u=t$. This
+is Eq.~\eqref{eq:Mn-bound}.
+
+\smallskip\noindent
+\textbf{Step 2: optimize the base.}
+Taking $n$-th roots in Eq.~\eqref{eq:Mn-bound} gives, for every $t\in(0,1]$,
+\begin{align*}
+M_n^{1/n}\;\le\;\frac{1+t+t^2}{t^{2/3}}.
+\end{align*}
+The right-hand side is independent of $n$, so taking $\limsup_{n\to\infty}$ and then
+the infimum over $t\in(0,1]$ yields
+\begin{align*}
+\limsup_{n\to\infty}M_n^{1/n}\;\le\;\min_{0<t\le1}\frac{1+t+t^2}{t^{2/3}}\;=:\;3\gamma.
+\end{align*}
+The minimand has a unique interior minimizer $t_\ast\in(0,1)$, characterized by the
+first-order condition
+\begin{align*}
+\frac{d}{dt}\log\frac{1+t+t^2}{t^{2/3}}=0
+\quad\Longleftrightarrow\quad
+\frac{1+2t}{1+t+t^2}=\frac{2}{3t}
+\quad\Longrightarrow\quad
+t_\ast\approx 0.5931,\qquad 3\gamma=\frac{1+t_\ast+t_\ast^2}{t_\ast^{2/3}}\approx 2.7551.
+\end{align*}
+Evaluating this closed-form optimum, carried out in \cite{ellenberggijswijt2017},
+gives $3\gamma<2.7558$ (equivalently $\gamma<0.9183$). This establishes
+Eq.~\eqref{eq:gamma-def} and completes the proof.
+\end{proof}
+
+\begin{remark}[On citing the numerical optimum]\label{rem:cite-opt}
+The reduction to the one-variable minimization $\min_{0<t\le1}(1+t+t^2)t^{-2/3}$ is
+proved in full above; only the evaluation of the minimizer to the stated decimal
+places is taken from \cite{ellenberggijswijt2017}, where the optimization is carried
+out explicitly. We do not reproduce the floating-point computation, but the value
+$3\gamma<2.7558$ is what feeds the corollary.
+\end{remark}

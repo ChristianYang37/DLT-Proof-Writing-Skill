@@ -1,11 +1,14 @@
-% ---------- packages ----------
-\usepackage{amsmath,amssymb,amsthm}
-\usepackage{aliascnt}
-\usepackage[capitalize]{cleveref}
-\usepackage{enumitem}
-\usepackage{mathtools}
+% macros.tex — VC generalization bound
+% Theorem environments use aliascnt so cleveref keys on the aliased counter
+% name (not the shared `theorem` counter); see references/conventions.md.
 
-% ---------- theorem environments (aliascnt for correct cleveref naming) ----------
+% ----- Theorem environments (aliascnt-safe) -----
+\usepackage{amsthm}
+\usepackage{aliascnt}
+\usepackage{hyperref}              % load BEFORE cleveref — makes \ref/\Cref/\eqref/\cite clickable
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\usepackage[capitalize]{cleveref}  % MUST come after hyperref, else \Cref hyperlinks break
+
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
 
@@ -49,28 +52,31 @@
 \crefname{remark}{Remark}{Remarks}
 \crefname{equation}{Eq.}{Eqs.}
 
-% ---------- math shortcuts ----------
-\newcommand{\R}{\mathbb{R}}
+% ----- \todo marker (used for user-decision records) -----
+\newcommand{\todo}[1]{{\color{red}\textbf{[TODO:} #1\textbf{]}}}
+
+% ----- Probability / expectation / asymptotics -----
 \newcommand{\E}{\mathbb{E}}
 \renewcommand{\Pr}{\mathbb{P}}
+\newcommand{\R}{\mathbb{R}}
 \newcommand{\1}{\mathbf{1}}
-\newcommand{\HH}{\mathcal{H}}
-\newcommand{\GG}{\mathcal{G}}
-\newcommand{\XX}{\mathcal{X}}
-\newcommand{\DD}{\mathcal{D}}
-\newcommand{\Samp}{\mathcal{S}}
-\newcommand{\EE}{\mathcal{E}}
-\newcommand{\FF}{\mathcal{F}}
-\newcommand{\Rad}{\mathfrak{R}}
-\newcommand{\VC}{\mathrm{VC}}
-\newcommand{\Risk}{R}
-\newcommand{\eRisk}{\widehat{R}}
-\newcommand{\growth}{\Pi}
-\DeclareMathOperator{\poly}{poly}
-\newcommand{\eps}{\varepsilon}
+\DeclareMathOperator{\VC}{VCdim}
 
-% Norm
+% ----- Norms -----
 \newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\abs}[1]{\left| #1 \right|}
 
-% TODO marker (visible in compiled PDF)
-\newcommand{\todo}[1]{\textbf{[TODO: #1]}}
+% ----- Problem-specific shorthands -----
+\newcommand{\Hcal}{\mathcal{H}}        % hypothesis class
+\newcommand{\Lcal}{\mathcal{L}}        % 0/1 loss class
+\newcommand{\Lbar}{\overline{\mathcal{L}}} % symmetrized loss class L u (-L)
+\newcommand{\Xcal}{\mathcal{X}}        % input space
+\newcommand{\Dcal}{\mathcal{D}}        % data distribution
+\newcommand{\Zcal}{\mathcal{Z}}        % example space X x {0,1}
+\newcommand{\Gcal}{\mathcal{G}}        % generic function class
+\newcommand{\Rad}{\mathfrak{R}}        % Rademacher complexity
+\newcommand{\Radhat}{\widehat{\mathfrak{R}}} % empirical Rademacher
+\newcommand{\Risk}{R}                  % population risk
+\newcommand{\Riskhat}{\widehat{R}}     % empirical risk
+\newcommand{\Growth}{\Pi}              % growth function
+\newcommand{\sgn}{\sigma}              % Rademacher signs

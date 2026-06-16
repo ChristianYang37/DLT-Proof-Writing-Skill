@@ -1,0 +1,87 @@
+\section{Contraction: one gradient step shrinks the residual}\label{sec:contraction}
+
+\begin{lemma}[One-step contraction and weight movement]\label{lem:contraction}
+Consider a single gradient-descent step Eq.~\eqref{eq:gd} from $W(k)$ to $W(k+1)$. Suppose
+the step size satisfies $\eta \le \lzero / (2 n^2)$. Then the per-neuron movement is bounded by
+\begin{align}\label{eq:move}
+\norm{ w_r(k+1) - w_r(k) } \;\le\; \frac{\eta \sqrt{n}}{\sqrt{m}}\, \norm{ y - u(k) },
+\qquad \forall\, r \in [m].
+\end{align}
+If, in addition, the Gram lower bound $\lmin(H(k)) \ge \tfrac12\lzero$ holds and every neuron
+keeps its activation pattern on all inputs over this step, then
+\begin{align}\label{eq:contract}
+\norm{ y - u(k+1) }^2 \;\le\; \left( 1 - \frac{\eta\,\lzero}{2} \right) \norm{ y - u(k) }^2 .
+\end{align}
+\end{lemma}
+
+\begin{proof}
+The strategy is to differentiate the loss to bound the per-neuron gradient (giving
+Eq.~\eqref{eq:move}), then expand the squared residual along the step and identify the Gram
+matrix in the cross term (giving Eq.~\eqref{eq:contract}).
+
+\smallskip\noindent\textbf{Step 1 (per-neuron gradient).}
+Differentiating Eq.~\eqref{eq:loss} through Eq.~\eqref{eq:network},
+\begin{align}\label{eq:grad-r}
+\frac{\partial L(W)}{\partial w_r}
+\;=\; & ~ \sum_{i=1}^{n} \left( u_i - y_i \right) \frac{\partial u_i}{\partial w_r}
+\;=\; \frac{1}{\sqrt{m}} \sum_{i=1}^{n} \left( u_i - y_i \right) a_r\, \indic{w_r^{\top} x_i \ge 0}\, x_i,
+\end{align}
+where the first step is the chain rule on Eq.~\eqref{eq:loss} and the second substitutes
+$\partial u_i / \partial w_r = \tfrac{1}{\sqrt m} a_r \sigma'(w_r^{\top} x_i) x_i$ with
+$\sigma'(z) = \indic{z \ge 0}$. Taking norms,
+\begin{align}\label{eq:grad-norm}
+\norm{ \frac{\partial L(W)}{\partial w_r} }
+\;\le\; & ~ \frac{1}{\sqrt{m}} \sum_{i=1}^{n} \abs{u_i - y_i}\,
+\abs{a_r}\, \indic{w_r^{\top} x_i \ge 0}\, \norm{x_i} \\
+\;\le\; & ~ \frac{1}{\sqrt{m}} \sum_{i=1}^{n} \abs{u_i - y_i}
+\;\le\; \frac{\sqrt{n}}{\sqrt{m}}\, \norm{y - u},
+\end{align}
+where the first step is the triangle inequality, the second uses $\abs{a_r}=1$,
+$\indic{\cdot}\le1$ and $\norm{x_i}=1$, and the last is Cauchy--Schwarz
+$\sum_i \abs{u_i - y_i} \le \sqrt{n}\,\norm{y - u}$. Multiplying by the step size $\eta$ in
+Eq.~\eqref{eq:gd} gives Eq.~\eqref{eq:move}.
+
+\smallskip\noindent\textbf{Step 2 (residual recursion identifies the Gram matrix).}
+Assume each neuron keeps its activation pattern $\indic{w_r^{\top} x_i \ge 0}$ unchanged over
+the step (so $f$ is locally linear in $W$ along the step). Then for each $i$,
+\begin{align}\label{eq:u-step}
+u_i(k+1) - u_i(k)
+\;=\; & ~ \inner{ \frac{\partial u_i}{\partial W}(k) }{ W(k+1) - W(k) }
+\;=\; -\eta \inner{ \frac{\partial u_i}{\partial W}(k) }{ \nabla_W L(W(k)) } \\
+\;=\; & ~ -\eta \sum_{j=1}^{n} \left( u_j(k) - y_j \right) H_{ij}(k),
+\end{align}
+where the first step is the (locally exact) linearity of $u_i$ in $W$ under a fixed activation
+pattern, the second substitutes the update Eq.~\eqref{eq:gd}, and the third uses the
+Jacobian inner product
+\begin{align}\label{eq:gram-identity}
+\inner{ \frac{\partial u_i}{\partial W} }{ \frac{\partial u_j}{\partial W} }
+\;=\; & ~ \frac{1}{m}\sum_{r=1}^{m} a_r^2\, x_i^{\top} x_j\,
+\indic{w_r^{\top}x_i\ge0}\,\indic{w_r^{\top}x_j\ge0}
+\;=\; H_{ij}(k),
+\end{align}
+which follows from Eq.~\eqref{eq:grad-r} and Eq.~\eqref{eq:emp-gram} with $a_r^2 = 1$. In
+vector form $u(k+1) - u(k) = -\eta H(k)\,(u(k) - y)$, hence
+\begin{align}\label{eq:resid-vec}
+y - u(k+1) \;=\; \left( I - \eta H(k) \right) \left( y - u(k) \right).
+\end{align}
+
+\smallskip\noindent\textbf{Step 3 (contraction in squared norm).}
+Taking squared norms of Eq.~\eqref{eq:resid-vec},
+\begin{align}\label{eq:contract-chain}
+\norm{ y - u(k+1) }^2
+\;=\; & ~ \left( y - u(k) \right)^{\top} \left( I - \eta H(k) \right)^2 \left( y - u(k) \right) \\
+\;\le\; & ~ \norm{ I - \eta H(k) }_2^2 \cdot \norm{ y - u(k) }^2 \\
+\;\le\; & ~ \left( 1 - \eta\,\lmin(H(k)) \right)^2 \norm{ y - u(k) }^2 \\
+\;\le\; & ~ \left( 1 - \frac{\eta\,\lzero}{2} \right)^2 \norm{ y - u(k) }^2
+\;\le\; \left( 1 - \frac{\eta\,\lzero}{2} \right) \norm{ y - u(k) }^2,
+\end{align}
+where the first step expands the quadratic form, the second is the Rayleigh bound
+$v^\top M^2 v \le \norm{M}_2^2 \norm{v}^2$, the third uses that $I - \eta H(k)$ is symmetric
+with eigenvalues $1 - \eta \lambda_\ell(H(k)) \in [\,1 - \eta\,\lambda_{\max}(H(k)),\,
+1 - \eta\,\lmin(H(k))\,]$ all lying in $[0, 1 - \eta\lmin(H(k))]$ --- nonnegativity of the
+lower endpoint uses $\eta\,\lambda_{\max}(H(k)) \le \eta n \le \tfrac{\lzero}{2n} \le 1$ since
+$\lambda_{\max}(H(k)) \le \opnorm{H(k)} \le n$ and $\eta \le \lzero/(2n^2)$ --- so
+$\norm{I - \eta H(k)}_2 \le 1 - \eta\lmin(H(k))$; the fourth substitutes
+$\lmin(H(k)) \ge \tfrac12\lzero$; and the last uses $(1 - x)^2 \le 1 - x$ for $x \in [0,1]$
+with $x = \tfrac{\eta\lzero}{2} \in [0,1]$. This is Eq.~\eqref{eq:contract}, completing the proof.
+\end{proof}

@@ -1,23 +1,69 @@
 {
   "eval_id": 3,
   "eval_name": "vc-generalization",
-  "version": "v2-full-workflow",
-  "graded_at": "2026-05-14T17:00:00+08:00",
-  "grader": "main-agent (hand-grade per agents/grader.md)",
+  "graded_at": "2026-06-09T00:00:00Z",
   "assertions": [
-    {"text": "Sauer–Shelah lemma is stated as a separate \\begin{lemma}, with hypothesis VC(H) ≤ d", "type": "qualitative", "passed": true, "evidence": "runner-log: 'Sauer-Shelah via Pascal induction' as one of three named lemmas; iter 1 Phase D rewrote Sauer (b) via clean Pascal induction", "notes": ""},
-    {"text": "symmetrization step introduces a ghost sample S' explicitly", "type": "qualitative", "passed": true, "evidence": "runner-log: 'Symmetrization in expectation' as a named lemma; Phase D iter 1 made Symm Step 2 exchangeability explicit", "notes": ""},
-    {"text": "Massart's finite-class bound is stated explicitly (for a class with N elements, expected Rademacher ≤ √(2 log N / n))", "type": "qualitative", "passed": true, "evidence": "Phase D iter 1 fix: Rademacher definition corrected to absolute-value form (canonical Massart form)", "notes": "Massart's bound stated and proved per runner-log"},
-    {"text": "concluding rate has the d log(n/d) term, not bare d log n (Sauer–Shelah is applied correctly)", "type": "qualitative", "passed": true, "evidence": "headline: C √((d log(n/d) + log(1/δ))/n); rem:headline-form documents the log(n/d) vs log(en/d) convention", "notes": "convention documented, not handwaved"},
-    {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script", "passed": true, "evidence": "compile_ok: True, undef_refs: 0, undef_cites: 0, errors: 0, lint.py: 0 errors", "notes": "no refs.bib needed (no \\cite used)"},
-    {"text": "no \"by a standard argument\" or \"it is clear that\" filler phrases", "type": "qualitative", "passed": true, "evidence": "lint.py: 0 errors (no R13-R16 violations from minimum-set anti-pattern rules)", "notes": ""},
-    {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢", "type": "script", "passed": true, "evidence": "confidence-trace.md present; 35 steps; pre-D 🟢 26 / 🟡 7 / 🔴 2 (Sauer property b sketch + main-proof Step 4 absorption gap); post-D 🟢 28 / 🟡 7 / 🔴 0 — both 🔴 absorbed by review-loop fixes", "notes": "C.5 surfaced exactly the gaps review-loop addressed"},
-    {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists", "type": "script", "passed": true, "evidence": "review-iteration-1.md (5 weaknesses; 4 fixes) + review-iteration-2.md (2 weaknesses, all PHANTOM/INTENTIONAL → no-fixes-applied termination)", "notes": "verdict: accept-with-minor-revisions"}
+    {
+      "text": "Sauer–Shelah lemma is stated as a separate \\begin{lemma}, with hypothesis VC(H) ≤ d",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "sections/04-sauer-massart.tex:8-12 '\\begin{lemma}[Sauer--Shelah]\\label{lem:sauer-shelah}\\nIf $\\VC(\\Hcal)=d$, then for every $m\\ge1$, ... \\Growth_{\\Hcal}(m)\\le\\sum_{i=0}^{d}\\binom{m}{i}'",
+      "notes": "Separate lemma with explicit VC(H)=d hypothesis and full shifting proof."
+    },
+    {
+      "text": "symmetrization step introduces a ghost sample S' explicitly",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "sections/03-symmetrization.tex:19-20 'Let $S'=(z_1',\\dots,z_n')$ with $z_i'=(x_i',y_i')$ be a ghost sample, i.i.d.\\ $\\sim\\Dcal$ and independent of $S$'",
+      "notes": "Ghost sample S' introduced explicitly; signs inserted via symmetry."
+    },
+    {
+      "text": "Massart's finite-class bound is stated explicitly (for a class with N elements, expected Rademacher ≤ √(2 log N / n))",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "sections/04-sauer-massart.tex:91-101 Massart core $\\E_{\\sgn}[\\max_{b\\in B}\\sum_i\\sgn_i b_i]\\le r\\sqrt{2\\log\\abs{B}}$ then $\\Radhat_S(\\Lbar)\\le\\sqrt{2\\log(2\\Growth_{\\Hcal}(n))/n}$",
+      "notes": "Massart core stated with radius r and √(2 log|B|); reduces to √(2 log N / n)."
+    },
+    {
+      "text": "concluding rate has the d log(n/d) term, not bare d log n (Sauer–Shelah is applied correctly)",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "sections/05-main-theorem.tex:14-15 '\\le C\\sqrt{\\frac{d\\log(en/d)+\\log(1/\\delta)}{n}} = C\\sqrt{\\frac{d\\log(n/d)+d+\\log(1/\\delta)}{n}}'",
+      "notes": "Rate carries d log(n/d) leading term (via (en/d)^d Sauer-Shelah), not bare d log n."
+    },
+    {
+      "text": "scripts/latexmk-wrapper.py reports compile_ok=true",
+      "type": "script",
+      "passed": true,
+      "evidence": "latexmk-wrapper.py output: compile_ok=true, overfull_violations=[], undef_refs=[], undef_cites=[], errors=[], warnings_count=0",
+      "notes": "Compiles cleanly; max overfull box 20.4pt < 50pt threshold."
+    },
+    {
+      "text": "no \"by a standard argument\" or \"it is clear that\" filler phrases",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "grep over sections/*.tex for 'standard argument|it is clear that|it is easy to see|clearly|trivially|obviously' => NO FILLER FOUND; only 'standard measurability convention' (01:13), a technical reference",
+      "notes": "No filler substitutes for proof steps; the one 'standard' is a measurability convention cite."
+    },
+    {
+      "text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method",
+      "type": "script",
+      "passed": true,
+      "evidence": ".proof-research/confidence-trace.md: 22 steps each with Initial/Current tag (🔴/🟡/🟢) + 'Verification method'; summary '🟢 16 / 🟡 6 / 🔴 0'",
+      "notes": "Full 22-step trace; every step tagged with explicit verification method."
+    },
+    {
+      "text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists recording the five-reviewer panel — five 0–10 scores (3 correctness + math-taste + derivation-integrity) and merged, verified weaknesses",
+      "type": "script",
+      "passed": true,
+      "evidence": "review-iteration-{1,2,3}.md each have a 5-row score table (R1-R3 correctness, R4 math-taste, R5 derivation-integrity); iter3 mean 8.80; 9 merged+verified weaknesses with verdicts",
+      "notes": "Three iterations, full five-reviewer panel, mean 7.40->8.00->8.80, accepted on gate (>8)."
+    }
   ],
   "overall": {
     "passed_count": 8,
     "failed_count": 0,
     "not_verifiable_count": 0,
-    "summary": "Full v2 workflow ran cleanly. 35-step C.5 sweep started 🟢 26 / 🟡 7 / 🔴 2 — both 🔴 (Sauer property (b) sketch + main-proof Step 4 absorption) were the SAME defects Phase D iter 1 caught as major weaknesses and fixed. This is the C.5 ↔ D coupling working as designed: the sweep predicts what the reviewer will find. Phase D iter 2 returned only PHANTOM/INTENTIONAL → no-fixes-applied termination with accept-with-minor-revisions verdict. Slightly weaker verdict than the other 4 evals because Sauer Pascal induction + symmetrization absolute-value Rademacher are foundational and required iter-1 rewrites; the final state is clean."
+    "summary": "Strong, faithful execution of the mandated symmetrization → Sauer-Shelah → Massart pipeline. All four ingredients are separate lemmas with full local proofs (including a complete Pajor/shifting Sauer-Shelah), assembled in a clean cross-reference theorem. Compile and lint are clean (0 errors); confidence trace (22 tagged steps) and three genuine five-reviewer iterations are present and self-consistent. The concluding rate correctly carries d log(n/d). Weaknesses are minor and the panel flagged them honestly: a couple of bundled-justification steps (Jensen+sup-swap, reflection isometry left implicit), and the runner-log claims C=3 while the file delivers C=√17 (a log-vs-artifact mismatch, not a proof error). Two visible \\todo user-decision markers print in the PDF by design. This would comfortably survive a NeurIPS/ICML appendix review. All 8 assertions pass."
   }
 }

@@ -1,0 +1,99 @@
+\section{Slice rank and its basic properties}\label{sec:slice-rank}
+
+Let $\F$ be a field and $X_1,\dots,X_k$ finite sets. A function
+$T:\prod_{j=1}^k X_j\to\F$ is called a \emph{slice} if there is a coordinate
+$i\in[k]$, a function $f:X_i\to\F$, and a function
+$g:\prod_{j\ne i}X_j\to\F$ such that, writing $\widehat{x}_i$ for the tuple with the
+$i$-th entry omitted,
+\begin{align}\label{eq:slice}
+T(x_1,\dots,x_k)\;=\;f(x_i)\,g(\widehat{x}_i)\qquad\text{for all }(x_1,\dots,x_k).
+\end{align}
+The \emph{slice rank} $\sr(T)$ is the least integer $r\ge 0$ such that $T$ is a sum
+of $r$ slices (and $\sr(0)=0$). For $k=2$, $\sr$ is the ordinary rank of the matrix
+$(T(x_1,x_2))$.
+
+\begin{lemma}[Slice rank: subadditivity, diagonal lower bound, restriction]\label{lem:slice-rank-def}
+Let $\F$ be a field and $X,X_1,\dots,X_k$ finite sets. The slice rank satisfies the
+following.
+\begin{enumerate}[label=\textup{(\alph*)}, ref=\ref*{lem:slice-rank-def}\alph*]
+\item\label{lem:slice-rank-def:sub} \emph{(Subadditivity.)} For all
+$T,T':\prod_j X_j\to\F$ and all $\lambda\in\F\setminus\{0\}$,
+$\sr(T+T')\le\sr(T)+\sr(T')$ and $\sr(\lambda T)=\sr(T)$.
+\item\label{lem:slice-rank-def:diag} \emph{(Diagonal lower bound.)} Let
+$D:X^k\to\F$ be the diagonal tensor $D(x_1,\dots,x_k)=\sum_{a\in X}c_a\,
+\one[x_1=\dots=x_k=a]$ with $c_a\ne 0$ for every $a\in X$. Then $\sr(D)=|X|$.
+\item\label{lem:slice-rank-def:restrict} \emph{(Restriction monotonicity.)} For
+$A_j\subseteq X_j$ and $T:\prod_j X_j\to\F$, the restriction $T|_{\prod_j A_j}$
+satisfies $\sr\!\big(T|_{\prod_j A_j}\big)\le\sr(T)$.
+\end{enumerate}
+\end{lemma}
+
+\begin{proof}
+% lint: ignore R19 — part (b) is the Croot–Lev–Pach/Tao kernel-dimension
+% argument, an inherently prose-bound linear-algebra count (the contraction
+% bookkeeping cannot be carried as a display chain); parts (a),(c) are one-line.
+We prove the three parts in turn.
+
+\smallskip\noindent
+\textbf{Part \ref{lem:slice-rank-def:sub} (subadditivity).}
+If $T=\sum_{i=1}^{r}S_i$ and $T'=\sum_{i=1}^{r'}S_i'$ are slice decompositions with
+$r=\sr(T)$ and $r'=\sr(T')$, then $T+T'=\sum_i S_i+\sum_i S_i'$ is a sum of $r+r'$
+slices, so $\sr(T+T')\le r+r'$. Scaling a slice Eq.~\eqref{eq:slice} by $\lambda\ne 0$
+gives the slice $(\lambda f)(x_i)\,g(\widehat{x}_i)$, so $\sr(\lambda T)\le\sr(T)$;
+applying this to $\lambda^{-1}$ gives the reverse inequality, hence equality.
+
+\smallskip\noindent
+\textbf{Part \ref{lem:slice-rank-def:diag} (diagonal lower bound).}
+The upper bound $\sr(D)\le|X|$ is the decomposition
+\begin{align*}
+D(x_1,\dots,x_k)\;=\;\sum_{a\in X}c_a\,\one[x_1=a]\cdot\one[x_2=\dots=x_k=a],
+\end{align*}
+a sum of $|X|$ slices. For the lower bound $\sr(D)\ge|X|$ we argue by induction on
+$k$, proving the stronger claim: \emph{every diagonal tensor
+$D'(x_1,\dots,x_k)=\sum_{a\in X'}c_a\,\one[x_1=\dots=x_k=a]$ with $X'\subseteq X$ and
+all $c_a\ne 0$ has $\sr(D')\ge|X'|$.} For the base case $k=2$, $\sr$ is matrix rank
+and $D'$ is a diagonal matrix with $|X'|$ nonzero entries, of rank exactly $|X'|$.
+Assume the claim for $k-1$ and let
+$D'=\sum_{i=1}^{r}f_i(x_{c_i})\,g_i(\widehat{x}_{c_i})$ be any slice decomposition.
+Let $S\subseteq[r]$ index the slices whose special coordinate is the last one,
+$c_i=k$, and let $U:=\Span\{f_i:i\in S\}\subseteq\F^{X'}$ (we view each $f_i$ as a
+function on $X'$ by restriction), so $\dim U\le|S|$. Its annihilator
+$W:=\{v\in\F^{X'}:\sum_{a\in X'}v(a)f_i(a)=0\ \forall i\in S\}$ has
+$\dim W\ge|X'|-\dim U\ge|X'|-|S|$. A subspace of $\F^{X'}$ of dimension $w$ contains
+a vector of support size $\ge w$ (in reduced row-echelon form its $w$ pivot columns
+are distinct coordinates, and the sum of the basis rows is nonzero in each pivot
+column), so choose $v\in W$ with $|\!\supp v|\ge\dim W\ge|X'|-|S|$. Contracting $D'$
+against $v$ in the last coordinate gives
+\begin{align*}
+\widetilde{D}(x_1,\dots,x_{k-1})
+\;:=\;\sum_{x_k\in X'}v(x_k)\,D'(x_1,\dots,x_{k-1},x_k)
+\;=\;\sum_{a\in X'}c_a\,v(a)\,\one[x_1=\dots=x_{k-1}=a],
+\end{align*}
+a diagonal $(k-1)$-tensor with nonzero diagonal set exactly $\supp v$. On one hand,
+the $i\in S$ slices vanish under the contraction (their $f_i$ are killed by $v\in W$)
+while each $i\notin S$ slice contracts to a slice of $\widetilde{D}$, so
+$\sr(\widetilde{D})\le r-|S|$. On the other hand, the inductive hypothesis gives
+$\sr(\widetilde{D})\ge|\!\supp v|\ge|X'|-|S|$. Combining,
+$|X'|-|S|\le r-|S|$, i.e.\ $r\ge|X'|$. As the decomposition was arbitrary,
+$\sr(D')\ge|X'|$; taking $X'=X$ yields $\sr(D)\ge|X|$, and with the upper bound,
+$\sr(D)=|X|$.
+
+\smallskip\noindent
+\textbf{Part \ref{lem:slice-rank-def:restrict} (restriction monotonicity).}
+If $T=\sum_{i=1}^{r}S_i$ with $r=\sr(T)$, then restricting every coordinate to the
+subsets $A_j$ gives $T|_{\prod_j A_j}=\sum_{i=1}^{r}\big(S_i|_{\prod_j A_j}\big)$,
+and each $S_i|_{\prod_j A_j}$ is again a slice (a restricted product of the form
+Eq.~\eqref{eq:slice}). Therefore $\sr\!\big(T|_{\prod_j A_j}\big)\le r=\sr(T)$.
+
+This completes the proof.
+\end{proof}
+
+\begin{remark}[Provenance]\label{rem:slice-prov}
+The notion of slice rank and the diagonal lower bound \ref{lem:slice-rank-def:diag}
+are due to \cite{tao2016slicerank} and are developed systematically in
+\cite{bccgnsu2017}; the lower bound is the symmetric repackaging of the
+Croot–Lev–Pach rank computation \cite{crootlevpach2017}. We reproduce only the two
+properties \ref{lem:slice-rank-def:sub} and \ref{lem:slice-rank-def:diag}, together
+with the restriction monotonicity \ref{lem:slice-rank-def:restrict}, that the cap-set
+argument consumes.
+\end{remark}

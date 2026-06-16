@@ -1,9 +1,23 @@
 \documentclass[11pt]{article}
 
-\usepackage[margin=1in]{geometry}
+\usepackage[letterpaper,margin=1in]{geometry}
+\linespread{1.0}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{aliascnt}
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\usepackage[capitalize]{cleveref}
+
+% Lightweight \todo marker (margin-free, inline) so the source is self-contained.
+\newcommand{\todo}[1]{{\color{red}\textbf{[TODO:} #1\textbf{]}}}
+
 \input{macros}
 
-\title{Minimax lower bound for Sobolev nonparametric regression}
+\title{A Minimax Lower Bound for Sobolev Nonparametric Regression}
 \author{}
 \date{}
 
@@ -11,11 +25,11 @@
 \maketitle
 
 \input{sections/01-preliminaries}
-\input{sections/02-main-result}
+\input{sections/02-varshamov-gilbert}
 \input{sections/03-bump-family}
 \input{sections/04-kl-bound}
-\input{sections/05-fano-application}
-\input{sections/06-proof-of-thm}
+\input{sections/05-fano}
+\input{sections/06-main-theorem}
 
 \bibliographystyle{plain}
 \bibliography{refs}

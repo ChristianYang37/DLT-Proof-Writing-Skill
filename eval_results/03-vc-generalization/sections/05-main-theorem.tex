@@ -1,0 +1,89 @@
+\section{The VC generalization bound}\label{sec:main}
+
+We assemble \Cref{lem:mcdiarmid-dev,lem:symmetrization,lem:massart-rademacher,%
+lem:sauer-shelah} into the uniform generalization bound. The proof is a short
+chain of cross-references; all the work was done in the preceding lemmas.
+
+\begin{theorem}[Uniform VC generalization bound]\label{thm:vc-bound}
+Suppose \Cref{ass:iid,ass:vc} hold, so that $\Hcal\subset\{0,1\}^{\Xcal}$ has
+$\VC(\Hcal)=d$ and $n\ge d\ge1$. Then there is a universal constant $C>0$ such
+that for every distribution $\Dcal$ and every $\delta\in(0,1)$, with probability
+at least $1-\delta$ over the i.i.d.\ sample $S\sim\Dcal^{n}$,
+\begin{align}\label{eq:vc-bound}
+\sup_{h\in\Hcal}\abs{\Risk(h)-\Riskhat_n(h)}
+\ \le\ C\sqrt{\frac{d\log(en/d)+\log(1/\delta)}{n}}
+\ =\ C\sqrt{\frac{d\log(n/d)+d+\log(1/\delta)}{n}}.
+\end{align}
+In particular the leading complexity term is the VC rate $d\log(n/d)$ of the
+prompt, the additive $d$ being the explicit form of the constant
+$\log e$ inside $\log(en/d)$.
+\end{theorem}
+
+\begin{proof}
+Write $\Phi(S)=\sup_{h\in\Hcal}\abs{\Risk(h)-\Riskhat_n(h)}$ as in
+\Cref{lem:mcdiarmid-dev}.
+
+\paragraph{Failure budget (union bound).}
+The high-probability content of Eq.~\eqref{eq:vc-bound} comes from the single
+concentration event of \Cref{lem:mcdiarmid-dev}. Define the favorable event
+\begin{align}\label{eq:event-E}
+\mathcal{E}:=\Bigl\{\,\Phi(S)\le\E_S\Phi(S)+\sqrt{\tfrac{\log(1/\delta)}{2n}}\,\Bigr\}.
+\end{align}
+By \Cref{lem:mcdiarmid-dev}, $\Pr[\mathcal{E}]\ge1-\delta$; equivalently the
+complementary (failure) event has probability at most $\delta$. As this is the
+only stochastic step---\Cref{lem:symmetrization,lem:massart-rademacher,%
+lem:sauer-shelah} are deterministic statements about the fixed class
+$\Hcal$---a union bound over the single event $\mathcal{E}$ already accounts for
+the entire failure budget $\delta$. We condition on $\mathcal{E}$ for the
+remainder of the proof.
+
+\paragraph{Deterministic bound on $\mathcal{E}$.}
+On $\mathcal{E}$ we bound the mean deviation by composing the symmetrization and
+finite-class steps:
+\begin{align}
+\Phi(S)
+&\;\overset{(a)}{\le}\;\E_S\Phi(S)+\sqrt{\frac{\log(1/\delta)}{2n}}
+\notag\\
+&\;\overset{(b)}{\le}\;2\,\Rad_n(\Lbar)+\sqrt{\frac{\log(1/\delta)}{2n}}
+\notag\\
+&\;\overset{(c)}{\le}\;2\sqrt{\frac{2\bigl(d\log(en/d)+\log 2\bigr)}{n}}
+   +\sqrt{\frac{\log(1/\delta)}{2n}}
+\notag\\
+&\;\overset{(d)}{\le}\;\frac{4\,\sqrt{d\log(en/d)}+\sqrt{\log(1/\delta)}}
+   {\sqrt{n}}
+\;\overset{(e)}{\le}\;\frac{C_0\,\sqrt{d\log(en/d)+\log(1/\delta)}}{\sqrt{n}},
+\label{eq:assemble}
+\end{align}
+where $(a)$ is the definition Eq.~\eqref{eq:event-E} of $\mathcal{E}$; $(b)$ is the
+symmetrization bound $\E_S\Phi(S)\le2\Rad_n(\Lbar)$ of
+\Cref{lem:symmetrization}; $(c)$ is the Massart/Sauer--Shelah bound
+$\Rad_n(\Lbar)\le\sqrt{2(d\log(en/d)+\log 2)/n}$ of
+\Cref{lem:massart-rademacher}; $(d)$ collects the common factor $1/\sqrt n$ and
+uses $d\log(en/d)+\log 2\le 2\,d\log(en/d)$ (valid since $d\log(en/d)\ge d\ge1
+>\log 2$), so $2\sqrt2\,\sqrt{d\log(en/d)+\log 2}\le4\,\sqrt{d\log(en/d)}$; and
+$(e)$ uses $\alpha\sqrt{u}+\beta\sqrt{v}\le\sqrt{\alpha^2+\beta^2}\,\sqrt{u+v}$
+(Cauchy--Schwarz in $\R^2$) with $\alpha=4$, $\beta=1$, so that
+$C_0=\sqrt{4^2+1^2}=\sqrt{17}$.
+
+Taking $C:=C_0=\sqrt{17}$ and recalling $\log(en/d)=\log(n/d)+1$, the bound
+Eq.~\eqref{eq:assemble} reads, on $\mathcal{E}$,
+\begin{align}\label{eq:final-on-E}
+\Phi(S)
+\ \le\ C\sqrt{\frac{d\log(en/d)+\log(1/\delta)}{n}}
+\ =\ C\sqrt{\frac{d\log(n/d)+d+\log(1/\delta)}{n}}.
+\end{align}
+Since $\Pr[\mathcal{E}]\ge1-\delta$ by the failure-budget paragraph above,
+Eq.~\eqref{eq:final-on-E} holds with probability at least $1-\delta$, which is
+exactly Eq.~\eqref{eq:vc-bound}. This completes the proof.
+\end{proof}
+
+\begin{remark}[On the rate and the constant]\label{rem:rate}
+The bound Eq.~\eqref{eq:vc-bound} is the classical VC rate
+$\widetilde O\bigl(\sqrt{d/n}\bigr)$: the $d\log(n/d)$ term is the metric
+entropy of $\Hcal$ at scale $n$ (via Sauer--Shelah), and the $\log(1/\delta)$
+term is the price of high-probability control (via McDiarmid). We did not
+optimize the universal constant $C=\sqrt{17}$; a sharper chaining (Dudley) argument
+removes the $\sqrt{\log(n/d)}$ factor and yields the optimal $\sqrt{d/n}$ rate,
+but that refinement is outside the stated symmetrization/Sauer--Shelah/Massart
+pipeline.
+\end{remark}

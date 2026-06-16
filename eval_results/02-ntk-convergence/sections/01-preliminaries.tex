@@ -1,94 +1,87 @@
-\section{Preliminaries}\label{sec:preliminaries}
+\section{Preliminaries}\label{sec:prelim}
 
-\subsection{Notation}\label{subsec:notation}
+\paragraph{Notation.}
+We write $[n]=\{1,\dots,n\}$. For a vector $v$, $\norm{v}$ is its Euclidean norm;
+for a matrix $M$, $\opnorm{M}$ is the operator (spectral) norm and $\fnorm{M}$ the
+Frobenius norm. For a symmetric matrix $M$, $\lmin(M)$ denotes its smallest eigenvalue.
+Throughout, $c, C, C_1, C_2, \ldots$ denote universal positive constants whose values may
+change from line to line and depend only on quantities specified in each statement's
+hypothesis; constants that depend on a problem parameter carry it as a subscript
+(e.g.\ $C_{\lzero}$). The training data are $\{(x_i, y_i)\}_{i=1}^n$ with inputs normalized
+to $\norm{x_i} = 1$ and labels $\abs{y_i} \le 1$.
 
-We use boldface for vectors and matrices. For a matrix $\mathbf A \in \R^{n\times n}$, $\lambda_{\min}(\mathbf A)$ and $\lambda_{\max}(\mathbf A)$ denote the smallest and largest eigenvalues, and $\opnorm{\mathbf A}$ denotes its operator norm (largest singular value). The Euclidean norm of a vector is $\norm{\cdot}_2$ and the Frobenius norm of a matrix is $\norm{\cdot}_F$. We write $[n] \defeq \{1, \ldots, n\}$. The indicator function of an event $A$ is $\one[A] \in \{0, 1\}$. The ReLU activation is $\sigma(z) \defeq \max(z, 0)$; we adopt the convention $\sigma'(0) = 0$ for the (Lebesgue-null) non-differentiable point.
-
-Throughout, $c, C, C_1, C_2, \ldots$ denote universal positive constants whose values may change from line to line and depend only on quantities specified in each lemma's hypotheses. Problem-dependent constants carry their dependencies as subscripts when needed.
-
-\subsection{Setup and data}\label{subsec:setup}
-
-Fix a training set $\{(\xb_i, y_i)\}_{i=1}^n \subset \R^d \times \R$. Denote the input matrix and target vector by $\mathbf X = [\xb_1, \ldots, \xb_n] \in \R^{d \times n}$ and $\yb = (y_1, \ldots, y_n)^\top \in \R^n$. We consider a two-layer ReLU network with $m$ hidden units,
+\paragraph{Model and training.}
+We study the two-layer ReLU network
 \begin{align}\label{eq:network}
-f(\Wb, \ab, \xb) \;=\; \frac{1}{\sqrt m} \sum_{r=1}^m a_r \, \sigma\!\big( \wb_r^\top \xb \big),
+f_{W}(x) \;=\; \frac{1}{\sqrt{m}} \sum_{r=1}^{m} a_r \, \sigma\!\left( w_r^{\top} x \right),
+\qquad \sigma(z) = \max\{z, 0\},
 \end{align}
-where $\Wb = [\wb_1, \ldots, \wb_m] \in \R^{d \times m}$ collects the first-layer weights and $\ab = (a_1, \ldots, a_m)^\top \in \R^m$ collects the second-layer weights. Throughout, the second-layer weights $\ab$ are frozen at initialization; only $\Wb$ is trained, in line with~\cite{du2019gradient}. We write $\ub_i(\Wb) \defeq f(\Wb, \ab, \xb_i)$ for the network's output on input $\xb_i$, $\ub(\Wb) \defeq (\ub_1(\Wb), \ldots, \ub_n(\Wb))^\top$, and define the training loss
+with first-layer weights $W = (w_1, \dots, w_m) \in \R^{d \times m}$ and output weights
+$a_r \in \{\pm 1\}$. At initialization $w_r(0) \sim \N(0, I_d)$ i.i.d.\ and
+$a_r \sim \Unif\{\pm 1\}$ i.i.d., independent of the $w_r(0)$. Only the first layer is
+trained: the $a_r$ are fixed at their initial values and gradient descent updates $W$ on the
+squared loss
 \begin{align}\label{eq:loss}
-L(\Wb) \;\defeq\; \tfrac{1}{2} \norm{\ub(\Wb) - \yb}_2^2 \;=\; \tfrac{1}{2} \sum_{i=1}^n \big( \ub_i(\Wb) - y_i \big)^2.
+L(W) \;=\; \tfrac{1}{2} \norm{y - u(W)}^2,
+\qquad u_i(W) := f_{W}(x_i),
 \end{align}
-Gradient descent with step size $\eta > 0$ generates the sequence $\Wb(0), \Wb(1), \Wb(2), \ldots$ via
-\begin{align}\label{eq:gd_update}
-\Wb(t+1) \;=\; \Wb(t) - \eta \, \nabla_{\Wb} L(\Wb(t)),
+with the update rule, for step size $\eta > 0$,
+\begin{align}\label{eq:gd}
+W(k+1) \;=\; W(k) - \eta \, \nabla_{W} L\!\left( W(k) \right),
+\qquad k = 0, 1, 2, \ldots.
 \end{align}
-with the per-column gradient (suppressing the argument $\Wb(t)$)
-\begin{align}\label{eq:gd_per_neuron}
-\frac{\partial L(\Wb)}{\partial \wb_r}
-\;=\; \frac{a_r}{\sqrt m} \sum_{i=1}^n \big( \ub_i(\Wb) - y_i \big) \, \one\!\big[ \wb_r^\top \xb_i \ge 0 \big] \, \xb_i.
+We abbreviate $u(k) := u(W(k))$ and write the residual as $y - u(k) \in \R^n$.
+
+\begin{definition}[Empirical and population NTK Gram matrices]\label{def:gram}
+For weights $W$, the \emph{empirical Gram matrix} $H(W) \in \R^{n \times n}$ has entries
+\begin{align}\label{eq:emp-gram}
+H_{ij}(W)
+\;=\;
+\frac{1}{m} \sum_{r=1}^{m} x_i^{\top} x_j \,
+\indic{w_r^{\top} x_i \ge 0}\,\indic{w_r^{\top} x_j \ge 0}.
 \end{align}
-We use $\ub(t) \defeq \ub(\Wb(t))$ and $\wb_r(t) \defeq \wb_r$ at step $t$.
+The \emph{population NTK Gram matrix} $\Hinf \in \R^{n \times n}$ has entries
+\begin{align}\label{eq:pop-gram}
+\Hinf_{ij}
+\;=\;
+\E_{w \sim \N(0, I_d)}\!\left[ x_i^{\top} x_j \,
+\indic{w^{\top} x_i \ge 0}\,\indic{w^{\top} x_j \ge 0} \right]
+\;=\;
+\E\!\left[ H_{ij}(W(0)) \right].
+\end{align}
+We abbreviate $H(k) := H(W(k))$. Both matrices are symmetric positive semidefinite.
+\end{definition}
 
-\subsection{Assumptions}\label{subsec:assumptions}
-
-\begin{assumption}[Normalized inputs and bounded labels]\label{ass:data}
-For every $i \in [n]$, $\norm{\xb_i}_2 = 1$ and $|y_i| \le 1$.
-\end{assumption}
-
-\begin{remark}\label{rem:data}
-Both conditions are standard in NTK analyses~\cite{du2019gradient}; the label bound enters only through the constant $\norm{\ub(0) - \yb}_2 = O(\sqrt n)$ established in \Cref{lem:init_residual}. Inputs may be rescaled to unit norm without loss of generality. The result extends to $\norm{\xb_i}_2 \le 1$ and $|y_i| \le C$ at the cost of a constant factor in $m$ and $\eta$.
-\end{remark}
-
-\begin{assumption}[Random initialization]\label{ass:init}
-The weights are initialized as
+\begin{assumption}[Spectral gap of the NTK]\label{ass:lambda0}
+The population Gram matrix is strictly positive definite:
 \begin{align*}
-\wb_r(0) \,\stackrel{\mathrm{iid}}{\sim}\, \mathcal N(\mathbf 0, \I_d), \qquad a_r \,\stackrel{\mathrm{iid}}{\sim}\, \mathrm{Unif}\{-1, +1\},
+\lzero \;:=\; \lmin\!\left( \Hinf \right) \;>\; 0 .
 \end{align*}
-independent across $r \in [m]$, and the two sequences $(\wb_r(0))_r$ and $(a_r)_r$ are mutually independent.
 \end{assumption}
 
-\begin{remark}\label{rem:init}
-This is the initialization scheme of~\cite{du2019gradient}. Symmetry of $a_r$ ensures $\E[\ub_i(0)] = 0$ for every $i$, and the variance scaling $1/\sqrt m$ in Eq.~\eqref{eq:network} keeps $\ub_i(0)$ stochastically bounded as $m \to \infty$.
+\begin{remark}\label{rem:lambda0-mild}
+\Cref{ass:lambda0} is the \emph{single} spectral assumption of the analysis; every constant
+below is tracked as a polynomial in $1/\lzero$. It is mild: $\lzero > 0$ holds whenever no two
+inputs are parallel ($x_i \not\parallel x_j$ for $i \ne j$), which is generic for distinct
+normalized data and is the condition identified by \cite{du2019gradient}. The matrix $\Hinf$
+is exactly the Neural Tangent Kernel Gram matrix induced by the first-layer ReLU features at
+infinite width.
 \end{remark}
 
-\subsection{The empirical and population Gram matrices}\label{subsec:gram}
+We record two standard external facts used repeatedly below.
 
-\begin{definition}[Gram matrix at weights $\Wb$]\label{def:gram_W}
-For weights $\Wb \in \R^{d \times m}$ and fixed sign vector $\ab \in \{-1,+1\}^m$, the empirical Gram matrix $\Hb(\Wb) \in \R^{n \times n}$ has entries
-\begin{align}\label{eq:gram_W}
-\Hb(\Wb)_{ij} \;\defeq\; \frac{1}{m} \sum_{r=1}^m \xb_i^\top \xb_j \, \one\!\big[ \wb_r^\top \xb_i \ge 0 \big] \, \one\!\big[ \wb_r^\top \xb_j \ge 0 \big]
-\qquad (i, j \in [n]).
-\end{align}
-\end{definition}
-
-\begin{remark}\label{rem:gram_W}
-$\Hb(\Wb)$ is the Gram matrix of the per-sample gradient features $\{ \nabla_{\Wb} \ub_i(\Wb) \}_{i=1}^n$: a direct computation from Eq.~\eqref{eq:gd_per_neuron} gives $\inner{\nabla_{\Wb} \ub_i(\Wb)}{\nabla_{\Wb} \ub_j(\Wb)} = a_r^2 m^{-1} \xb_i^\top \xb_j \one[\wb_r^\top \xb_i \ge 0]\one[\wb_r^\top \xb_j \ge 0] = \Hb(\Wb)_{ij}$ since $a_r^2 = 1$.
-\end{remark}
-
-\begin{definition}[Population NTK Gram matrix]\label{def:gram_infty}
-The population NTK Gram matrix $\Hb^\infty \in \R^{n \times n}$ has entries
-\begin{align}\label{eq:gram_infty}
-\Hb^\infty_{ij} \;\defeq\; \E_{\wb \sim \mathcal N(\mathbf 0, \I_d)}\!\Big[ \xb_i^\top \xb_j \, \one\!\big[ \wb^\top \xb_i \ge 0 \big] \, \one\!\big[ \wb^\top \xb_j \ge 0 \big] \Big]
-\qquad (i, j \in [n]).
-\end{align}
-Define $\lambda_0 \defeq \lambda_{\min}(\Hb^\infty)$.
-\end{definition}
-
-\begin{assumption}[Spectral assumption]\label{ass:lambda0}
-$\lambda_0 = \lambda_{\min}(\Hb^\infty) > 0$.
-\end{assumption}
-
-\begin{remark}\label{rem:lambda0}
-\Cref{ass:lambda0} is the single spectral hypothesis driving the whole proof. \cite{du2019gradient} show that $\lambda_0 > 0$ whenever no two inputs are parallel; i.e., $\xb_i / \norm{\xb_i}_2 \ne \pm \xb_j / \norm{\xb_j}_2$ for all $i \ne j$. The width and step-size requirements scale polynomially in $1/\lambda_0$.
-\end{remark}
-
-\subsection{External facts}\label{subsec:facts}
-
-\begin{fact}[Hoeffding's inequality, bounded case]\label{fac:hoeffding}
-Let $Z_1, \ldots, Z_m$ be independent random variables with $\E Z_r = 0$ and $|Z_r| \le b$ a.s. Then for all $t \ge 0$,
+\begin{fact}[Hoeffding's inequality, {\cite[Thm.~2.2.6]{vershynin2018high}}]\label{fac:hoeffding}
+Let $Z_1, \dots, Z_m$ be independent random variables with $Z_r \in [\alpha_r, \beta_r]$
+almost surely, and let $S = \sum_{r=1}^m Z_r$. Then for every $t > 0$,
 \begin{align*}
-\Pr\!\Big[\, \Big|\tfrac{1}{m}\textstyle\sum_{r=1}^m Z_r\Big| \ge t \,\Big] \;\le\; 2 \exp\!\Big( - \tfrac{m t^2}{2 b^2} \Big).
+\Pr\!\left[ \abs{S - \E S} \ge t \right]
+\;\le\;
+2 \exp\!\left( - \frac{2 t^2}{\sum_{r=1}^m (\beta_r - \alpha_r)^2} \right).
 \end{align*}
 \end{fact}
 
-\begin{fact}[Gaussian small-ball, one-dimensional]\label{fac:smallball}
-Let $g \sim \mathcal N(0, 1)$. Then for all $R \ge 0$, $\Pr[\,|g| \le R\,] \le R \sqrt{2/\pi} \le R$.
+\begin{fact}[Weyl's inequality, {\cite[Cor.~III.2.6]{bhatia1997matrix}}]\label{fac:weyl}
+Let $A, B \in \R^{n \times n}$ be symmetric. Then for every $i \in [n]$,
+$\abs{\lambda_i(A) - \lambda_i(B)} \le \opnorm{A - B}$, where eigenvalues are sorted in
+decreasing order. In particular $\lmin(A) \ge \lmin(B) - \opnorm{A - B}$.
 \end{fact}

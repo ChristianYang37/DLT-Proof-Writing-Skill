@@ -33,7 +33,7 @@ After writing each `\begin{proof} ... \end{proof}`, check:
 1. **Opening.** First sentence states the strategy in one line.
 2. **Every cited object resolves.** Every `\Cref` / `\eqref` / `\cite` points at something that exists in the project.
 3. **Every cited hypothesis is satisfied.** When you invoke `\Cref{lem:X}`, are the hypotheses of Lemma X actually met at this point in the proof? **This is the most common silent bug.**
-4. **Every derivation step has a justification.** No display equation is allowed to dangle without prose or tag.
+4. **Display-first derivation.** Every inferential step (every `=`, `\le`, `\ge` doing mathematical work) is a **row in an `align` / `equation` display**, justified by a trailer / `\tag{}` / legend — never a step asserted in a prose sentence (*"by the definition of …, this equals …"*). No display dangles without a reason; no reason floats without a display. Lint **R19** enforces math-chars ≥ prose-chars per proof; the Phase-D derivation-integrity reviewer audits the rest. See [templates.md](templates.md) §Derivation patterns (display-first).
 5. **Step count matches trailer count.** If the trailer says "the first ... the second ... the last", ordinals correspond one-to-one with visible relation rows. Recount manually.
 6. **No used-but-undefined symbols.** Every symbol on the right-hand side of any display was defined upstream.
 7. **No unused intermediate result.** If you proved a sub-claim and never used it, delete or move to a separate lemma.
@@ -95,8 +95,8 @@ The previous version of this gate told you to *"open the rendered PDF and spot-c
 
 Triggered when all lemmas and the theorem proof are complete (Phase D), after the LaTeX compilation gate above has passed.
 
-The end-to-end review is a **bounded peer-review loop**, not a single-shot check. A reviewer sub-agent writes a structured review (Summary / Strengths / Weaknesses / Questions / Verdict); the author agent verifies each weakness point-by-point, applies minimum-change fixes, and resubmits. The loop terminates by `accept-as-is` verdict, a 3-iteration hard cap, convergence detection (weakness overlap ≥ 80%), no-fixes-applied, or statement-change escalation.
+The end-to-end review is a **bounded peer-review loop**, not a single-shot check. Each iteration spawns a **five-reviewer panel in parallel** (3 correctness lenses + math-taste + derivation-integrity), each scoring 0–10; the author agent merges/dedupes their weaknesses, verifies each point-by-point, applies minimum-change fixes, and resubmits. The proof is **accepted only when the mean score > 8 with no unresolved critical**; the loop also terminates by a 3-iteration hard cap, convergence detection (weakness overlap ≥ 80%), no-fixes-applied, or statement-change escalation.
 
-→ **Read [review-loop.md](review-loop.md)** for the reviewer prompt template, the verification taxonomy (REAL-blocking / REAL-nonblocking / PHANTOM / INTENTIONAL), the cost-gated fix decision table, and the final-report format.
+→ **Read [review-loop.md](review-loop.md)** for the panel orchestration + scoring gate, the verification taxonomy (REAL-blocking / REAL-nonblocking / PHANTOM / INTENTIONAL), the cost-gated fix decision table, and the final-report format, and **[reviewer-roles.md](reviewer-roles.md)** for the five role prompts.
 
 Before invoking the loop, re-read [anti-patterns.md](anti-patterns.md) — especially the AI-specific failure modes — and grep your own proof for any of them. Catching your own mistakes pre-review is cheaper than relying on the reviewer to find them.

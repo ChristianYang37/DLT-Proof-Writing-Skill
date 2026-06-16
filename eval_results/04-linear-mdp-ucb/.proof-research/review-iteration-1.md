@@ -1,57 +1,78 @@
-# Review iteration 1 — LSVI-UCB regret proof
+# Review iteration 1 — LSVI-UCB regret (thm:regret)
 
-## Summary
+## Reviewer scores
+| Reviewer | Lens | Score | Blocking |
+|---|---|---|---|
+| R1 | correctness: line-by-line | 8 | no |
+| R2 | correctness: assumptions/generality | 9 | no |
+| R3 | correctness: ML-significance | 8 | no |
+| R4 | math-taste | 8 | no |
+| R5 | derivation-integrity | 7 | no |
+| **mean** | | **8.00** | |
 
-The paper proves a $\widetilde{O}(d^{3/2} \sqrt{H^3 T})$ high-probability regret bound for LSVI-UCB on linear MDPs, following the Jin et al. (2020) decomposition. The proof skeleton has five components:
-(1) **Good event $\cE$** (\Cref{lem:concentration}): the empirical Bellman residual $\langle \phi, \widehat w_h^k\rangle - r_h - P_h V_{h+1}^k$ is bounded by $\beta \|\phi\|_{(\Lambda_h^k)^{-1}}$ uniformly, with $\Pr[\cE] \ge 1 - \delta$, established via self-normalised concentration + $\varepsilon$-net on the value class $\cV$.
-(2) **Optimism** (\Cref{lem:optimism}): $V_h^k \ge V_h^*$ on $\cE$ by backward induction.
-(3) **Per-step gap** (\Cref{lem:per-step}): on $\cE$, $Q_h^k - r_h - P_h V_{h+1}^k \le 2\beta\|\phi\|_{(\Lambda)^{-1}}$.
-(4) **Decomposition** (\Cref{lem:decomposition}): $\Reg \le T_1 + T_2 + T_3$ where $T_1$ is a martingale, $T_2$ is the cumulative bonus, $T_3 = 0$.
-(5) **Closing $T_1, T_2$** (\Cref{lem:azuma_mds,lem:elliptical,lem:T2_bound}): Azuma–Hoeffding closes $T_1$; elliptical-potential closes $T_2$.
+**Accept gate:** mean > 8 is strict; 8.00 is NOT > 8 ⇒ **ITERATE**. No unresolved REAL-blocking critical (the only 🔴 is the symbolic C_β numeric constant, a flagged user decision — rate exponents exact). Decision: iterate, apply minimum-change fixes.
 
-The skeleton is faithful to the canonical proof. Constants are tracked through the bonus $\beta = C_\beta\, dH\sqrt\iota$ with $\iota = \log(2dKH/\delta)$.
+## Merged + verified weaknesses
 
-## Strengths
+### Weakness #1 (severity: minor, raised by 1/5: R1) — CS factor under-named in Lemma 2.1
+**Claim:** The final Cauchy–Schwarz step omits the √(k−1) factor from summing vᵀΛ⁻¹v over τ; displayed (dk)^{1/2} is correct but under-licensed. (02-concentration.tex:28)
+**Verdict:** REAL-nonblocking (conclusion correct; naming gap).
+**Fix:** Added clause "(so the first factor is (∑‖v‖²)^{1/2}=√(k−1)≤√k)". 1 line.
 
-- **Clean separation of concerns.** The good-event encapsulation lets the rest of the proof read deterministically. The decomposition lemma is stated as a deterministic implication on $\cE$, and the union bound is paid only once in the main proof.
-- **Explicit $d^{3/2}$ origin.** \Cref{rem:T2_d_three_halves} cleanly attributes $d^{3/2}$ to $d$ (from $\beta$) plus $\sqrt d$ (from elliptical-potential), which is what readers most often miss.
-- **Honest `\todo{}` flag.** Section 3 marks the bonus-constant absorption $\sqrt d + d^{3/2} \to d^{3/2}$ as needing verification — this is a constant-juggling step where AI-derived proofs commonly drop a factor.
-- **Citation discipline.** All three citations (Jin 2020, Abbasi 2011, Azuma 1967) resolve in `refs.bib`.
+### Weakness #2 (severity: minor, raised by 1/5: R1) — spurious √H in Step 6 decomposition
+**Claim:** "√(H³)·√(HK)·√H = H^{5/2}√K ≠ H²√K"; middle √H spurious. Conclusion √(H³T) correct. (05-main-theorem.tex:127)
+**Verdict:** REAL-nonblocking (typo; conclusion correct).
+**Fix:** Replaced chain with H²√K=√(H⁴K)=√(H³·KH)=√(H³T). 1 line.
 
-## Weaknesses
+### Weakness #3 (severity: minor, raised by 2/5: R2,R3) — C / C_β cross-lemma binding left implicit
+**Claim:** C in lem:recursion silently equals the event-radius C; C_β floors (≥C here, ≥C+4 in recursion) resolved only implicitly by MAX. (02-concentration.tex:110; 03-optimism.tex:79,84)
+**Verdict:** REAL-nonblocking (constants licensed "change line to line"; binding correct but unstated).
+**Fix:** At 02-concentration.tex:110 named C as the shared event-radius constant and switched to the stronger floor C_β≥C+4, explicitly noting it is the max of the two floors. ~3 lines.
 
-### Weakness #1 (severity: major)
-**Claim:** The proof of \Cref{lem:concentration} compresses the Bellman-residual decomposition into a chain that hides the role of $w_h^*$. Specifically, near line 79 of `03-concentration.tex`, the identity
-"$\langle\phi, \widehat w_h^k\rangle - r_h - [P_h V_{h+1}^k] = \phi^\top(\Lambda)^{-1}\sum_\tau \phi_\tau \eta_\tau - \lambda\phi^\top(\Lambda)^{-1} w_h^*$"
-is asserted without derivation; this step relies crucially on $r_h + P_h V_{h+1}^k$ being a linear function $\langle \phi, w_h^*\rangle$ (true by \Cref{ass:linear_mdp}), but the linear representation of $w_h^*$ is only justified parenthetically inside the proof.
-**Evidence:** `03-concentration.tex:79` "$\inner{\phi(s, a)}{\wh{w}_h^k} - r_h(s, a) - [P_h V_{h+1}^k](s, a) = \phi(s, a)^\top (\Lam_h^k)^{-1} \!\!\sum_{\tau=1}^{k-1}\!\! \phi_\tau \eta_\tau^{V_{h+1}^k} - \lambda \phi(s, a)^\top (\Lam_h^k)^{-1} w_h^*$"
-**Severity:** major
+### Weakness #4 (severity: MAJOR by R5; minor by R2, raised by 2/5: R2,R5) — discretization (cover-to-target) correction asserted not displayed
+**Claim:** Fixed-V self-normalized bound applied to data-dependent V_{h+1}^k through prose; the additive discretization-correction term (the reason β=Θ(dH)) never appears as a display. (02-concentration.tex:94–104)
+**Verdict:** REAL-nonblocking. The argument's validity does not hinge on the missing display — the bridge prose carries it and R1/R2/R3 line-verified the transition as correct; only R5 rated major. Still worth showing for derivation integrity.
+**Fix:** Added an explicit display transferring V_{h+1}^k to its nearest cover element V̄ with additive correction 2ε√k (via 1-Lipschitzness + Cauchy–Schwarz + trace bound), evaluated ≤2dH at ε=dH/K, then carried it into the squared-norm bound via (a+b)²≤2a²+2b² with the new +2(2dH)² term absorbed into C²d²H²ι. ~14 lines. Lower-order term now load-bearing-visible.
 
-### Weakness #2 (severity: major)
-**Claim:** The closure of the $\varepsilon$-net residual in \Cref{lem:concentration} contains an off-by-one in the residual bound. Specifically, the bound $\|\sum_\tau (\eta_\tau^{V_{h+1}^k} - \eta_\tau^{V^\dagger}) \phi_\tau\|_{(\Lam_h^k)^{-1}} \le 2 \cdot K \cdot (1/K) \cdot \sqrt k$ uses $|\eta_\tau^{V_{h+1}^k} - \eta_\tau^{V^\dagger}| \le 2\|V_{h+1}^k - V^\dagger\|_\infty \le 2/K$ but then writes "$\le 2 \cdot K \cdot \tfrac{1}{K} \cdot \sqrt k$" which has the wrong product structure: the correct bound is $\sqrt{\sum_\tau (\eta_\tau^{V_{h+1}^k} - \eta_\tau^{V^\dagger})^2 \norm{\phi_\tau}_{(\Lambda)^{-1}}^2} \le (2/K) \sqrt{k \cdot \max_\tau \|\phi_\tau\|_{(\Lambda)^{-1}}^2} \le (2/K) \sqrt d$.
-**Evidence:** `03-concentration.tex:83` "$\le C_3 d^{3/2} H \sqrt{\iota} + 2 \cdot K \cdot \tfrac{1}{K} \cdot \sqrt{k}$"
-**Severity:** major
+### Weakness #5 (severity: minor, raised by 1/5: R3) — cover omits log-β dependence
+**Claim:** Covering bound (eq:cover) carries no log β term though β controls the A-direction Lipschitz constant. (02-concentration.tex:91)
+**Verdict:** INTENTIONAL / rate-immaterial. β enters only logarithmically and is absorbed into ι (the text states "log(1+HdK/(ελ))≲ι"); the JYWJ Lemma D.6 form quoted is the standard one. Headline rate unaffected. Rebut, no fix.
 
-### Weakness #3 (severity: minor)
-**Claim:** The headline rate in \Cref{thm:main} is $\Otil(d^{3/2}\sqrt{H^3 T})$, but the prompt and \cite{jin2020provably} use the equivalent form $\Otil(d^{3/2} H \sqrt{HK})$. The remark explains the form match, but $\Otil(d^{3/2}\sqrt{H^3 T})$ is less standard.
-**Evidence:** `02-main-result.tex:10` "$\Otil(d^{3/2} \sqrt{H^3 T})$"
-**Severity:** minor
+### Weakness #6 (severity: minor, raised by 1/5: R3) — prompt-vs-proven rate gap only in TODO comment
+**Claim:** Proven d^{3/2}√(H³T) differs from prompt's d^{3/2}√(HT); justified only in commented-out TODO. (05-main-theorem.tex:19)
+**Verdict:** INTENTIONAL (flagged user decision). The proven rate is the correct canonical JYWJ-2020 rate; the weaker prompt rate is not provable under β=Θ(dH√ι). Changing it would alter the theorem headline ⇒ out of scope per Component 3. Rebut, no fix; surfaced to user.
 
-### Weakness #4 (severity: minor)
-**Claim:** The proof of \Cref{lem:cover} elides the Lipschitz-on-$A^{-1}$ computation, citing it to Jin et al. (Lemma D.6). This is acceptable but inverts the convention that load-bearing covering bounds should be proved in-place rather than cited.
-**Evidence:** `03-concentration.tex:33` "the detailed computation appears as Lemma D.6 in \cite{jin2020provably}"
-**Severity:** minor
+### Weakness #7 (severity: minor, raised by 1/5: R3) — C_β fixed point self-referential, asserted not shown
+**Claim:** C_β fixed by self-referential choice (C_β≥C where C comes from a cover whose class uses β=C_β dH√ι); not exhibited as a self-consistent inequality. (02-concentration.tex:110)
+**Verdict:** INTENTIONAL. The numeric C_β is a flagged symbolic constant (the sole 🔴 in the trace); rate exponents are exact, no exponential-in-H/d constant hides. The cover's log-β dependence is absorbed into ι and does NOT feed back into the exponent, so the "fixed point" is benign (β appears only inside a log). Rebut, no fix.
 
-### Weakness #5 (severity: minor)
-**Claim:** \Cref{lem:weight_bound} gives $\|\widehat w_h^k\| \le H\sqrt{dk}$ but the proof step "$\norm{u}_{(\Lam)^{-1}}^2 \le \norm{u}_2^2 / \lambda \le 1$" uses both $\lambda = 1$ AND a hidden assumption that $u$ is a unit vector. The hidden bound $\norm{u}_2 \le 1$ is correct since $u$ is by construction a unit vector but should be stated.
-**Evidence:** `03-concentration.tex:18` "$\norm{u}_{(\Lam_h^k)^{-1}}^2 \le \norm{u}_2^2 / \lambda \le 1$"
-**Severity:** minor (style)
+### Weakness #8 (severity: style, raised by 2/5: R4,R5) — phantom T₁+T₂+T₃ three-way split
+**Claim:** Regret announced as T₁+T₂+T₃ but bonus sum is one underbrace T₁+T₂ never separately bounded; really a two-term split. (05-main-theorem.tex:75–82)
+**Verdict:** REAL-nonblocking (decorative over-naming).
+**Fix:** Relabelled to an honest two-term split: bonus sum = T₁, martingale = T₂. Updated intro prose, Step 3 heading ("two-term"), Steps 4–6 headings and the eq:T12-bound / eq:T3-bound term names. Mechanical rename, ~8 sites.
 
-## Questions for the author
+### Weakness #9 (severity: style, raised by 1/5: R4) — \Norm / \Inner cosmetic duplicate macros
+**Claim:** \Norm is byte-identical to \norm; \Inner differs from \inner only by a thin space. (macros.tex:70)
+**Verdict:** REAL-nonblocking style, but NOT fixed. Both macros are used (\Norm ×2, \Inner ×5) — not dead. Collapsing them touches 7 call sites (exceeds the 1-line/token style budget) and \Inner's thin space is a deliberate display-spacing choice; removing it risks an alignment regression. The comment already documents \Norm as an intentional display alias. Rebut, no fix.
 
-- Q1: The bonus coefficient $\beta = C_\beta\, d H\sqrt\iota$ is stated and used throughout, but the **value** of $C_\beta$ is left as "sufficiently large universal". For replicability (e.g., experiments-plan.md), can a numerical $C_\beta$ be given?
-- Q2: \Cref{rem:T1_T3_separation} sets $T_3 = 0$ "for symmetry". Is this consistent with \cite{jin2020provably}'s three-term decomposition, or is the merger of $T_1$ and $T_3$ a notational choice?
-- Q3: The bound says "$\log(4/\delta) \le \iota$ ... for $d \ge 2$". For $d = 1$, is the proof still valid without additional constants? The remark dismisses this with "absorb the constant" — is this precise?
+### Weakness #10 (severity: style, raised by 1/5: R4) — dead macros \poly \Omegatil \Indic \argmin
+**Claim:** Four declared macros never used. (macros.tex:54)
+**Verdict:** REAL-nonblocking (confirmed unused by fixed-string search).
+**Fix:** Removed all four. (\argmax was briefly removed too but is used at preliminaries:74 — compile caught it, rolled back and restored.) Net: 4 dead macros deleted.
 
-## Verdict
-accept-with-minor-revisions
+### Weakness #11 (severity: minor, raised by 1/5: R5) — predictability hypothesis not asserted at cite-site
+**Claim:** lem:self-normalized requires {φ_τ} to be {F_{τ−1}}-predictable; only the noise MDS property is checked at the application. (02-concentration.tex:62)
+**Verdict:** REAL-nonblocking (true and easy to state).
+**Fix:** Added clause "the regressors φ_h^τ are F_{τ,h−1}-measurable, hence {F_{τ,h−1}}-predictable, so the hypotheses of lem:self-normalized are met." ~2 lines.
+
+## Fixes applied (summary)
+Fixed: #1, #2, #3, #4, #8, #10, #11 (all minimum-change, within cost gates; #4's major flag addressed with an explicit display).
+Rebutted (no fix): #5 (rate-immaterial), #6 (INTENTIONAL headline / user decision), #7 (INTENTIONAL symbolic constant), #9 (style, cost exceeds budget + spacing risk).
+
+## Gates after fixes
+- lint.py (incl R19): **0 errors, 0 warnings**.
+- latexmk-wrapper: **compile_ok = True**, errors = [], undef_macros = [].
+- pdf/main.pdf refreshed from .output/main.pdf.
+
+## Decision
+Iteration 1 complete; fixes applied and gates green. Mean was 8.00 (not > 8) ⇒ did not meet the strict accept gate this round; loop proceeds to iteration 2 (panel re-review) per review-loop.md. No unresolved REAL-blocking critical; the residual user-decision items (#6 prompt-vs-proven rate, #7 symbolic C_β) are headline/constant choices surfaced for the user, not auto-fixable.

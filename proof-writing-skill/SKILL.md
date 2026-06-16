@@ -15,12 +15,13 @@ These three rules are enforced by scripts, not by your judgment. If a script fli
 
 1. **All LaTeX compile artifacts live under `<project-root>/.output/`.** The only sanctioned compile path is `python <skill>/scripts/latexmk-wrapper.py main.tex --outdir <project-root>/.output`. Parse the JSON output: `compile_ok` MUST be `true` and `overfull_violations` MUST be empty (> 50pt threshold). The script returns exit code 1 on any failure — react to it. (Belt-and-braces: copy `<skill>/settings.recommended.json` into `<project-root>/.claude/settings.json` so a PreToolUse hook blocks any PDF/AUX/LOG written outside `.output/`.)
 
-2. **Three Phase-D gates MUST all return exit 0 before the review loop runs.** Run them in order; do not enter the review loop with a red gate.
+2. **Four Phase-D gates MUST all return exit 0 / pass before the review loop runs.** Run them in order; do not enter the review loop with a red gate.
 
    ```bash
    python <skill>/scripts/latexmk-wrapper.py main.tex --outdir <root>/.output  # gate (a)
    python <skill>/scripts/lint.py main.tex macros.tex sections/*.tex --bib refs.bib  # gate (b)
    python <skill>/scripts/check_confidence_tags.py <root>  # gate (c)
+   python <skill>/scripts/lint.py main.tex macros.tex sections/*.tex --bib refs.bib --final  # gate (d): desk-reject (R20) + the desk-reject gate reviewer must return "desk-accept"
    ```
 
 3. **Every claim carries its evidence.** Every `\cite{key}` must have a matching `.proof-research/cite-<key>-*.md` digest (else: lint R13 errors). Every non-trivial technique invoked in a proof must have `.proof-research/<technique>.md` (else: R14). Every derivation step in the project must appear in `.proof-research/confidence-trace.md` with a 🔴 / 🟡 / 🟢 tag (else: `check_confidence_tags.py` fails). Every `1-\delta` in a theorem statement must be discharged by an explicit union-bound paragraph in its proof (else: R17). Every bare `$C$` / `$c$` requires the universal-constant declaration somewhere in the project (else: R15).
@@ -36,7 +37,7 @@ These scripts live at `<skill>/scripts/`. SKILL.md is the only place they are li
 | Script | Purpose | When |
 |---|---|---|
 | `latexmk-wrapper.py` | Compile + structured-JSON log parse + exit 1 on errors / overfull > 50pt | Phase D gate (a); use as the only compile path |
-| `lint.py` | Static rules R0a–R18 over `.tex` files (style, R0c aliascnt, R13 cite-digest, R14 technique-digest, R15 constants, R17 union-bound, R18 no-inline-in-main) | After every section write + Phase D gate (b) |
+| `lint.py` | Static rules R0a–R19 over `.tex` files (style, R0c aliascnt, R13 cite-digest, R14 technique-digest, R15 constants, R17 union-bound, R18 no-inline-in-main, R19 display-math ≥ prose) | After every section write + Phase D gate (b) |
 | `check_confidence_tags.py` | Validates `.proof-research/confidence-trace.md` covers ≥ 50% of estimated steps and every 🔴 has a `\todo{verify}` marker | Phase D gate (c) |
 | `check_scope.py` | Validates `.proof-research/scope.md` declaration matches project size (closes the "I'll just say Quick to skip Phase D" loophole) | Phase A.0a |
 | `hook_output_guard.py` | Invoked by Claude Code PreToolUse hook (auto, via `settings.recommended.json`) — blocks PDF/AUX/LOG writes outside `.output/` | Automatic |
@@ -79,6 +80,10 @@ Four phases. Do not skip; do not reorder.
 
 3. **A.1 Read the task.** Re-read the user's target statement until you can recite it from memory. List inputs (assumptions, prior lemmas, allowed citations) and the precise goal (equality? inequality? high-probability? asymptotic rate?).
 
+4. **A.1a Socratic intake.** Settle the proof's **setting** (norm, probability space, regime, tight-vs-`\poly` constants, what counts as a win) and **architecture** (decomposition) *with the user* before drafting. Ask one batch of defaulted, justified questions — one mathematical decision each, the proposed default always the **stronger/tighter** option — then **end your turn and wait**. Runs for every scope; depth scales (Quick: 1–2 setting questions; Appendix: full setting + architecture). Do not draft preliminaries while waiting — an answer can invalidate them. `you decide` (or autonomous/eval mode) → adopt the stronger default, record it in `.proof-research/decisions.md` (NOT as inline `\todo` — reserve `\todo` for genuine `\todo{verify:}` gaps), and re-surface in the Phase A report.
+
+   → **Read [`references/socratic-intake.md`](references/socratic-intake.md)** for the protocol, the question bank, the scope-proportional depth, and the delegation rule.
+
 3. **A.2 Technical reconnaissance.** List every non-trivial *tool* the proof will need — not theorems-to-prove, but tools-to-use (matrix Bernstein, Hanson-Wright, Yarotsky gadget, elliptical-potential, Gronwall, SETH, Varshamov-Gilbert + Fano, etc.). For each tool you cannot recite precisely from memory, save a digest under `<project-root>/.proof-research/<tool-slug>.md`.
 
    → **Read [`references/technical-research.md`](references/technical-research.md)** for the digest schema, the sub-agent prompt, and the list of techniques that warrant digests. **Skip this step at your peril** — AI memory of advanced techniques is unreliable on hypotheses and constants.
@@ -100,7 +105,7 @@ Four phases. Do not skip; do not reorder.
 
    If a lemma's `Downstream consumers:` is empty, the lemma MUST be deleted or merged before drafting — there is no "we'll use it later" exception. Then create one `TodoWrite` item per surviving lemma + one per theorem proof + one per end-to-end review.
 
-7. **A.6 Surface ambiguity.** If any input is unclear (which norm, which probability space, tight constants vs. `\poly` slack), ask the user before drafting.
+7. **A.6 Surface residual ambiguity.** The proof's setting was settled in A.1a; A.6 catches only ambiguity *newly discovered during decomposition* (a lemma needs a hypothesis the user never specified, a constant must dominate a quantity the target left open). Surface these the same way — a defaulted, justified question — before drafting their proofs.
 
 ### Phase B — Preliminaries
 
@@ -139,7 +144,7 @@ For each node in the dependency graph, in topological order (leaves first):
    python <skill>/scripts/lint.py <changed-file.tex> --bib <project>/refs.bib
    ```
 
-   Fix every reported error (R0a–R17) before continuing. R13/R14 will fire as soon as you write a `\cite{}` or invoke a technique without the corresponding `.proof-research/` digest — this is the intended workflow, not nuisance noise.
+   Fix every reported error (R0a–R19) before continuing. R13/R14 will fire as soon as you write a `\cite{}` or invoke a technique without the corresponding `.proof-research/` digest — this is the intended workflow, not nuisance noise. R19 fires when a proof's prose outweighs its display+inline math — convert prose derivation into display steps (or annotate `% lint: ignore R19` for a genuinely prose-bound argument).
 
 7. **`\input{}` ordering rule.** When introducing a new section file: write the `.tex` file FIRST (with at least placeholder content), then add the `\input{sections/NN-foo}` line to `main.tex`. Reversed order leaves a non-compilable repo on interruption.
 
@@ -157,7 +162,7 @@ When all proofs are written and before invoking Phase D, run a confidence sweep.
 
 When all lemmas and the theorem proof are written:
 
-1. **Three gates — every gate MUST return exit 0 before the review loop.** Run them in order:
+1. **Four gates — every gate MUST return exit 0 before the review loop.** Run them in order (gate (d) is the desk-reject screen — an editor's pre-review pass):
 
    ```bash
    # Gate (a) — compile + structured log
@@ -166,17 +171,24 @@ When all lemmas and the theorem proof are written:
 
    # Gate (b) — static rules
    python <skill>/scripts/lint.py main.tex macros.tex sections/*.tex --bib refs.bib
-   # → exit 0 (R0a–R17 all pass)
+   # → exit 0 (R0a–R19 all pass; R19 = display-math ≥ prose per proof)
 
    # Gate (c) — confidence sweep coverage
    python <skill>/scripts/check_confidence_tags.py <root>
    # → exit 0 (every step tagged, every 🔴 has \todo{verify})
+
+   # Gate (d) — desk-reject screen (submission-grade), two halves:
+   python <skill>/scripts/lint.py main.tex macros.tex sections/*.tex --bib refs.bib --final
+   # → exit 0 (--final adds R20: no surviving \todo invocation, no
+   #   .proof-research/decisions.md/runner-log reference in any .tex)
+   # then spawn the desk-reject gate reviewer (references/reviewer-roles.md
+   #   §Desk-reject gate reviewer) → its verdict MUST be "desk-accept"
    ```
 
-   If any returns non-zero, fix and re-run. A non-compiling proof is a draft, not a proof; a proof with unaddressed lint errors is unreviewable; a proof without a confidence sweep is from-memory. R0c statically prevents the aliascnt counter-share bug, so visual PDF spot-checking is no longer required. See [`references/quality-checks.md`](references/quality-checks.md) §LaTeX compilation gate for the underlying rationale of each gate.
+   If any returns non-zero, fix and re-run. A non-compiling proof is a draft, not a proof; a proof with unaddressed lint errors is unreviewable; a proof without a confidence sweep is from-memory; a proof that fails the desk-reject gate (an open `\todo`, a reference to an internal research file, missing setting/insight, or any author/process leakage) is not even submittable — an editor would bounce it before review. R0c statically prevents the aliascnt counter-share bug, so visual PDF spot-checking is no longer required. See [`references/quality-checks.md`](references/quality-checks.md) §LaTeX compilation gate for the underlying rationale of each gate, and [`references/review-loop.md`](references/review-loop.md) §Desk-reject gate for gate (d).
 
-2. **Run the bounded review loop.** Spawn a reviewer sub-agent to produce a peer-review-style assessment (Summary / Strengths / Weaknesses / Questions / Verdict), then point-by-point verify each weakness, apply minimum-change fixes, and iterate. Loop terminates by `accept-as-is` verdict, 3-iteration cap, convergence detection, no-fixes-applied, or statement-change escalation.
-   → **Read [`references/review-loop.md`](references/review-loop.md)** for the reviewer prompt, verification taxonomy (REAL-blocking / REAL-nonblocking / PHANTOM / INTENTIONAL), cost-gated fix decisions, and termination conditions.
+2. **Run the bounded review loop.** Each iteration spawns a **five-reviewer panel in parallel** (3 correctness lenses + math-taste + derivation-integrity), each returning a 0–10 score. Merge and dedupe their weaknesses, point-by-point verify each, apply minimum-change fixes, and iterate. **Accept when the mean panel score > 8 (strict) and no unresolved critical weakness remains.** Loop also terminates by 3-iteration cap, convergence detection, no-fixes-applied, or statement-change escalation.
+   → **Read [`references/review-loop.md`](references/review-loop.md)** for the panel orchestration, scoring/accept gate, verification taxonomy (REAL-blocking / REAL-nonblocking / PHANTOM / INTENTIONAL), cost-gated fix decisions, and termination conditions, and **[`references/reviewer-roles.md`](references/reviewer-roles.md)** for the five role prompts.
 
 3. **Grep your own proof against [`references/anti-patterns.md`](references/anti-patterns.md)** — especially §AI-specific failure modes. Fabricated citations, hallucinated lemma applications, and confident interpolation over missing arguments are the failure modes you will produce most often; they are also the ones that get past you most easily.
 
@@ -205,13 +217,15 @@ Most of these triggers are also lint-enforced (R13–R17), so the protocol is th
 | File | When to load | Why |
 |---|---|---|
 | [`references/conventions.md`](references/conventions.md) | Phase A.0 (first contact with project) | macros, label slugs, `\Cref` vs `\ref`, asymptotic notation, voice |
+| [`references/socratic-intake.md`](references/socratic-intake.md) | Phase A.1a (before reconnaissance) | question protocol for settling the setting + architecture with the user; scope-proportional depth; delegation rule |
 | [`references/technical-research.md`](references/technical-research.md) | Phase A.2 (technical reconnaissance) | digest schema, sub-agent prompt, list of digest-worthy techniques |
 | [`references/pattern-menu.md`](references/pattern-menu.md) | Phase A.3 (pattern selection) | proof-type → recommended organizational patterns |
 | [`references/templates.md`](references/templates.md) | Phase B (preliminaries) and Phase C (each new statement / derivation) | LaTeX templates for statements, derivation patterns, proof boundaries |
 | [`references/quality-checks.md`](references/quality-checks.md) | Phase C (per-statement / per-proof review) and Phase D (end-to-end) | the three checklists, constants tracking, compilation gate, end-to-end review |
 | [`references/confidence-sweep.md`](references/confidence-sweep.md) | Phase C.5 (after all proofs written, before Phase D) | tag taxonomy, trace schema, sub-agent dispatch, fast-path / re-derivation decisions |
 | [`references/anti-patterns.md`](references/anti-patterns.md) | Phase C (after writing a derivation) and Phase D (final pass) | math anti-patterns, exposition anti-patterns, AI-specific failure modes |
-| [`references/review-loop.md`](references/review-loop.md) | Phase D (after compilation gate passes) | reviewer sub-agent prompt, verification taxonomy, fix-cost decisions, loop termination |
+| [`references/review-loop.md`](references/review-loop.md) | Phase D (after compilation gate passes) | five-reviewer panel orchestration, scoring + mean>8 accept gate, verification taxonomy, fix-cost decisions, loop termination |
+| [`references/reviewer-roles.md`](references/reviewer-roles.md) | Phase D Component 1 (with review-loop.md) | the five reviewer prompts: shared scaffold, 0–10 scale, structured return, and the 3 correctness + taste + derivation-integrity role mandates |
 | [`references/theory-experiment.md`](references/theory-experiment.md) | only if the user explicitly asks for experiments | how to design ICML/NeurIPS/ICLR-grade empirical validation as a separate `experiments-plan.md`; **never fabricate results, never pollute `main.tex` with experiment sections** |
 
 Load on demand. Do not load up front.

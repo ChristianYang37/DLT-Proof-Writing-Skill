@@ -1,24 +1,76 @@
 {
   "eval_id": 1,
   "eval_name": "hoeffding-prove",
-  "version": "v2-full-workflow",
-  "graded_at": "2026-05-14T17:00:00+08:00",
-  "grader": "main-agent (hand-grade per agents/grader.md)",
+  "graded_at": "2026-06-08T20:39:45Z",
   "assertions": [
-    {"text": "scripts/latexmk-wrapper.py reports compile_ok=true on the output file", "type": "script", "passed": true, "evidence": "compile_ok: True, undef_refs: [], undef_cites: [], errors: [], warnings: 0", "notes": "clean compile"},
-    {"text": "proof uses MGF / Chernoff approach (Markov on exp(λS) + Hoeffding's lemma + optimize λ), not a different route", "type": "qualitative", "passed": true, "evidence": "runner-log: '4-step Chernoff assembly: Markov → factor by independence → apply lemma → optimize λ'", "notes": "canonical structure"},
-    {"text": "Hoeffding's lemma is stated explicitly as a separate \\begin{lemma} with proof, not invoked as a black box", "type": "qualitative", "passed": true, "evidence": "lem:hoeffding-lemma proved via log-MGF / exponential tilt / Popoviciu / Taylor with Lagrange remainder", "notes": "full proof, not invoked as black box"},
-    {"text": "the optimization over λ shows the first-order condition or AM-GM step explicitly", "type": "qualitative", "passed": true, "evidence": "Phase D iter 1 included a Taylor sign-handling rewrite — confirms explicit derivative treatment", "notes": "no phantom optimization"},
-    {"text": "no \\[ ... \\] math displays (only align/align*)", "type": "script", "passed": true, "evidence": "lint.py: 0 R0a violations", "notes": ""},
-    {"text": "all in-prose \\eqref uses are prefixed with Eq.~", "type": "script", "passed": true, "evidence": "lint.py: 0 R0b violations", "notes": ""},
-    {"text": "no fabricated citations (every \\cite resolves in the .bib if one is created)", "type": "script", "passed": true, "evidence": "no \\cite used, no refs.bib (textbook material, runner judged citations unnecessary)", "notes": ""},
-    {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method", "type": "script", "passed": true, "evidence": ".proof-research/confidence-trace.md (17.8KB) with 29 steps; final 🟢 26 / 🟡 3 / 🔴 0", "notes": "all steps fast-path verifiable; no sub-agent dispatch needed"},
-    {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists with the Summary/Strengths/Weaknesses/Questions/Verdict schema", "type": "script", "passed": true, "evidence": "review-iteration-1.md (7.3KB, 3 weaknesses, 2 fixed/1 INTENTIONAL) + review-iteration-2.md (4.7KB, accept-as-is)", "notes": "2 iterations, terminated by accept-as-is"}
+    {
+      "text": "scripts/latexmk-wrapper.py reports compile_ok=true on the output file",
+      "type": "script",
+      "passed": true,
+      "evidence": "latexmk-wrapper.py main.tex: {\"compile_ok\": true, ... \"undef_refs\": [], \"undef_cites\": [], \"errors\": [], \"warnings_count\": 0}",
+      "notes": "Compiles cleanly with no undef refs/cites or errors."
+    },
+    {
+      "text": "proof uses MGF / Chernoff approach (Markov on exp(λS) + Hoeffding's lemma + optimize λ), not a different route",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "02-hoeffding-theorem.tex:33 \"\\le e^{-\\lambda t}\\,\\E[e^{\\lambda \\sum Y_i}]=e^{-\\lambda t}\\prod_i\\E[e^{\\lambda Y_i}]\" (Markov), :45 \"\\Cref{lem:hoeffding} bounds each factor\", :59 \"g'(\\lambda)=-t+\\lambda V/4=0\".",
+      "notes": "Exact canonical MGF/Chernoff skeleton: Markov → Hoeffding's lemma → optimize λ."
+    },
+    {
+      "text": "Hoeffding's lemma is stated explicitly as a separate \\begin{lemma} with proof, not invoked as a black box",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "01-hoeffding-lemma.tex:16 \"\\begin{lemma}[Hoeffding's lemma]\\label{lem:hoeffding}\" followed by full 4-step \\begin{proof} (:24-87) deriving ψ''≤(b-a)^2/4.",
+      "notes": "Separate lemma with a complete first-principles proof, not black-boxed."
+    },
+    {
+      "text": "the optimization over λ shows the first-order condition or AM-GM step explicitly",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "02-hoeffding-theorem.tex:59-63 \"g'(\\lambda)=-t+\\frac{\\lambda V}{4}=0 \\Longleftrightarrow \\lambda^\\star=\\frac{4t}{V}>0\" with \"g''(\\lambda)=V/4>0 confirms ... global minimiser\".",
+      "notes": "Explicit first-order condition plus second-order check; no phantom optimization."
+    },
+    {
+      "text": "no \\[ ... \\] math displays (only align/align*)",
+      "type": "script",
+      "passed": true,
+      "evidence": "lint.py main.tex sections/*.tex: 0 R0a violations (n_errors=0); grep '\\\\[' over main.tex+sections returns no matches.",
+      "notes": "All displays use align/align; zero R0a hits."
+    },
+    {
+      "text": "all in-prose \\eqref uses are prefixed with Eq.~",
+      "type": "script",
+      "passed": true,
+      "evidence": "lint.py: 0 R0b violations; grep of all 'eqref' occurrences shows every one prefixed 'Eq.~\\eqref' (e.g. 01:51, 02:47,73).",
+      "notes": "Every \\eqref carries the Eq.~ prefix."
+    },
+    {
+      "text": "no fabricated citations (every \\cite resolves in the .bib if one is created)",
+      "type": "script",
+      "passed": true,
+      "evidence": "grep '\\\\cite' main.tex sections/ returns no matches; no refs.bib shipped; undef_cites=[] in latexmk output.",
+      "notes": "Zero \\cite calls, so vacuously clean (self-contained proof)."
+    },
+    {
+      "text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method",
+      "type": "script",
+      "passed": true,
+      "evidence": ".proof-research/confidence-trace.md has 15 steps, each with Initial/Current tag (e.g. Step 3 🔴→🟡, Step 13 🟢) and a \"Verification method:\" line.",
+      "notes": "All 15 steps tagged with per-step verification method; final 13🟢/2🟡/0🔴."
+    },
+    {
+      "text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists recording the five-reviewer panel — five 0–10 scores (3 correctness + math-taste + derivation-integrity) and merged, verified weaknesses",
+      "type": "script",
+      "passed": true,
+      "evidence": "review-iteration-1.md scores table: R1 correctness 9, R2 assumptions 9, R3 ML-significance 9, R4 math taste 9, R5 derivation integrity 9, mean 9.00; \"Merged + verified weaknesses\" section with 7 items + verdicts.",
+      "notes": "Five-reviewer panel with correct lenses, scored 0-10, merged/verified weaknesses recorded."
+    }
   ],
   "overall": {
     "passed_count": 9,
     "failed_count": 0,
     "not_verifiable_count": 0,
-    "summary": "Full v2 workflow ran cleanly. 29-step confidence sweep finished 🟢 26 / 🟡 3 / 🔴 0. Review loop converged in 2 iterations with 2 fixes applied + 1 INTENTIONAL rebuttal. Phase D actually rewrote Taylor sign-handling — Phase C.5 caught a 🟡 step the review loop then upgraded. Clean compile, no fabricated cites, no \\todo residuals. Would pass NeurIPS/ICML/COLT review."
+    "summary": "All 9 assertions pass. The proof is the canonical MGF/Chernoff Hoeffding argument: a fully-proved separate Hoeffding's lemma (sharp (b-a)^2/8 proxy via ψ''≤(b-a)^2/4), Markov on the exponential MGF, independence factorization, an explicit first-order λ-optimization with second-order check, and a two-sided union bound. It compiles cleanly, has zero lint violations (no \\[…\\], Eq.~ prefixes, no fabricated cites), a 15-step confidence trace, and a genuine five-reviewer panel (mean 9.00). Strengths: mathematically correct, every step justified, no black boxes. Weaknesses: minor—three \\todo{user-decision} markers render into the final PDF, and five unused template macros remain. The eval prompt asked for hoeffding.tex but output is main.tex+sections; no assertion tests this so not penalized. Would comfortably survive a NeurIPS/ICML appendix review."
   }
 }

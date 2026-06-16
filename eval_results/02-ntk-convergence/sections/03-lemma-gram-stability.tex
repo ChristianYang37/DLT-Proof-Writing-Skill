@@ -1,0 +1,111 @@
+\section{Stability: the Gram matrix survives small perturbations}\label{sec:gram-stability}
+
+\begin{lemma}[Gram stability under weight perturbation]\label{lem:gram-stability}
+Fix $\delta \in (0,1)$ and a radius
+\begin{align}\label{eq:radius}
+R \;=\; \frac{c\, \delta\, \lzero}{n^2},
+\end{align}
+for a sufficiently small universal constant $c > 0$. Let $W = (w_1, \dots, w_m)$ be any
+weights (possibly depending on the data) with $\norm{w_r - w_r(0)} \le R$ for every
+$r \in [m]$. Then with probability at least $1 - \delta$ over the random initialization
+$W(0)$,
+\begin{align}\label{eq:gram-stable}
+\opnorm{H(W) - H(0)} \;\le\; \frac{\lzero}{4}.
+\end{align}
+Consequently, on the intersection with the event of \Cref{lem:init-gram-close},
+$\lmin(H(W)) \ge \tfrac{1}{2}\lzero$.
+\end{lemma}
+
+\begin{proof}
+The strategy is: identify the event that lets a neuron change the Gram matrix (a sign flip of
+its activation), bound its probability by Gaussian anti-concentration, take expectation to
+control $\E\opnorm{H(W)-H(0)}$, and convert to high probability by Markov.
+
+\smallskip\noindent\textbf{Step 1 (a neuron contributes only if it flips).}
+With $\sigma$ the ReLU, $\indic{w_r^{\top} x_i \ge 0}$ is the activation indicator of neuron
+$r$ on $x_i$. Subtracting Eq.~\eqref{eq:emp-gram} at $W$ and at $W(0)$,
+\begin{align}\label{eq:entry-diff}
+\abs{H_{ij}(W) - H_{ij}(0)}
+\;\le\; & ~ \frac{1}{m} \sum_{r=1}^{m} \abs{x_i^{\top} x_j} \cdot
+\abs{ S_{r,ij}(W) - S_{r,ij}(0) } \\
+\;\le\; & ~ \frac{1}{m} \sum_{r=1}^{m} \indic{ E_{r,i} \cup E_{r,j} },
+\end{align}
+where $S_{r,ij}(\cdot) := \indic{w_r^{\top} x_i \ge 0}\indic{w_r^{\top} x_j \ge 0}$, the first
+step is the triangle inequality applied termwise, and the second uses $\abs{x_i^{\top}x_j}\le1$
+together with the observation that $S_{r,ij}(W) \ne S_{r,ij}(0)$ forces neuron $r$ to flip its
+sign on $x_i$ or on $x_j$; here
+\begin{align}\label{eq:flip-event}
+E_{r,i} \;:=\; \left\{ \abs{ w_r(0)^{\top} x_i } \le R \right\}.
+\end{align}
+The inclusion holds because, by Cauchy--Schwarz and $\norm{x_i}=1$,
+$\abs{(w_r - w_r(0))^{\top} x_i} \le \norm{w_r - w_r(0)} \le R$, so a sign change of
+$w_r^{\top} x_i$ relative to $w_r(0)^{\top} x_i$ requires $\abs{w_r(0)^{\top} x_i} \le R$.
+
+\smallskip\noindent\textbf{Step 2 (Gaussian anti-concentration).}
+Since $\norm{x_i} = 1$, the projection $w_r(0)^{\top} x_i \sim \N(0, 1)$. The standard normal
+density is bounded by $1/\sqrt{2\pi} \le 1/2$, so for the small-ball event Eq.~\eqref{eq:flip-event},
+\begin{align}\label{eq:anti-conc}
+\Pr\!\left[ E_{r,i} \right]
+\;=\; & ~ \Pr\!\left[ \abs{\N(0,1)} \le R \right]
+\;=\; \int_{-R}^{R} \frac{1}{\sqrt{2\pi}}\, e^{-t^2/2}\, dt
+\;\le\; \frac{2R}{\sqrt{2\pi}}
+\;\le\; R,
+\end{align}
+where the first equality is the definition of $E_{r,i}$, the second writes the Gaussian
+probability as an integral, the third bounds the integrand by its maximum $1/\sqrt{2\pi}$ over
+the interval of length $2R$, and the last uses $2/\sqrt{2\pi} \le 1$.
+
+\smallskip\noindent\textbf{Step 3 (a $W$-independent dominating quantity).}
+The right-hand side of Eq.~\eqref{eq:entry-diff} depends on $W(0)$ alone, not on $W$, and
+dominates $\abs{H_{ij}(W)-H_{ij}(0)}$ for \emph{every} $W$ in the ball simultaneously. Define
+the single random variable
+\begin{align}\label{eq:dom-quantity}
+D \;:=\; \sum_{i=1}^{n}\sum_{j=1}^{n} \frac{1}{m}\sum_{r=1}^{m}
+\indic{ E_{r,i} \cup E_{r,j} },
+\end{align}
+which is a function of $W(0)$ only. By Eq.~\eqref{eq:entry-diff} and
+$\opnorm{\cdot} \le \fnorm{\cdot} \le \sum_{ij}\abs{\cdot}$,
+\begin{align}\label{eq:dom-sup}
+\sup_{\,W :\; \norm{w_r-w_r(0)}\le R\;\forall r}\; \opnorm{H(W)-H(0)} \;\le\; D .
+\end{align}
+Taking expectations
+and using the union bound $\Pr[E_{r,i}\cup E_{r,j}] \le \Pr[E_{r,i}] + \Pr[E_{r,j}] \le 2R$
+together with Eq.~\eqref{eq:anti-conc} for each of the $m$ neurons,
+\begin{align}\label{eq:exp-op}
+\E[D]
+\;=\; & ~ \sum_{i=1}^{n}\sum_{j=1}^{n} \frac{1}{m}\sum_{r=1}^{m}
+\Pr\!\left[ E_{r,i} \cup E_{r,j} \right]
+\;\le\; \sum_{i=1}^{n}\sum_{j=1}^{n} 2R
+\;=\; 2 n^2 R,
+\end{align}
+where the first step is linearity of expectation, the second applies Eq.~\eqref{eq:anti-conc}
+to each neuron, and the last counts the $n^2$ entries.
+
+\smallskip\noindent\textbf{Step 4 (Markov to high probability, uniformly over $W$).}
+By Markov's inequality applied to the nonnegative $W$-independent random variable $D$,
+\begin{align}\label{eq:markov-stab}
+\Pr\!\left[ D \ge \frac{\lzero}{4} \right]
+\;\le\; & ~ \frac{4}{\lzero}\, \E[D]
+\;\le\; \frac{8 n^2 R}{\lzero}
+\;=\; 8 c\, \delta
+\;\le\; \delta,
+\end{align}
+where the first step is Markov, the second substitutes Eq.~\eqref{eq:exp-op}, the third
+substitutes the radius Eq.~\eqref{eq:radius}, and the last holds for $c \le 1/8$. On the
+complementary event $\{D \le \lzero/4\}$, which has probability at least $1-\delta$ and depends
+on $W(0)$ alone, $\opnorm{H(W)-H(0)} \le D \le \lzero/4$ holds for \emph{every} admissible $W$
+at once; in particular it applies to the data-dependent iterates $W(k)$ downstream. This
+establishes Eq.~\eqref{eq:gram-stable} as the uniform event claimed.
+
+\smallskip\noindent\textbf{Step 5 (eigenvalue floor).}
+On the intersection with the event of \Cref{lem:init-gram-close} (where
+$\lmin(H(0)) \ge \tfrac34\lzero$), Weyl's inequality (\Cref{fac:weyl}) gives
+\begin{align}\label{eq:weyl-stab}
+\lmin\!\left( H(W) \right)
+\;\ge\; & ~ \lmin\!\left( H(0) \right) - \opnorm{H(W) - H(0)}
+\;\ge\; \frac{3}{4}\lzero - \frac{1}{4}\lzero
+\;=\; \frac{1}{2}\lzero,
+\end{align}
+where the first step is Weyl applied to the symmetric matrices $H(W)$ and $H(0)$ and the
+second substitutes the two events. This gives the assertion.
+\end{proof}

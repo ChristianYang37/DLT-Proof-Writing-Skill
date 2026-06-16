@@ -1,0 +1,69 @@
+\section{The key per-coordinate lemma}
+\label{sec:key-lemma}
+
+We retain the conditional model of \Cref{sec:region}: $C$ is a random variable
+on a finite set $S$, $p_c \in [0,1]$ for $c \in S$, $X$ is $\mathrm{Bernoulli}(p_C)$
+given $C$, and $(C', X')$ is an independent copy of $(C, X)$. The key lemma
+amplifies the conditional entropy of a single bit by a constant factor when its
+marginal is small.
+
+\begin{lemma}[Key amplification lemma]
+\label{lem:single-var}
+Suppose $\E[X] = \E_c[p_c] \le 0.01$. Then
+\begin{align*}
+\Ent\bigl(X \cupbit X' \given C, C'\bigr) \;\ge\; 1.26\,\Ent(X \given C).
+\end{align*}
+Equivalently, if $\{p_c\}_{c \in S} \subset [0,1]$ satisfies $\E_c[p_c] \le 0.01$,
+then $\E_{c,c'}\bigl[\hb(p_c + p_{c'} - p_c p_{c'})\bigr] \ge 1.26\,\E_c[\hb(p_c)]$.
+\end{lemma}
+
+\begin{proof}
+The strategy is to split the joint conditioning $(C, C')$ into the three disjoint
+region-events determined by the threshold partition $S = \Cz \sqcup \Co$ of
+\Cref{sec:region}, bound the first two regions by \Cref{lem:region-low,lem:region-mix},
+and discard the third (which is non-negative). Expanding
+$\Ent(X \cupbit X' \given C, C')$ over the four region combinations and grouping
+the two mixed combinations by symmetry,
+\begin{align}
+\Ent\bigl(X \cupbit X' \given C, C'\bigr)
+&\;=\; \underbrace{\Pr[\Cz, \Cz']\,\Ent\bigl(X \cupbit X' \given \Cz, \Cz'\bigr)}_{\eqqcolon\, T_1} \notag \\
+&\quad +\; \underbrace{2\,\Pr[\Cz, \Co']\,\Ent\bigl(X \cupbit X' \given \Cz, \Co'\bigr)}_{\eqqcolon\, T_2} \notag \\
+&\quad +\; \underbrace{\Pr[\Co, \Co']\,\Ent\bigl(X \cupbit X' \given \Co, \Co'\bigr)}_{\eqqcolon\, T_3}. \label{eq:three-regions}
+\end{align}
+Here $T_2$ collects both mixed events $\{\Cz, \Co'\}$ and $\{\Co, \Cz'\}$, which
+contribute equally because $(C, X)$ and $(C', X')$ are i.i.d.\ and the OR is
+symmetric; this accounts for the factor $2$. Using independence of the two copies,
+$\Pr[\Cz, \Cz'] = \Pr[\Cz]^2$ and $\Pr[\Cz, \Co'] = \Pr[\Cz]\,\Pr[\Co]$. We bound
+each surviving term:
+\begin{align*}
+T_1 \;=\; \Pr[\Cz]^2\,\Ent\bigl(X \cupbit X' \given \Cz, \Cz'\bigr)
+&\;\overset{(a)}{\ge}\; 1.26\,\Pr[\Cz]\,\Ent(X \given C \in \Cz), \\
+T_2 \;=\; 2\,\Pr[\Cz]\,\Pr[\Co]\,\Ent\bigl(X \cupbit X' \given \Cz, \Co'\bigr)
+&\;\overset{(b)}{\ge}\; 1.62\,\Pr[\Co]\,\Ent(X \given C \in \Co), \\
+T_3 &\;\overset{(c)}{\ge}\; 0,
+\end{align*}
+where step $(a)$ is \Cref{lem:region-low}, step $(b)$ is \Cref{lem:region-mix}
+(noting $\Pr[\Cz, \Co'] = \Pr[\Cz]\Pr[\Co]$ so the lemma's left-hand side equals
+$T_2$), and step $(c)$ holds because entropy is non-negative. Summing the three
+bounds and using $1.62 \ge 1.26$,
+\begin{align*}
+\Ent\bigl(X \cupbit X' \given C, C'\bigr)
+&\;\ge\; 1.26\,\Pr[\Cz]\,\Ent(X \given C \in \Cz) + 1.62\,\Pr[\Co]\,\Ent(X \given C \in \Co) \\
+&\;\ge\; 1.26\,\bigl(\Pr[\Cz]\,\Ent(X \given C \in \Cz) + \Pr[\Co]\,\Ent(X \given C \in \Co)\bigr) \\
+&\;=\; 1.26\,\Ent(X \given C),
+\end{align*}
+where the final equality is the law of total conditional entropy across the
+partition $S = \Cz \sqcup \Co$:
+$\Ent(X \given C) = \Pr[\Cz]\,\Ent(X \given C \in \Cz) + \Pr[\Co]\,\Ent(X \given C \in \Co)$.
+This completes the proof.
+\end{proof}
+
+\begin{remark}[The discarded region]
+\label{rem:discarded}
+The term $T_3$, corresponding to both samples having large conditional marginal,
+is thrown away. It is non-negative, and regions $T_1, T_2$ alone already exceed
+$1.26\,\Ent(X \given C)$, so retaining $T_3$ would only improve the constant. A
+tight version of \Cref{lem:single-var} — which would push the Frankl bound to
+the sharp threshold $\tfrac{3 - \sqrt{5}}{2} \approx 0.38$ — requires analyzing
+$T_3$ as well; this was carried out in follow-up work and is not reproduced here.
+\end{remark}

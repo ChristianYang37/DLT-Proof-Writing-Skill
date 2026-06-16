@@ -1,13 +1,6 @@
-% ============================================================
-% macros.tex --- Sobolev minimax lower bound
-% ============================================================
+% macros.tex — theorem environments (aliascnt-safe) + notation shortcuts.
 
-% --- Theorem environments via aliascnt (cleveref-safe) ---
-\usepackage{amsmath,amssymb,amsthm}
-\usepackage{aliascnt}
-\usepackage{enumitem}
-\usepackage[capitalize]{cleveref}
-
+% ---- Theorem environments (aliascnt so cleveref names key correctly) ----
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
 
@@ -41,6 +34,7 @@
 \newtheorem{remark}[remark]{Remark}
 \aliascntresetthe{remark}
 
+% ---- Cleveref names (now correctly keyed to the aliased counters) ----
 \crefname{theorem}{Theorem}{Theorems}
 \crefname{lemma}{Lemma}{Lemmas}
 \crefname{proposition}{Proposition}{Propositions}
@@ -51,47 +45,17 @@
 \crefname{remark}{Remark}{Remarks}
 \crefname{equation}{Eq.}{Eqs.}
 
-% --- Asymptotic notation ---
-\DeclareMathOperator{\poly}{poly}
-\newcommand{\Otil}{\widetilde{O}}
-\newcommand{\Omegatil}{\widetilde{\Omega}}
-
-% --- Number sets and operators ---
-\newcommand{\R}{\mathbb{R}}
+% ---- Asymptotics and operators ----
+\DeclareMathOperator*{\argmin}{arg\,min}
 \newcommand{\N}{\mathbb{N}}
-\newcommand{\Z}{\mathbb{Z}}
 \newcommand{\E}{\mathbb{E}}
-\renewcommand{\Pr}{\mathbb{P}}
 \newcommand{\1}{\mathbf{1}}
-
-% --- Norm and inner product ---
-\newcommand{\norm}[1]{\left\| #1 \right\|}
-\newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
-
-% --- Function-space norms ---
-\newcommand{\Ltwo}{L^{2}}
-\newcommand{\Linf}{L^{\infty}}
-\newcommand{\Wnorm}[1]{\norm{#1}_{W^{s}_{2}}}
-\newcommand{\Ltwonorm}[1]{\norm{#1}_{\Ltwo}}
-\newcommand{\Linfnorm}[1]{\norm{#1}_{\Linf}}
-\newcommand{\empnorm}[1]{\norm{#1}_{n}}
-
-% --- Sobolev ball, distributions ---
-\newcommand{\Sobball}{\mathcal{F}}
-\newcommand{\Hpack}{\mathcal{H}}
+\providecommand{\Pr}{}\renewcommand{\Pr}{\mathbb{P}}
 \newcommand{\KL}{\mathrm{KL}}
+\newcommand{\Sob}{W^{s}_{2}}                 % Sobolev space symbol
+\newcommand{\Ltwo}{L^{2}}
 
-% --- Estimators ---
-\newcommand{\fhat}{\widehat{f}}
-\newcommand{\fstar}{f^{*}}
-
-% --- Probability and risk ---
-\newcommand{\probP}{P}
-\newcommand{\probQ}{Q}
-\newcommand{\Dn}{\mathcal{D}_{n}}
-
-% --- Misc ---
-\newcommand{\rH}{\rho_{H}}
-\newcommand{\eps}{\varepsilon}
-\newcommand{\del}{\delta}
-\newcommand{\msf}[1]{\mathsf{#1}}
+% ---- Norms ----
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\Nzero}[1]{\left\| #1 \right\|_{0}}   % Hamming weight / l0
+\newcommand{\rhoH}{\rho_{H}}                       % Hamming distance

@@ -1,11 +1,9 @@
-% ===== Theorem environments using aliascnt (cleveref-safe) =====
-\usepackage{amsmath, amssymb, amsthm}
-\usepackage{aliascnt}
-\usepackage[capitalize]{cleveref}
-\usepackage{enumitem}
-\usepackage{mathtools}
-\usepackage{xcolor}
+% macros.tex — theorem environments (aliascnt-safe) + notation macros.
+% No \documentclass / \begin{document} here; this is \input{}-ed by main.tex.
 
+% ---------------------------------------------------------------------------
+% Theorem environments — aliascnt so cleveref keys names on the right counter.
+% ---------------------------------------------------------------------------
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
 
@@ -39,6 +37,7 @@
 \newtheorem{remark}[remark]{Remark}
 \aliascntresetthe{remark}
 
+% Cleveref names — keyed on the aliascnt counters above.
 \crefname{theorem}{Theorem}{Theorems}
 \crefname{lemma}{Lemma}{Lemmas}
 \crefname{proposition}{Proposition}{Propositions}
@@ -49,35 +48,37 @@
 \crefname{remark}{Remark}{Remarks}
 \crefname{equation}{Eq.}{Eqs.}
 
-% ===== Asymptotics =====
-\DeclareMathOperator{\poly}{poly}
-\DeclareMathOperator{\polylog}{polylog}
-\DeclareMathOperator*{\argmax}{arg\,max}
-\DeclareMathOperator*{\argmin}{arg\,min}
+% ---------------------------------------------------------------------------
+% Asymptotics
+% ---------------------------------------------------------------------------
 \newcommand{\Otil}{\widetilde{O}}
-\newcommand{\Omegatil}{\widetilde{\Omega}}
-\newcommand{\Thetatil}{\widetilde{\Theta}}
 
-% ===== Common shortcuts =====
-\newcommand{\wt}{\widetilde}
-\newcommand{\wh}{\widehat}
-\newcommand{\R}{\mathbb{R}}
-\newcommand{\N}{\mathbb{N}}
+% ---------------------------------------------------------------------------
+% Probability / expectation
+% ---------------------------------------------------------------------------
 \newcommand{\E}{\mathbb{E}}
-\renewcommand{\Pr}{\mathbb{P}}
-\newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
-\newcommand{\1}{\mathbf{1}}
-\newcommand{\eps}{\varepsilon}
-\newcommand{\norm}[1]{\left\| #1 \right\|}
-\newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\R}{\mathbb{R}}
 
-% ===== MDP-specific =====
-\newcommand{\cS}{\mathcal{S}}
-\newcommand{\cA}{\mathcal{A}}
-\newcommand{\cE}{\mathcal{E}}
-\newcommand{\cF}{\mathcal{F}}
-\newcommand{\cV}{\mathcal{V}}
-\newcommand{\cN}{\mathcal{N}}
-\newcommand{\cM}{\mathcal{M}}
-\newcommand{\Lam}{\Lambda}
+% ---------------------------------------------------------------------------
+% Norms / inner products
+% ---------------------------------------------------------------------------
+\newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\Norm}[1]{\left\| #1 \right\|}        % alias for big norm in displays
+\newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
+\newcommand{\Inner}[2]{\left\langle #1,\, #2 \right\rangle} % big inner product
+\newcommand{\Mnorm}[2]{\left\| #1 \right\|_{#2}}  % Mahalanobis / weighted norm
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+% ---------------------------------------------------------------------------
+% MDP / RL objects
+% ---------------------------------------------------------------------------
+\newcommand{\St}{\mathcal{S}}            % state space
+\newcommand{\Ac}{\mathcal{A}}            % action space
+\newcommand{\featmap}{\phi}              % feature map
+\newcommand{\Gram}{\Lambda}              % Gram / covariance matrix
+\newcommand{\Ev}{\mathcal{E}}            % successful event
+\newcommand{\Vsp}{\mathcal{V}}           % value-function class
+\newcommand{\Pop}{P}                     % transition kernel
 \newcommand{\Reg}{\mathrm{Regret}}
+\newcommand{\T}{\mathbb{T}}              % Bellman backup operator

@@ -1,0 +1,101 @@
+\section{Hoeffding's inequality}
+\label{sec:hoeffding-theorem}
+
+We now assemble the main result. The proof is the canonical Chernoff argument:
+exponentiate, apply Markov's inequality, factorise the moment generating
+function across the independent summands, bound each factor with
+\Cref{lem:hoeffding}, optimise the free parameter $\lambda$, and finally combine
+the two tails by a union bound.
+
+\begin{theorem}[Hoeffding's inequality]\label{thm:hoeffding}
+Let $X_1, \ldots, X_n$ be independent random variables with $X_i \in [a_i, b_i]$
+almost surely for each $i$, where $a_i < b_i$, and set $S_n := \sum_{i=1}^n X_i$.
+Write $V := \sum_{i=1}^n (b_i - a_i)^2$. Then for every $t > 0$,
+\begin{align}\label{eq:hoeffding-main}
+\Pr\!\big[\, \abs{S_n - \E[S_n]} \ge t \,\big]
+\;\le\; 2 \exp\!\left( - \frac{2 t^2}{\sum_{i=1}^n (b_i - a_i)^2} \right).
+\end{align}
+\end{theorem}
+
+\begin{proof}
+Set $Y_i := X_i - \E[X_i]$, so that $Y_i$ is centered with $Y_i \in [a_i', b_i']$
+almost surely for $a_i' := a_i - \E[X_i]$ and $b_i' := b_i - \E[X_i]$; note
+$b_i' - a_i' = b_i - a_i$. The centered sum is $S_n - \E[S_n] = \sum_{i=1}^n Y_i$.
+The proof proceeds in three stages: a one-sided exponential tail bound, its
+optimisation over $\lambda$, and the two-sided combination.
+
+\smallskip\noindent\textbf{Step 1 (Chernoff bound on the upper tail).}
+For any $\lambda > 0$, the map $x \mapsto e^{\lambda x}$ is increasing and
+positive, so by Markov's inequality applied to $e^{\lambda(S_n - \E S_n)}$,
+\begin{align}
+\Pr\!\big[\, S_n - \E[S_n] \ge t \,\big]
+&\;=\; \Pr\!\big[\, e^{\lambda (S_n - \E S_n)} \ge e^{\lambda t} \,\big] \notag \\
+&\;\le\; e^{-\lambda t} \, \E\!\left[ e^{\lambda \sum_{i=1}^n Y_i} \right]
+   \;=\; e^{-\lambda t} \prod_{i=1}^n \E\!\left[ e^{\lambda Y_i} \right], \label{eq:chernoff}
+\end{align}
+where the first step exponentiates both sides of the event with the increasing
+bijection $x \mapsto e^{\lambda x}$, the second is Markov's inequality
+$\Pr[Z \ge s] \le \E[Z]/s$ applied to the nonnegative variable
+$Z = e^{\lambda(S_n - \E S_n)}$, and the last step factorises the expectation of
+a product using the independence of $Y_1, \ldots, Y_n$ (a measurable function of
+independent variables).
+
+\smallskip\noindent\textbf{Step 2 (apply Hoeffding's lemma and optimise $\lambda$).}
+Each $Y_i$ is centered and bounded in an interval of width $b_i - a_i$, so
+\Cref{lem:hoeffding} bounds each factor by
+$\E[e^{\lambda Y_i}] \le \exp(\lambda^2 (b_i - a_i)^2 / 8)$. Substituting into
+Eq.~\eqref{eq:chernoff} and writing $V = \sum_i (b_i - a_i)^2$,
+\begin{align}
+\Pr\!\big[\, S_n - \E[S_n] \ge t \,\big]
+&\;\le\; e^{-\lambda t} \prod_{i=1}^n \exp\!\left( \frac{\lambda^2 (b_i - a_i)^2}{8} \right) \notag \\
+&\;=\; \exp\!\left( -\lambda t + \frac{\lambda^2 V}{8} \right)
+   \;=:\; \exp\big( g(\lambda) \big), \label{eq:exponent}
+\end{align}
+where the first step applies \Cref{lem:hoeffding} to each of the $n$ independent
+factors, and the second collects the product of exponentials into a single
+exponent $g(\lambda) := -\lambda t + \lambda^2 V / 8$. The bound holds for every
+$\lambda > 0$, so we minimise $g$. The first-order condition is
+\begin{align}
+g'(\lambda) \;=\; -t + \frac{\lambda V}{4} \;=\; 0
+\qquad\Longleftrightarrow\qquad
+\lambda^\star \;=\; \frac{4 t}{V} \;>\; 0, \label{eq:foc}
+\end{align}
+and $g''(\lambda) = V/4 > 0$ confirms $\lambda^\star$ is the global minimiser.
+Evaluating the exponent at $\lambda^\star$,
+\begin{align}
+g(\lambda^\star)
+\;=\; -\frac{4t}{V}\, t + \frac{1}{8}\left( \frac{4t}{V} \right)^{\!2} V
+\;=\; -\frac{4 t^2}{V} + \frac{2 t^2}{V}
+\;=\; -\frac{2 t^2}{V}, \label{eq:exponent-opt}
+\end{align}
+where the first equality substitutes $\lambda^\star = 4t/V$ into
+$g(\lambda) = -\lambda t + \lambda^2 V/8$, and the remaining equalities are
+arithmetic simplification. Combining Eq.~\eqref{eq:exponent}
+and Eq.~\eqref{eq:exponent-opt} gives the one-sided bound
+\begin{align}
+\Pr\!\big[\, S_n - \E[S_n] \ge t \,\big]
+\;\le\; \exp\!\left( - \frac{2 t^2}{V} \right). \label{eq:one-sided}
+\end{align}
+
+\smallskip\noindent\textbf{Step 3 (two-sided bound by a union bound).}
+Applying the one-sided bound Eq.~\eqref{eq:one-sided} to the variables $-X_i \in
+[-b_i, -a_i]$, whose interval widths are again $b_i - a_i$ and whose centered sum
+is $-(S_n - \E S_n)$, yields the matching lower-tail bound
+\begin{align}
+\Pr\!\big[\, S_n - \E[S_n] \le -t \,\big]
+\;=\; \Pr\!\big[\, (\E S_n - S_n) \ge t \,\big]
+\;\le\; \exp\!\left( - \frac{2 t^2}{V} \right). \label{eq:lower-sided}
+\end{align}
+The two-sided event decomposes as $\{\abs{S_n - \E S_n} \ge t\} = \{S_n - \E S_n
+\ge t\} \cup \{S_n - \E S_n \le -t\}$. By a union bound over these two events,
+together with Eq.~\eqref{eq:one-sided} and Eq.~\eqref{eq:lower-sided},
+\begin{align}
+\Pr\!\big[\, \abs{S_n - \E[S_n]} \ge t \,\big]
+&\;\le\; \Pr\!\big[\, S_n - \E S_n \ge t \,\big] + \Pr\!\big[\, S_n - \E S_n \le -t \,\big] \notag \\
+&\;\le\; 2 \exp\!\left( - \frac{2 t^2}{V} \right), \label{eq:two-sided}
+\end{align}
+where the first step is the union bound applied to the two tail events, and the
+second substitutes the upper- and lower-tail bounds. Since $V = \sum_{i=1}^n
+(b_i - a_i)^2$, this is exactly Eq.~\eqref{eq:hoeffding-main}, which completes
+the proof.
+\end{proof}

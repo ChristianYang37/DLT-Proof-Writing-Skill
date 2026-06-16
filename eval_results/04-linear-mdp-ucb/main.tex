@@ -1,26 +1,35 @@
 \documentclass[11pt]{article}
 
-\usepackage[margin=1in]{geometry}
-\usepackage{microtype}
+\usepackage[letterpaper,margin=1in]{geometry}
+\linespread{1.0}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{aliascnt}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\usepackage[capitalize]{cleveref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\newcommand{\todo}[1]{{\color{red}\textbf{[TODO: #1]}}}
 
 \input{macros}
 
-\title{Regret Bound for LSVI-UCB on Linear MDPs}
+\title{Sublinear Regret of LSVI-UCB on Linear MDPs}
+\author{}
 \date{}
 
 \begin{document}
-
 \maketitle
 
 \input{sections/01-preliminaries}
-\input{sections/02-main-result}
-\input{sections/03-concentration}
-\input{sections/04-optimism}
-\input{sections/05-decomposition}
-\input{sections/06-elliptical}
-\input{sections/07-proof-main}
+\input{sections/02-concentration}
+\input{sections/03-optimism}
+\input{sections/04-elliptical}
+\input{sections/05-main-theorem}
 
-\bibliographystyle{plainnat}
+\bibliographystyle{plain}
 \bibliography{refs}
 
 \end{document}

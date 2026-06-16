@@ -1,0 +1,69 @@
+\section{The union-closed corollary}
+\label{sec:frankl}
+
+We finally specialize \Cref{thm:gilmer-entropy} to the uniform distribution over
+a union-closed family, recovering Gilmer's constant lower bound for the
+union-closed sets conjecture~\cite{gilmer2022unionclosed} (Theorem~2 therein).
+
+\begin{theorem}[Constant lower bound for union-closed families]
+\label{thm:gilmer-frankl}
+Let $\F \subseteq 2^{[n]}$ be a union-closed family with $|\F| \ge 2$. Then there
+exists an element $i \in [n]$ contained in at least a $c = 0.01$ fraction of the
+sets of $\F$; that is,
+\begin{align*}
+\bigl|\{\, A \in \F : i \in A \,\}\bigr| \;\ge\; 0.01\,|\F|.
+\end{align*}
+\end{theorem}
+
+% Proof-by-contradiction reduction: the load-bearing content is the logical chain
+% (assume all p_i < 0.01, invoke thm:gilmer-entropy, collide with the max-entropy
+% bound), which is inherently prose-logic rather than a display derivation.
+% lint: ignore R19 — prose-bound contradiction/reduction argument (see note above)
+\begin{proof}
+The strategy is to assume every element has frequency below $0.01$ and derive a
+contradiction with \Cref{thm:gilmer-entropy}. Let $A, B$ be independent uniform
+samples from $\F$, and set $p_i \coloneqq \Pr[i \in A] = |\{A \in \F : i \in A\}| / |\F|$.
+Suppose, for contradiction, that $p_i < 0.01$ for every $i \in [n]$; in
+particular $\Pr[i \in A] \le 0.01$ for all $i$, so \Cref{thm:gilmer-entropy}
+applies and gives
+\begin{align}
+\Ent(A \cup B) \;\ge\; 1.26\,\Ent(A). \label{eq:apply-entropy}
+\end{align}
+On the other hand, union-closure forces $A \cup B \in \F$ almost surely, so
+$A \cup B$ is supported on $\F$; the maximum-entropy bound
+\Cref{fac:max-entropy} and the fact that $A$ is uniform on $\F$ give
+\begin{align}
+\Ent(A \cup B)
+&\;\overset{(a)}{\le}\; \log|\F|
+\;\overset{(b)}{=}\; \Ent(A), \label{eq:max-entropy-step}
+\end{align}
+where step $(a)$ applies \Cref{fac:max-entropy} to the $\F$-supported variable
+$A \cup B$, and step $(b)$ uses that $A$ is uniform on $\F$, for which
+\Cref{fac:max-entropy} holds with equality $\Ent(A) = \log|\F|$. Since
+$|\F| \ge 2$, the uniform distribution on $\F$ is non-degenerate, so
+\begin{align*}
+\Ent(A) \;=\; \log|\F| \;\ge\; \log 2 \;=\; 1 \;>\; 0.
+\end{align*}
+Chaining Eq.~\eqref{eq:max-entropy-step} and Eq.~\eqref{eq:apply-entropy},
+\begin{align*}
+\Ent(A)
+\;\overset{(a)}{\ge}\; \Ent(A \cup B)
+\;\overset{(b)}{\ge}\; 1.26\,\Ent(A)
+\;\overset{(c)}{>}\; \Ent(A),
+\end{align*}
+where step $(a)$ is Eq.~\eqref{eq:max-entropy-step}, step $(b)$ is
+Eq.~\eqref{eq:apply-entropy}, and step $(c)$ is strict because $\Ent(A) > 0$.
+The chain $\Ent(A) > \Ent(A)$ is a contradiction. Hence some $p_i \ge 0.01$,
+i.e.\ some element $i$ lies in at least a $0.01$ fraction of the sets of $\F$.
+This completes the proof.
+\end{proof}
+
+\begin{remark}[On the constant]
+\label{rem:constant}
+The constant $0.01$ is not optimized; it is the value carried through the
+unoptimized region constants of \Cref{lem:region-low,lem:region-mix}. The sharp
+threshold for this method is $\tfrac{3 - \sqrt{5}}{2} \approx 0.38$, attained by
+later refinements of \Cref{lem:single-var}; Frankl's conjecture itself asks for
+the constant $\tfrac{1}{2}$, which remains open and provably out of reach of the
+present argument since $\tfrac{3 - \sqrt 5}{2} < \tfrac{1}{2}$.
+\end{remark}

@@ -1,0 +1,33 @@
+\section{Conditional-entropy monotonicity under coarsening}
+\label{sec:cond-mono}
+
+The information-theoretic formulation of the proof rests on a single structural
+fact: conditioning on \emph{more} information cannot increase conditional
+entropy. We state it in the form used at the crucial step of the main theorem.
+
+\begin{lemma}[Coarsening monotonicity]
+\label{lem:cond-mono}
+Let $X, Y$ be random variables on finite sets and let $f$ be any (deterministic)
+function of $Y$. Then
+\begin{align*}
+\Ent(X \given Y) \;\le\; \Ent\bigl(X \given f(Y)\bigr).
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+The triple $X \to Y \to f(Y)$ is a Markov chain, since $f(Y)$ is a deterministic
+function of $Y$ and hence conditionally independent of $X$ given $Y$. We compute
+\begin{align*}
+\Info\bigl(X; f(Y)\bigr)
+&\;\overset{(a)}{\le}\; \Info(X; Y) \\
+\Ent(X) - \Ent\bigl(X \given f(Y)\bigr)
+&\;\overset{(b)}{\le}\; \Ent(X) - \Ent(X \given Y) \\
+\Ent(X \given Y)
+&\;\overset{(c)}{\le}\; \Ent\bigl(X \given f(Y)\bigr),
+\end{align*}
+where step $(a)$ is the data-processing inequality \Cref{fac:data-processing}
+applied to the Markov chain $X \to Y \to f(Y)$, step $(b)$ rewrites each mutual
+information through the identity $\Info(X; W) = \Ent(X) - \Ent(X \given W)$, and
+step $(c)$ cancels the common term $\Ent(X)$ and rearranges. This gives the
+assertion.
+\end{proof}

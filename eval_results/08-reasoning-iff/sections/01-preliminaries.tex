@@ -1,0 +1,59 @@
+\section{Setting and notation}
+\label{sec:preliminaries}
+
+We work in a deterministic, finite-dimensional, single-token setting: there is no
+randomness and no asymptotics, only inner-product geometry together with a first-order
+optimality condition. All objects below are fixed throughout.
+
+\paragraph{Carrier and vocabulary.}
+Let $E$ be a real inner product space with inner product $\inner{\cdot}{\cdot}$ and induced
+norm $\norm{\cdot}$; we assume $E$ is complete (e.g. $E = \mathbb{R}^{d}$ with the Euclidean
+inner product, or any real Hilbert space). Let $\Vocab$ be a finite vocabulary with at least
+two tokens, and let
+\begin{align*}
+W : \Vocab \to E,
+\end{align*}
+be the unembedding map, so that $W_{a} \in E$ is the row associated with token $a \in \Vocab$.
+
+\paragraph{LayerNorm sphere.}
+Fix a radius $r > 0$. The LayerNorm sphere of radius $r$ is
+\begin{align*}
+\Sphere \;=\; \{\, x \in E : \norm{x} = r \,\}.
+\end{align*}
+A point $x$ lies on the sphere precisely when $\norm{x} = r$.
+
+\begin{definition}[Decoder: greedy argmax is the true decoder]
+\label{def:decoder}
+Let $\loss : E \to \mathbb{R}$ denote the implicit loss and let $x \in E$ be a hidden state.
+Because the setting is single-token ($n = 1$), the greedy argmax over rows \emph{is} the true
+decoder. We say that token $a \in \Vocab$ is \emph{generated at} $x$, written
+$\Generated(a, x)$, when $x$ lies in the open decoding cone of $a$, i.e. the row $W_{a}$ has
+strictly larger inner product with $x$ than every competing row:
+\begin{align*}
+\Generated(a, x) \;\;:\Longleftrightarrow\;\; \forall\, b \ne a,\quad \inner{W_{a}}{x} > \inner{W_{b}}{x}.
+\end{align*}
+\end{definition}
+
+\begin{definition}[Constrained stationarity on the sphere]
+\label{def:stationarity}
+We model ``the hidden state has settled at a constrained stationary point of the loss on the
+sphere'' by the first-order (Lagrange) condition: a point $\xstar \in \Sphere$ is
+\emph{constrained-stationary} with multiplier $\mu \in \mathbb{R}$ when the ambient gradient
+of the loss is normal to the sphere at $\xstar$,
+\begin{align*}
+\grad \loss(\xstar) \;=\; \mu\,\xstar.
+\end{align*}
+Equivalently, the Riemannian gradient of $\loss$ along the sphere vanishes at $\xstar$. We
+take the multiplier $\mu$ and this stationarity equation as hypotheses; no convexity, global
+minimality, or convergence rate is assumed.
+\end{definition}
+
+\begin{remark}[Differentiability is a setting remark, not a hypothesis]
+\label{rem:differentiability}
+The loss $\loss$ is intended to be differentiable, and $\grad\loss(\xstar)$ denotes its
+gradient at $\xstar$. This is a property of the ambient setting, not a working hypothesis of
+the results below: the proofs never differentiate $\loss$; they use only the \emph{value} of
+the vector $\grad\loss(\xstar)$ through the stationarity equation of
+\Cref{def:stationarity}. Accordingly, differentiability of $\loss$ is deliberately omitted
+from the statements, which keeps them as general as the argument actually warrants.
+\end{remark}

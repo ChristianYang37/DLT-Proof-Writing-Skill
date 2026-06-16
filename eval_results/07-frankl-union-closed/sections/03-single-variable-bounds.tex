@@ -1,0 +1,84 @@
+\section{Single-variable entropy inequalities}
+\label{sec:single-var}
+
+For two independent bits with success probabilities $p, p'$, the union (bitwise
+OR) succeeds with probability
+\begin{align*}
+\Pr[\text{bit} \cupbit \text{bit}' = 1] \;=\; 1 - (1-p)(1-p') \;=\; p + p' - p p'.
+\end{align*}
+The two lemmas below control the binary entropy $\hb(p + p' - p p')$ of this OR
+in the two regimes the key lemma needs: both probabilities small
+(\Cref{lem:concavity-half}), and one of them arbitrary (\Cref{lem:concavity-mix}).
+Both are consequences of concavity of $\hb$ (\Cref{fac:concavity}).
+
+\begin{lemma}[Small-probability amplification]
+\label{lem:concavity-half}
+For all $p, p' \in [0, 0.1]$,
+\begin{align*}
+\hb(p + p' - p p') \;\ge\; 1.4 \cdot \frac{\hb(p) + \hb(p')}{2}.
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+The inequality holds with both sides $0$ when $p = p' = 0$, so assume
+$(p,p') \ne (0,0)$. We bound the ratio
+$\hb(p + p' - p p') \big/ \tfrac{1}{2}(\hb(p) + \hb(p'))$ from below. First,
+concavity of $\hb$ (\Cref{fac:concavity}) gives
+\begin{align}
+\frac{\hb(p) + \hb(p')}{2}
+&\;\le\; \hb\!\left(\frac{p + p'}{2}\right). \label{eq:concavity-half-den}
+\end{align}
+Next, on $[0,0.1]^2$ we have $1 - p' \ge 0.9$, hence
+\begin{align}
+p + p' - p p' \;=\; p + p'(1 - p) \;\ge\; p(1-p') + p'(1-p) \;\ge\; 0.9\,(p + p'). \label{eq:concavity-half-num}
+\end{align}
+Since $\hb$ is increasing on $[0, 1/2]$ and $0.9(p+p') \le \tfrac{p+p'}{2}\cdot 1.8 \le 0.18 \le 1/2$,
+combining Eq.~\eqref{eq:concavity-half-den} and Eq.~\eqref{eq:concavity-half-num}
+yields, with $u \coloneqq p + p' \in (0, 0.2]$,
+\begin{align*}
+\frac{\hb(p + p' - p p')}{\tfrac{1}{2}\bigl(\hb(p) + \hb(p')\bigr)}
+\;\ge\; \frac{\hb\bigl(0.9(p+p')\bigr)}{\hb\bigl(\tfrac{1}{2}(p+p')\bigr)}
+\;=\; \frac{\hb(0.9\,u)}{\hb(0.5\,u)}
+\;\eqqcolon\; g(u).
+\end{align*}
+A direct calculation shows $g$ is minimized on $(0, 0.2]$ at $u = 0.2$, where
+\begin{align*}
+g(0.2) \;=\; \frac{\hb(0.18)}{\hb(0.10)} \;=\; 1.450\ldots \;>\; 1.4.
+\end{align*}
+Therefore $\hb(p + p' - p p') \ge 1.4 \cdot \tfrac{1}{2}(\hb(p) + \hb(p'))$ on the
+whole domain, as desired.
+\end{proof}
+
+\begin{lemma}[Mixed-probability bound]
+\label{lem:concavity-mix}
+For all $p, p' \in [0, 1]$,
+\begin{align*}
+\hb(p + p' - p p') \;\ge\; (1 - p)\,\hb(p').
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+Write the OR-probability as a convex combination of the endpoints $1$ and $p'$:
+\begin{align*}
+p + p' - p p' \;=\; p \cdot 1 + (1 - p)\, p'.
+\end{align*}
+Applying concavity of $\hb$ (\Cref{fac:concavity}) to this convex combination,
+\begin{align*}
+\hb\bigl(p \cdot 1 + (1 - p)\, p'\bigr)
+&\;\ge\; p\,\hb(1) + (1 - p)\,\hb(p')
+\;=\; (1 - p)\,\hb(p'),
+\end{align*}
+where the final equality uses $\hb(1) = 0$ (\Cref{def:binary-entropy}). This
+gives the assertion.
+\end{proof}
+
+\begin{remark}[Relation to the i.i.d.-marginal heuristic]
+\label{rem:placeholder}
+In the special case where $A$ has i.i.d.\ $\mathrm{Bernoulli}(p)$ coordinates,
+one has $\Ent(A) = \hb(p)\,n$ and $\Ent(A \cup B) = \hb(2p - p^2)\,n$, so the
+relevant single-variable quantity is $\hb(2p - p^2) - 2\hb(p)$ in disguise
+(equivalently the ratio $\hb(2p - p^2)/\hb(p)$). This is the heuristic
+placeholder $\hb(p^2) - 2\hb(p)$ referenced in the problem statement, recovered
+from \Cref{lem:concavity-half} by setting $p = p'$. The two lemmas above are the
+conditional generalizations actually needed once the coordinates are correlated.
+\end{remark}

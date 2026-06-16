@@ -1,138 +1,464 @@
-# Confidence Trace — LSVI-UCB Regret Proof
+# Confidence trace — LSVI-UCB regret (Phase C.5)
 
-Initial state: every step at 🔴 from-memory. Sweep upgrades via textbook fact, project lemma match, or digest match.
+Every derivation step starts 🔴 `from-memory` and is upgraded via fast-path
+(textbook inequality → 🟢; project-lemma / digest match → 🟡) or kept 🔴 with a
+`\todo{verify}` marker. Sweep date: 2026-06-09. v1.2 finalize (2026-06-09): the
+last 🔴 step (the $C_\beta$ covering constant, Step 13) was cross-checked against
+cite-jin2020provably Theorem 3.1 and upgraded to 🟡; its `\todo{verify}` is
+resolved and removed. $C_\beta$ is a universal constant with verified $dH\sqrt\iota$
+scaling (no closed-form numeric value in the source — none fabricated). No 🔴 steps
+remain.
+
+Summary after sweep: 🟢 31 / 🟡 19 / 🔴 0  (50 steps enumerated).
 
 ---
 
 ## Step 1
-**Location:** sections/03-concentration.tex (Lemma weight_bound, proof)
-**Content:** $|u^\top \widehat{w}_h^k| \le H \sqrt{(k-1) d}$ by Cauchy–Schwarz with $|y_\tau| \le H$, $\sum_\tau \|\phi_\tau\|_{(\Lambda_h^k)^{-1}}^2 \le d$.
+**Location:** sections/01-preliminaries.tex:111
+**Content (≤ 2 lines):** $\T_h g(x,a)=r_h+\int g\,d P_h = \langle\phi,\theta_h\rangle + \int g\langle\phi,d\mu_h\rangle$ (definition of backup, substitute Assumption A).
 **Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Textbook Cauchy–Schwarz + trace inequality $\sum_\tau \|\phi_\tau\|_{A^{-1}}^2 = \mathrm{tr}(A^{-1} \sum_\tau \phi_\tau \phi_\tau^\top) \le \mathrm{tr}(I) = d$ since $A \succeq \sum_\tau \phi_\tau \phi_\tau^\top$.
+**Current tag:** 🟡 cross-checked
+**Verification method:** Matches .proof-research/linear-mdp-value-linearity.md and cite-jin2020provably (Prop 2.3 / Assumption A); pure substitution of the linear-MDP definition.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-14
+**Last updated:** 2026-06-09T05:00:00Z
 
 ## Step 2
-**Location:** sections/03-concentration.tex (Lemma cover, proof)
-**Content:** $\log |\cN_\varepsilon| \le d \log(1 + 4L/\varepsilon) + d^2 \log(1 + 8 d^{1/2} \beta^2 / \varepsilon^2)$.
+**Location:** sections/01-preliminaries.tex:111
+**Content (≤ 2 lines):** Pull $\phi(x,a)$ out of the $x'$-integral: $\int g\langle\phi,d\mu_h\rangle=\langle\phi,\int g\,d\mu_h\rangle$.
 **Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** Matches digest `value-function-covering.md` (Lemma D.6 of Jin et al. 2020). Proof sketch given; full Lipschitz computation deferred to citation.
+**Current tag:** 🟢 verified
+**Verification method:** Linearity of the inner product in a fixed vector; hand-checked (Fubini / pull-out of constant vector).
 **Sub-agent task id:** none
-**Last updated:** 2026-05-14
+**Last updated:** 2026-06-09T05:00:00Z
 
 ## Step 3
-**Location:** sections/03-concentration.tex (Lemma concentration, Eq self_norm_fixed_V)
-**Content:** $\|S_{k-1}^V\|_{(\Lambda_h^k)^{-1}}^2 \le H^2 d \log((1+k)/\delta')$ by self-normalised concentration.
+**Location:** sections/01-preliminaries.tex:123
+**Content (≤ 2 lines):** $\|w\|\le\|\theta_h\|+\|\int g\,d\mu_h\|\le\sqrt d+H\sqrt d\le 2H\sqrt d$.
 **Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** Matches digest `self-normalized-concentration.md` (Theorem 1 of Abbasi-Yadkori et al. 2011), with $R = H$ (sub-Gaussian bound from $|V| \le H$), $\det(\Lambda_h^k) \le (1 + k)^d$.
+**Current tag:** 🟢 verified
+**Verification method:** Triangle inequality + $0\le g\le H$ + normalization $\|\theta_h\|,\|\mu_h(\mathcal S)\|\le\sqrt d$; hand-checked. Matches JYWJ Lemma B.1 norm $2H\sqrt d$.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-14
+**Last updated:** 2026-06-09T05:00:00Z
 
 ## Step 4
-**Location:** sections/03-concentration.tex (covering bound substitution)
-**Content:** $\log|\cN_\varepsilon| \le C_1 d^2 \iota$ with $\varepsilon = 1/K$.
+**Location:** sections/02-concentration.tex:17
+**Content (≤ 2 lines):** $|v^\top w_h^k|=|\sum_\tau v^\top(\Lambda_h^k)^{-1}\phi_h^\tau y_h^\tau|$ (expand ridge weight).
 **Initial tag:** 🔴 from-memory
-**Current tag:** 🟡 cross-checked
-**Verification method:** Substitution of $L = H\sqrt{dK}$, $\varepsilon = 1/K$, $\beta = O(dH\sqrt\iota)$ into Lemma cover. Each log factor is $O(\iota)$, so total $\le d^2 \iota$. Constants absorbed.
+**Current tag:** 🟢 verified
+**Verification method:** Direct substitution of Eq.(weight-def); hand-checked.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-14
+**Last updated:** 2026-06-09T05:00:00Z
 
 ## Step 5
-**Location:** sections/03-concentration.tex (Bellman-residual decomposition)
-**Content:** $\langle \phi, \widehat w_h^k\rangle - r_h - [P_h V_{h+1}^k] = \phi^\top (\Lambda_h^k)^{-1} \sum_\tau \phi_\tau \eta_\tau - \lambda \phi^\top (\Lambda_h^k)^{-1} w_h^*$.
+**Location:** sections/02-concentration.tex:17
+**Content (≤ 2 lines):** $\le H\sum_\tau|v^\top(\Lambda_h^k)^{-1}\phi_h^\tau|$ using $|y_h^\tau|\le H$ + triangle inequality.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Identity: $\widehat w_h^k = (\Lambda_h^k)^{-1}[\sum_\tau \phi_\tau y_\tau]$ where $y_\tau = r_h + V_{h+1}^k(s_{h+1}^\tau)$. Linear MDP gives $r_h + P_h V_{h+1}^k = \langle \phi, w_h^*\rangle$, so $y_\tau = \langle \phi_\tau, w_h^*\rangle + \eta_\tau$. Substituting: $\widehat w_h^k - w_h^* = (\Lambda_h^k)^{-1}\sum_\tau \phi_\tau \eta_\tau - \lambda (\Lambda_h^k)^{-1} w_h^*$ (the $\lambda I$ adds $-\lambda w_h^*$ via $\sum_\tau \phi_\tau \phi_\tau^\top w_h^* = (\Lambda_h^k - \lambda I) w_h^*$). Hand-derived.
+**Verification method:** Named textbook inequality (triangle) + bound $|y|\le H$; hand-checked.
 **Sub-agent task id:** none
-**Last updated:** 2026-05-14
+**Last updated:** 2026-06-09T05:00:00Z
 
 ## Step 6
-**Location:** sections/03-concentration.tex (final $\beta$ bound)
-**Content:** Total Bellman residual $\le (\sqrt{d} + d^{3/2}) H \sqrt\iota \cdot \|\phi\|_{(\Lambda^{-1})}$; conclude $C_\beta = O(d^{3/2})/d = O(\sqrt{d})$ to make $\beta = C_\beta d H\sqrt\iota$ absorb both. **Marked with `\todo{}` for human attention.**
+**Location:** sections/02-concentration.tex:17
+**Content (≤ 2 lines):** Cauchy–Schwarz in $(\Lambda_h^k)^{-1}$ inner product: $\le H(\sum_\tau v^\top(\Lambda_h^k)^{-1}v)^{1/2}(\sum_\tau(\phi_h^\tau)^\top(\Lambda_h^k)^{-1}\phi_h^\tau)^{1/2}$.
 **Initial tag:** 🔴 from-memory
-**Current tag:** 🔴 from-memory (with `\todo{}` flag in source)
-**Verification method:** Not fully verified; constant tightness depends on whether $d^{3/2}$ in the noise term subsumes $\sqrt{d}$ in the regularisation term. The `\todo{}` flag is in section 03 (line ~90).
-**Sub-agent task id:** none (deferred to reviewer)
-**Last updated:** 2026-05-14
+**Current tag:** 🟢 verified
+**Verification method:** Named textbook inequality (Cauchy–Schwarz in a PD inner product); hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
 ## Step 7
-**Location:** sections/04-optimism.tex (Lemma per-step, upper inequality)
-**Content:** $Q_h^k(s,a) \le r_h + P_h V_{h+1}^k + 2\beta \|\phi\|_{\Lambda^{-1}}$ on $\cE$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct: $Q_h^k = \min\{\langle \phi, \widehat w\rangle + \beta\|\phi\|_{\Lambda^{-1}}, H\} \le \langle \phi, \widehat w\rangle + \beta\|\phi\|_{\Lambda^{-1}}$. On $\cE$, $\langle \phi, \widehat w\rangle \le r_h + P_h V_{h+1}^k + \beta\|\phi\|_{\Lambda^{-1}}$, so sum is $\le r_h + P_h V_{h+1}^k + 2\beta\|\phi\|_{\Lambda^{-1}}$. Algebra.
-**Sub-agent task id:** none
-
-## Step 8
-**Location:** sections/04-optimism.tex (Lemma per-step, lower inequality)
-**Content:** Either $Q_h^k(s,a) \ge r_h + P_h V_{h+1}^k$ or $Q_h^k(s,a) = H$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Case split. If $Q_h^k = H$, done. Else $Q_h^k = \langle \phi, \widehat w\rangle + \beta\|\phi\|_{\Lambda^{-1}}$. On $\cE$, $\langle \phi, \widehat w\rangle \ge r_h + P_h V_{h+1}^k - \beta\|\phi\|_{\Lambda^{-1}}$, so $Q_h^k \ge r_h + P_h V_{h+1}^k$. Algebra.
-
-## Step 9
-**Location:** sections/04-optimism.tex (Lemma optimism, induction)
-**Content:** $V_h^k(s) \ge V_h^*(s)$ for all $h$ by backward induction on $\cE$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Standard optimism induction; pick $a^* = \pi_h^*(s)$, then $V_h^k(s) \ge Q_h^k(s, a^*) \ge \min\{r_h + P_h V_{h+1}^k, H\} \ge \min\{r_h + P_h V_{h+1}^*, H\} = Q_h^*(s,a^*) \le V_h^*(s)$ via monotonicity of $P_h$ and inductive hypothesis. Hand-verified.
-
-## Step 10
-**Location:** sections/05-decomposition.tex (per-step recursion for $\delta_h^k$)
-**Content:** $\delta_h^k \le 2\beta\|\phi_h^k\|_{\Lambda^{-1}} + (V_{h+1}^k - V_{h+1}^{\pi^k})(s_{h+1}^k) + \zeta_{h,1}^k$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct from Lemma per-step (Step 7) applied to $Q_h^k - r_h - P_h V_{h+1}^k$, plus addition/subtraction of $P_h V_{h+1}^{\pi^k}$, definition of $\zeta_{h,1}^k$. Hand-verified.
-
-## Step 11
-**Location:** sections/05-decomposition.tex (Lemma azuma_mds)
-**Content:** $|T_1| \le 4H\sqrt{T \log(2/\delta_0)}$ w.p. $\ge 1-\delta_0$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct application of digest `azuma-hoeffding.md` with $c_t = 2H$, $T$ steps, $\sum c_t^2 = 4H^2 T$, $\epsilon = 2H\sqrt{2T\log(2/\delta_0)}$; $2\sqrt{2} \le 4$ for the final constant. Constants absorbed.
-
-## Step 12
-**Location:** sections/06-elliptical.tex (Lemma elliptical)
-**Content:** $\sum_t \min\{1, \|\phi_t\|_{\Lambda_t^{-1}}^2\} \le 2 d \log(1 + T/(d\lambda))$.
+**Location:** sections/02-concentration.tex:17
+**Content (≤ 2 lines):** $\le H\cdot\|v\|\cdot(dk)^{1/2}=H\sqrt{dk}$ via $v^\top(\Lambda_h^k)^{-1}v\le\|v\|^2$ and trace bound $\le d$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟡 cross-checked
-**Verification method:** Matches digest `elliptical-potential.md` (Lemma 11 of Abbasi-Yadkori 2011). Hypotheses verified ($\|\phi_t\| \le 1$, $\lambda \ge 1$, predictable filtration).
+**Verification method:** Uses $\lambda_{\min}(\Lambda)\ge\lambda=1$ (Rayleigh) and \Cref{lem:trace-bound} (proved in §04, itself 🟢); hypotheses hold here.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 8
+**Location:** sections/02-concentration.tex:45
+**Content (≤ 2 lines):** Definition of successful event $\mathcal E$: $\|\sum_\tau\phi_h^\tau[V_{h+1}^k-P_hV_{h+1}^k]\|_{(\Lambda_h^k)^{-1}}\le C\,dH\sqrt\iota$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Matches cite-jin2020provably (Lemma B.3) verbatim in form; the radius $C\,dH\sqrt\iota$ is the digested value.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 9
+**Location:** sections/02-concentration.tex:55
+**Content (≤ 2 lines):** $\varepsilon_h^\tau(V)=V(x_{h+1}^\tau)-(P_hV)(x_h^\tau,a_h^\tau)$ is a martingale-difference, $|\varepsilon|\le H$, $H$-sub-Gaussian.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Conditional mean zero by definition of $P_h$; bounded by $H$ since $0\le V\le H$; bounded → sub-Gaussian (Hoeffding's lemma). Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 10
+**Location:** sections/02-concentration.tex:70
+**Content (≤ 2 lines):** Self-normalized bound (fixed $V$): $\|\sum_\tau\phi_h^\tau\varepsilon_h^\tau\|_{(\Lambda_h^k)^{-1}}^2\le 2H^2\log(\det(\Lambda_h^k)^{1/2}\det(\lambda I)^{-1/2}/\delta')$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Matches \Cref{lem:self-normalized} = cite-abbasi2011improved (Theorem 1) with $\sigma=H$; hypotheses (predictable $\phi$, sub-Gaussian $\varepsilon$) verified at Step 9.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 11
+**Location:** sections/02-concentration.tex:70
+**Content (≤ 2 lines):** $\le 2H^2(\tfrac d2\log\tfrac{\lambda+k}{\lambda}+\log\tfrac1{\delta'})$ via $\det(\Lambda_h^k)\le(\lambda+k)^d$, $\det(\lambda I)=\lambda^d$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** AM–GM on eigenvalues of $\Lambda_h^k$ (trace $\le\lambda d+k$ ⇒ det $\le(\lambda+k/d)^d\le(\lambda+k)^d$); hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 12
+**Location:** sections/02-concentration.tex:91
+**Content (≤ 2 lines):** Covering number of the value-function class $\mathcal V$: $\log|\mathcal V_\epsilon|\le C_1 d^2\log(1+HdK/(\epsilon\lambda))$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Matches cite-jin2020provably (Lemma D.6); the $d^2$ comes from covering $(w,A)$ with $w\in\R^d$, $A\in\R^{d\times d}$. Cited, not re-derived.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
 ## Step 13
-**Location:** sections/06-elliptical.tex (Cauchy–Schwarz $\sum_k a_k \le \sqrt K \sqrt{\sum a_k^2}$)
-**Content:** $\sum_k \|\phi_h^k\|_{(\Lambda_h^k)^{-1}} \le \sqrt K \sqrt{\sum_k \min\{1, \|\phi\|^2_{\Lambda^{-1}}\}}$.
+**Location:** sections/02-concentration.tex:110
+**Content (≤ 2 lines):** Union bound + discretization: $\|\sum_\tau\phi_h^\tau\varepsilon_h^\tau(V_{h+1}^k)\|_{(\Lambda_h^k)^{-1}}^2\le 2H^2(\tfrac d2\iota+C_2 d^2\iota)\le C^2 d^2H^2\iota$; pick $C_\beta\ge C$.
 **Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Cauchy–Schwarz textbook. The identity $\|\phi\|^2 = \min\{1, \|\phi\|^2\}$ when $\|\phi\| \le 1$ is trivial. Hand-verified.
+**Current tag:** 🟡 cross-checked
+**Verification method:** Sub-agent re-derivation of the constant absorption (covering term $\log(1/\delta')\le C_2 d^2\iota$ folding into $C^2$) at .proof-research/sweep-step-13.md (verdict: matches at rate level). Cross-checked against cite-jin2020provably (Theorem 3.1, $\beta=c\,dH\sqrt\iota$): $C_\beta$ is a universal constant with the SAME $dH\sqrt\iota$ scaling, fixed only implicitly by the self-consistency / union-bound balance $c'\sqrt{\log2+\log(c_\beta+1)}\le c_\beta\sqrt{\log2}$ (their Eq. 14) — no closed-form numeric value exists in the source. Honest completion: proof now states $C_\beta$ is a universal constant with verified $dH\sqrt\iota$ scaling (no fabricated number); `\todo{verify: C_beta}` removed from sections/02-concentration.tex. Rate exponents $dH\sqrt\iota$ are exact.
+**Sub-agent task id:** sweep-13-cbeta
+**Last updated:** 2026-06-09T17:30:00Z
 
 ## Step 14
-**Location:** sections/06-elliptical.tex (substitution $\beta = C_\beta d H\sqrt\iota$)
-**Content:** $T_2 \le 2\sqrt 2 C_\beta d^{3/2} H^{3/2} \sqrt T \cdot \iota$.
+**Location:** sections/03-optimism.tex:28
+**Content (≤ 2 lines):** $w_h^k-w_h^\pi=(\Lambda_h^k)^{-1}\sum_\tau\phi_h^\tau[r+V_{h+1}^k]-w_h^\pi$ (expand ridge minus true weight).
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Direct substitution: $2\beta \cdot H \sqrt K \sqrt{2 d \log(1+K/d)} = 2 C_\beta d H \sqrt\iota \cdot H \sqrt K \cdot \sqrt{2 d \iota}$ — wait. Recomputing: factor of $H$ comes from summing over $h$, $\sqrt K$ from Cauchy–Schwarz, $\sqrt{2 d \iota}$ from elliptical, $\beta = C_\beta dH\sqrt\iota$. Product: $2 C_\beta d H \sqrt\iota \cdot H \sqrt K \cdot \sqrt{2 d\iota} = 2\sqrt 2 C_\beta d^{3/2} H^2 \sqrt K \cdot \iota$. With $T = KH$, $H^2 \sqrt K = H^{3/2} \sqrt{HK} = H^{3/2}\sqrt T$. So $T_2 = O(d^{3/2} H^{3/2} \sqrt T \cdot \iota)$. **Match.** Algebra hand-verified.
+**Verification method:** Substitution of Eq.(weight-def); hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
 ## Step 15
-**Location:** sections/07-proof-main.tex (union bound + final combination)
-**Content:** $\Reg(K) \le C d^{3/2} H \sqrt{T \iota^2}$ on $\cE \cap \cE_1$, $\Pr \ge 1-\delta$.
+**Location:** sections/03-optimism.tex:28
+**Content (≤ 2 lines):** $=(\Lambda_h^k)^{-1}\{-\lambda w_h^\pi+\sum_\tau\phi_h^\tau[V_{h+1}^k-P_hV_{h+1}^\pi]\}$ using $w_h^\pi=(\Lambda_h^k)^{-1}\Lambda_h^k w_h^\pi$ + normal-eq identity.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Matches cite-jin2020provably (Lemma B.4 proof, the $q_1$ split). Uses $\langle\phi_h^\tau,w_h^\pi\rangle=r+P_hV_{h+1}^\pi$ (Bellman, fac:value-linear). Re-derived against digest.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 16
+**Location:** sections/03-optimism.tex:28
+**Content (≤ 2 lines):** Three-term split $w_h^k-w_h^\pi=q_1+q_2+q_3$ by adding/subtracting $P_hV_{h+1}^k$ inside the sum.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Matches cite-jin2020provably (Lemma B.4); algebraic add-subtract, re-derived against digest.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 17
+**Location:** sections/03-optimism.tex:43
+**Content (≤ 2 lines):** Inner-product with $\phi(x,a)$: $\langle\phi,w_h^k-w_h^\pi\rangle=\langle\phi,q_1\rangle+\langle\phi,q_2\rangle+\langle\phi,q_3\rangle$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** $\Reg(K) \le T_1 + T_2$ (Lemma decomposition + Lemma optimism), $T_1 = O(H\sqrt{T\iota})$, $T_2 = O(d^{3/2} H^{3/2} \sqrt T \iota)$, $T_1$ dominated by $T_2$ for $d \ge 1$, so total $= O(d^{3/2} H^{3/2} \sqrt T \iota)$. Equivalently $O(d^{3/2} H \sqrt{T \iota^2} \cdot \sqrt H/1)$, ugh—the stated form is $C d^{3/2} H \sqrt{T \iota^2}$. There's a factor of $\sqrt H$ discrepancy. Check: $H^{3/2} \sqrt T = H \sqrt{HT}$ which equals $H \sqrt{T\iota^2} \cdot \sqrt{H}/\iota$. **Mismatch by $\sqrt H$ noted but absorbed:** the headline statement was $O(d^{3/2} \sqrt{HT})$ in the user's prompt, which translates to $d^{3/2} \sqrt{HT}\cdot \mathrm{polylog}$ = $d^{3/2} \cdot H^{1/2} \sqrt T \cdot \iota$. So the bound we proved is $\Otil(d^{3/2} H \sqrt{HT}) = \Otil(d^{3/2} H^{3/2} \sqrt T)$, which exceeds the user's prompt by $\sqrt H$. **Flag for review.**
+**Verification method:** Linearity of inner product; hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
----
+## Step 18
+**Location:** sections/03-optimism.tex:49
+**Content (≤ 2 lines):** $\langle\phi,q_3\rangle=P_h(V_{h+1}^k-V_{h+1}^\pi)(x,a)-\lambda\langle\phi,(\Lambda_h^k)^{-1}\int(V_{h+1}^k-V_{h+1}^\pi)d\mu_h\rangle$ via $(\Lambda_h^k)^{-1}\sum\phi\phi^\top=I-\lambda(\Lambda_h^k)^{-1}$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Sub-agent re-derivation at .proof-research/sweep-step-18.md (verdict: matches). Uses linear-MDP $P_hg=\langle\phi,\int g\,d\mu_h\rangle$ + the resolvent identity $(\Lambda)^{-1}(\Lambda-\lambda I)=I-\lambda\Lambda^{-1}$.
+**Sub-agent task id:** sweep-18-q3
+**Last updated:** 2026-06-09T05:00:00Z
 
-## Summary
+## Step 19
+**Location:** sections/03-optimism.tex:59
+**Content (≤ 2 lines):** Define $\Delta_h^k=\langle\phi,q_1\rangle+\langle\phi,q_2\rangle-\lambda\langle\phi,(\Lambda_h^k)^{-1}\int(\cdot)d\mu_h\rangle$ ⇒ recursion identity Eq.(recursion).
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Collecting terms from Steps 17–18; hand-checked algebra.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-- Total steps: 15
-- After sweep: **10** 🟢 / **4** 🟡 / **1** 🔴
-- 🔴 steps:
-  - Step 6: bonus constant $C_\beta$ tightness — marked with `\todo{}` in section 03; reviewer / human attention requested.
+## Step 20
+**Location:** sections/03-optimism.tex:69
+**Content (≤ 2 lines):** $|\Delta_h^k|\le\|\phi\|_{(\Lambda_h^k)^{-1}}(\lambda\|w_h^\pi\|_{(\Lambda)^{-1}}+\|\sum\phi\varepsilon\|_{(\Lambda)^{-1}}+\lambda\|\int(\cdot)d\mu_h\|_{(\Lambda)^{-1}})$ via Cauchy–Schwarz per term.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Named textbook inequality (Cauchy–Schwarz in $(\Lambda_h^k)^{-1}$) + triangle; hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-## Disposition
+## Step 21
+**Location:** sections/03-optimism.tex:69
+**Content (≤ 2 lines):** $\le\|\phi\|_{(\Lambda)^{-1}}(\sqrt\lambda\|w_h^\pi\|+C\,dH\sqrt\iota+\sqrt\lambda\|\int(\cdot)d\mu_h\|)$ using $\|u\|_{(\Lambda)^{-1}}\le\|u\|/\sqrt\lambda$ and event $\mathcal E$ on the middle term.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Rayleigh bound $\|u\|_{(\Lambda)^{-1}}\le\|u\|/\sqrt{\lambda_{\min}}$ (🟢) + def of $\mathcal E$ (Step 8, 🟡 via lem:concentration). Hypotheses of $\mathcal E$ hold (conditioning on $\mathcal E$).
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-One step remains 🔴 with a `\todo{}` marker in the .tex (Step 6, constant absorption in the bonus). All other steps either follow from textbook inequalities (Cauchy–Schwarz, Azuma) or match a citation digest (elliptical-potential, self-normalised concentration, value-function covering). Proceeding to Phase D.
+## Step 22
+**Location:** sections/03-optimism.tex:69
+**Content (≤ 2 lines):** $\le\|\phi\|_{(\Lambda)^{-1}}(2H\sqrt d+C\,dH\sqrt\iota+2H\sqrt d)\le\beta\|\phi\|_{(\Lambda)^{-1}}$, $C_\beta\ge C+4$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** $\|w_h^\pi\|\le2H\sqrt d$ (fac:value-linear, 🟢) + $\|\int(V^k-V^\pi)d\mu_h\|\le H\sqrt d\le 2H\sqrt d$; constants fold into $\beta=C_\beta dH\sqrt\iota$. Rate-exact; numeric $C_\beta$ tracked at Step 13.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-Note: the rate $\Otil(d^{3/2} \sqrt{H^3 T})$ proven here is one $\sqrt H$ factor larger than the user's prompt $\Otil(d^{3/2}\sqrt{HT})$; the proven rate matches the canonical Jin et al. (2020) statement $\Otil(\sqrt{d^3 H^3 T})$. \Cref{rem:rate_unpacking} discusses the form match.
+## Step 23
+**Location:** sections/03-optimism.tex:105
+**Content (≤ 2 lines):** Optimism base case $h=H+1$: $V_{H+1}^k\equiv0\equiv V_{H+1}^\star$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Convention $V_{H+1}\equiv0$; trivial.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 24
+**Location:** sections/03-optimism.tex:105
+**Content (≤ 2 lines):** Inductive step: $\langle\phi,w_h^k\rangle-Q_h^\star=P_h(V_{h+1}^k-V_{h+1}^\star)+\Delta_h^k\ge0-\beta\|\phi\|_{(\Lambda)^{-1}}$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** lem:recursion (Step 19–22, 🟡) + inductive hypothesis $V_{h+1}^k\ge V_{h+1}^\star$ ⇒ $P_h(\cdot)\ge0$ ($P_h$ monotone). Matches cite-jin2020provably (Lemma B.5).
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 25
+**Location:** sections/03-optimism.tex:117
+**Content (≤ 2 lines):** $Q_h^\star\le\min\{\langle\phi,w_h^k\rangle+\beta\|\phi\|_{(\Lambda)^{-1}},H\}=Q_h^k$; then $\max_a$ ⇒ $V_h^k\ge V_h^\star$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Rearrange Step 24 + $Q^\star\le H$ + monotonicity of $\max_a$; hand-checked. Closes the induction.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 26
+**Location:** sections/04-elliptical.tex:19
+**Content (≤ 2 lines):** Trace bound: $\sum_i\phi_i^\top\Lambda_t^{-1}\phi_i=\mathrm{tr}(\Lambda_t^{-1}\sum_i\phi_i\phi_i^\top)$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** $u^\top Mu=\mathrm{tr}(Muu^\top)$ + trace cyclicity + linearity; hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 27
+**Location:** sections/04-elliptical.tex:19
+**Content (≤ 2 lines):** $=\sum_{j=1}^d\sigma_j/(\sigma_j+\lambda)\le d$ via eigendecomposition.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Each summand $\le1$; hand-checked. Matches digest elliptical-potential.md (D.1) and cite-jin2020provably (Lemma D.1).
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 28
+**Location:** sections/04-elliptical.tex:52
+**Content (≤ 2 lines):** $\phi_j^\top\Lambda_{j-1}^{-1}\phi_j\le\lambda_{\min}(\Lambda_0)^{-1}\|\phi_j\|^2\le1$ (Rayleigh + $\lambda_{\min}\ge1$, $\|\phi\|\le1$).
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Rayleigh quotient bound; hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 29
+**Location:** sections/04-elliptical.tex:63
+**Content (≤ 2 lines):** $\sum_j\phi_j^\top\Lambda_{j-1}^{-1}\phi_j\le\sum_j 2\log(1+\phi_j^\top\Lambda_{j-1}^{-1}\phi_j)=2\sum_j\log\frac{\det\Lambda_j}{\det\Lambda_{j-1}}=2\log\frac{\det\Lambda_t}{\det\Lambda_0}$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** $x\le2\log(1+x)$ on $[0,1]$ (Step 28 gives $x\in[0,1]$) + matrix-determinant lemma + telescoping; hand-checked. Matches digest (D.2).
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 30
+**Location:** sections/04-elliptical.tex:63
+**Content (≤ 2 lines):** $2\log\frac{\det\Lambda_t}{\det\Lambda_0}\le 2d\log\frac{\lambda_{\max}(\Lambda_0)+t}{\lambda_{\min}(\Lambda_0)}$ (AM–GM: $\det\Lambda_t\le(\lambda_{\max}(\Lambda_0)+t)^d$).
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Trace $\le d\lambda_{\max}(\Lambda_0)+t$ ⇒ AM–GM on eigenvalues; $\det\Lambda_0\ge\lambda_{\min}^d$; hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 31
+**Location:** sections/04-elliptical.tex:101
+**Content (≤ 2 lines):** Self-normalized bound statement (lem:self-normalized) — external, cited.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Restatement of cite-abbasi2011improved (Theorem 1); cited via the `[\cite]` bracket form (R5 form 2). No re-derivation needed (external).
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 32
+**Location:** sections/05-main-theorem.tex:30
+**Content (≤ 2 lines):** Definitions $\delta_h^k=V_h^k(x_h^k)-V_h^{\pi^k}(x_h^k)$, $\zeta_{h+1}^k=\E[\delta_{h+1}^k|x_h^k,a_h^k]-\delta_{h+1}^k$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Definitions (no inference); matches cite-jin2020provably (Lemma B.6). Listed for completeness.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 33
+**Location:** sections/05-main-theorem.tex:38
+**Content (≤ 2 lines):** $\mathrm{Regret}(K)=\sum_k[V_1^\star-V_1^{\pi^k}]\le\sum_k[V_1^k-V_1^{\pi^k}]=\sum_k\delta_1^k$ via optimism.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** lem:optimism ($V_1^k\ge V_1^\star$, Step 25, 🟢) applied termwise; hypotheses (on $\mathcal E$) hold. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 34
+**Location:** sections/05-main-theorem.tex:51
+**Content (≤ 2 lines):** $\delta_h^k=Q_h^k(x_h^k,a_h^k)-Q_h^{\pi^k}(x_h^k,a_h^k)$ (greedy/optimal action identities).
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** $V_h^k=Q_h^k$ at greedy $a_h^k$; $V_h^{\pi^k}=Q_h^{\pi^k}$ at $\pi^k$-action; hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 35
+**Location:** sections/05-main-theorem.tex:51
+**Content (≤ 2 lines):** $\le P_h(V_{h+1}^k-V_{h+1}^{\pi^k})(x_h^k,a_h^k)+2\beta\|\phi_h^k\|_{(\Lambda_h^k)^{-1}}$ via Eq.(Q-def)+lem:recursion.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** $Q_h^k\le\langle\phi,w_h^k\rangle+\beta\|\phi\|_{(\Lambda)^{-1}}$ + recursion identity (Step 19, $|\Delta|\le\beta\|\phi\|$) gives factor $2\beta$. Matches cite-jin2020provably (Lemma B.6).
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 36
+**Location:** sections/05-main-theorem.tex:51
+**Content (≤ 2 lines):** $=\delta_{h+1}^k+\zeta_{h+1}^k+2\beta\|\phi_h^k\|_{(\Lambda_h^k)^{-1}}$ via $P_h(\cdot)=\E[\delta_{h+1}^k|\cdot]=\delta_{h+1}^k+\zeta_{h+1}^k$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Definition of $\zeta$ (Step 32); hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 37
+**Location:** sections/05-main-theorem.tex:65
+**Content (≤ 2 lines):** Unroll $h=1..H$ with $\delta_{H+1}^k=0$: $\delta_1^k\le\sum_h\zeta_{h+1}^k+2\beta\sum_h\|\phi_h^k\|_{(\Lambda_h^k)^{-1}}$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Telescoping the per-step recursion (Step 36); hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 38
+**Location:** sections/05-main-theorem.tex:72
+**Content (≤ 2 lines):** Sum over $k$: $\mathrm{Regret}(K)\le 2\beta\sum_{k,h}\|\phi_h^k\|_{(\Lambda_h^k)^{-1}}(=T_1+T_2)+\sum_{k,h}\zeta_{h+1}^k(=T_3)$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Combine Step 33 + Step 37; the three-term naming is bookkeeping. Hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 39
+**Location:** sections/05-main-theorem.tex:90
+**Content (≤ 2 lines):** $\{\zeta_{h+1}^k\}$ is a martingale-difference sequence with $|\zeta_{h+1}^k|\le2H$ ($T$ terms).
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** $V_{h+1}^k$ measurable before episode-$k$ transition (rem:filtration) ⇒ conditional mean zero; $0\le\delta\le H$ ⇒ $|\zeta|\le2H$. Matches azuma-hoeffding.md digest.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 40
+**Location:** sections/05-main-theorem.tex:90
+**Content (≤ 2 lines):** Azuma–Hoeffding: w.p. $1-\delta/2$, $T_3\le 2H\sqrt{2T\log(2/\delta)}\le4H\sqrt{T\iota}$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Named textbook inequality (Azuma–Hoeffding, $N=T$, $b=2H$); $\log(2/\delta)\le\iota$, $\sqrt2\le2$; hand-checked vs azuma-hoeffding.md.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 41
+**Location:** sections/05-main-theorem.tex:101
+**Content (≤ 2 lines):** $\sum_{k,h}\|\phi_h^k\|_{(\Lambda_h^k)^{-1}}=\sum_h\sum_k((\phi_h^k)^\top(\Lambda_h^k)^{-1}\phi_h^k)^{1/2}$ (reorder).
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Reordering finite double sum; trivial.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 42
+**Location:** sections/05-main-theorem.tex:101
+**Content (≤ 2 lines):** $\le\sum_h(K\sum_k(\phi_h^k)^\top(\Lambda_h^k)^{-1}\phi_h^k)^{1/2}$ by Cauchy–Schwarz $\sum_k a_k\le(K\sum_k a_k^2)^{1/2}$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Named textbook inequality (Cauchy–Schwarz / power-mean); hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 43
+**Location:** sections/05-main-theorem.tex:101
+**Content (≤ 2 lines):** $\le\sum_h(K\cdot2d\iota)^{1/2}=H\sqrt{2dK\iota}$ via elliptical potential $\sum_k(\phi_h^k)^\top(\Lambda_h^k)^{-1}\phi_h^k\le2d\log(1+K)\le2d\iota$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** \Cref{lem:elliptical} with $\Lambda_0=I$, $t=K$ (Steps 28–30, 🟢); previous-time structure $\Lambda_h^k$ (episodes $1..k-1$) matches the lemma. $\log(1+K)\le\iota$ since $\iota=\log(2dT/\delta)\ge\log(1+K)$.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 44
+**Location:** sections/05-main-theorem.tex:115
+**Content (≤ 2 lines):** $T_1+T_2=2\beta\sum_{k,h}\|\phi\|_{(\Lambda)^{-1}}\le2\beta H\sqrt{2dK\iota}=2C_\beta dH\sqrt\iota\cdot H\sqrt{2dK\iota}\le4C_\beta d^{3/2}H^2\sqrt K\iota$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Substitute Step 43 + $\beta=C_\beta dH\sqrt\iota$; collect $\sqrt2\le2$; hand-checked. (Numeric $C_\beta$ tracked at Step 13; exponents exact.)
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 45
+**Location:** sections/05-main-theorem.tex:130
+**Content (≤ 2 lines):** $H^2\sqrt K=\sqrt{H^3\cdot KH}=\sqrt{H^3 T}$ (since $T=KH$).
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Algebra: $H^2\sqrt K=\sqrt{H^4 K}=\sqrt{H^3\cdot HK}=\sqrt{H^3 T}$; hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 46
+**Location:** sections/05-main-theorem.tex:130
+**Content (≤ 2 lines):** $H\sqrt{T\iota}\le d^{3/2}\sqrt{H^3 T}\iota$ (since $d,H,\iota\ge1$), so $T_3$ is dominated by $T_1+T_2$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Monotonicity in $d,H,\iota\ge1$: $H\sqrt T\le H^{3/2}\sqrt T\le d^{3/2}H^{3/2}\sqrt T=d^{3/2}\sqrt{H^3T}$; hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 47
+**Location:** sections/05-main-theorem.tex:130
+**Content (≤ 2 lines):** $\mathrm{Regret}(K)\le4C_\beta d^{3/2}\sqrt{H^3T}\iota+4d^{3/2}\sqrt{H^3T}\iota\le C d^{3/2}\sqrt{H^3T}\iota$, $C=4C_\beta+4$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Substitute Steps 40, 44, 45, 46; collect constants; hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 48
+**Location:** sections/05-main-theorem.tex:140
+**Content (≤ 2 lines):** Union bound: $\Pr[\mathcal E\cap\mathcal E']\ge1-\delta/2-\delta/2=1-\delta$ ($\mathcal E$ from lem:concentration, $\mathcal E'$ Azuma).
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** $\Pr[\mathcal E^c]\le\delta/2$ (lem:concentration), $\Pr[(\mathcal E')^c]\le\delta/2$ (Step 40); union bound; hand-checked. Discharges the $1-\delta$ in the theorem (R17).
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 49
+**Location:** sections/05-main-theorem.tex:140
+**Content (≤ 2 lines):** Conclude $\mathrm{Regret}(K)=\Otil(d^{3/2}\sqrt{H^3 T})$ since $\iota=\log(2dT/\delta)$ is logarithmic.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** $\iota$ absorbed into $\Otil$; definitional. Matches cite-jin2020provably (Theorem 3.1, rate $\sqrt{d^3H^3T}$).
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 50
+**Location:** sections/01-preliminaries.tex:63
+**Content (≤ 2 lines):** Gram/weight/$Q$ definitions (Eqs. gram-def, weight-def, Q-def, V-def) — algorithm specification.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Matches cite-jin2020provably (Algorithm 1) verbatim: $\lambda=1$, $w=\Lambda^{-1}\sum\phi[r+\max_aQ_{h+1}]$, $Q=\min\{w^\top\phi+\beta(\phi^\top\Lambda^{-1}\phi)^{1/2},H\}$. Specification, not inference.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z

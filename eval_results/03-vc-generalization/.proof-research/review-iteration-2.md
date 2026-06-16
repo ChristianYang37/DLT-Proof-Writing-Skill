@@ -1,57 +1,126 @@
-# Review iteration 2 — VC generalization proof
+# Review iteration 2 — VC generalization bound
 
-## Reviewer output (iteration 2, after fixes from iteration 1)
+Proof under review: `\thm:vc-bound` (Uniform VC generalization bound) and its
+supporting lemmas, in `eval_results/03-vc-generalization/`.
 
-### Summary
-Same as iteration 1. The proof of the VC generalization bound via the standard symmetrization → Sauer-Shelah → Massart → McDiarmid pipeline. Iteration 1's revisions: (1) the Sauer-Shelah proof was rewritten using the clean induction on $(m, |\HH|)$ approach (replacing the shifting-operator argument); (2) the Step 4 absorption in the main proof was simplified; (3) the symmetrization Step 2 exchangeability was made explicit; (4) the Rademacher-complexity definition was corrected to include the absolute value.
+## Reviewer scores
+| Reviewer | Lens | Score | Blocking? |
+|---|---|---|---|
+| R1 | correctness: line-by-line | 7 | no |
+| R2 | correctness: assumptions/generality | 9 | no |
+| R3 | correctness: ML-significance | 9 | no |
+| R4 | math-taste | 8 | no |
+| R5 | derivation-integrity | 7 | no |
+| **mean** | | **8.00** | |
 
-### Strengths
-- The Sauer-Shelah proof now uses the clean Pascal-induction approach (BLM Ch. 13), which is simpler and more verifiable than the shifting operator.
-- The Step 2 randomization in symmetrization is now explicit about exchangeability.
-- Constants are tracked: $C_1 = 4$ in expectation, $C = 8$ in the dominant regime $n \ge ed$.
+## Accept decision
+mean = 8.00 is **not** strictly > 8, so the accept gate fails (`mean > 8` is
+strict). No unresolved REAL-blocking critical exists. Decision per orchestrator:
+**ITERATE** — apply minimum-change fixes to the REAL-nonblocking weaknesses.
 
-### Weaknesses
+## Merged + verified weaknesses
 
-#### Weakness 1 (severity: minor)
-**Claim:** The Step 4 absorption still acknowledges (in Case $d \le n < ed$) that the bound is "to be read as $\Phi(S) \le \min\{1, C\sqrt{\ldots}\}$ implicitly". This is the cleanest possible resolution given the user's headline form, but it does require the reader to accept the convention of `rem:headline-form`.
-**Evidence:** sections/06-proof-of-main.tex:84.
-**Severity:** minor (intentional design choice; the alternative is a statement-changing rewrite, which is out of scope).
+### Weakness #1 (severity: major, raised by 3/5)
+**Claim:** Symmetrization chain step (d) is displayed as an equality
+(`\overset{(d)}{=}`) but the accompanying prose at :55 explicitly invokes the
+triangle inequality to split the sum, which is a strict `\le`; so the printed
+relation overstates what the prose proves. (R1 major + R1 minor prose; R5-a
+major; R5-b major + minor.)
+**Location:** sections/03-symmetrization.tex:39 (and prose :55).
+**Verdict:** REAL-nonblocking.
+**Rebuttal / fix-plan:** Confirmed: from step (c) `E[sup|...|]`, the triangle
+split gives `E[sup|.'|]+E[sup|.|]=2E[sup|.|]`, a genuine `\le`. The lemma's
+overall conclusion `\le 2\Rad_n(\Lbar)` is unaffected. **Fixed**: changed
+`\overset{(d)}{=}` to `\overset{(d)}{\le}` (one token). Prose already correct.
 
-#### Weakness 2 (severity: minor)
-**Claim:** The Sauer-Shelah proof, while cleanly inducted, has a small subtlety: the claim "$|\HH| = |\HH_1| + |\HH_2|$" counts patterns with both extensions twice (once in $|\HH|$) and once (in $|\HH_1|$). The relation should be $|\HH| = |\HH_1| + |\HH_2|$ where $\HH_2$ are patterns with TWO extensions in $\HH$. Re-reading the text: it says "each pattern $h_0 \in \HH_1$ corresponds to either one $h \in \HH$ ... or both $h_0^{(0)}, h_0^{(1)} \in \HH$ (then $h_0 \in \HH_2$). So $|\HH| = |\HH_1| + |\HH_2|$, counting the 'double' extensions once for each." This is correct (patterns in $\HH_1$ contribute 1 each; patterns in $\HH_2$ contribute an additional 1 because they have BOTH extensions, so total contribution to $|\HH|$ is 2 = 1 (in $|\HH_1|$) + 1 (in $|\HH_2|$).
-**Evidence:** sections/04-sauer-shelah.tex:42-43.
-**Severity:** minor (relation is correct upon careful re-reading; the explanation is terse but accurate).
+### Weakness #2 (severity: minor, raised by 3/5)
+**Claim:** The confidence trace is stale relative to the iteration-2 .tex: trace
+Steps 18/20/21/22 assert `2\Rad_n(\Lcal)` and `C=3`, whereas the audited proof
+uses `2\Rad_n(\Lbar)` and `C=\sqrt{17}`; green tags do not attest to the lines
+actually present (verification-coverage gap, not a math error). (R1 minor; R3
+style; R5 minor.)
+**Location:** .proof-research/confidence-trace.md Steps 18, 20, 21, 22.
+**Verdict:** REAL-nonblocking.
+**Rebuttal / fix-plan:** Confirmed bookkeeping drift; the .tex is correct.
+**Fixed**: updated trace Steps 18/20 to `\Rad_n(\Lbar)` and
+`2(d\log(en/d)+\log 2)/n`; Steps 21/22 to the `(d)` inflation route and
+`C_0=\sqrt{17}`. Verification methods refreshed accordingly.
 
-### Questions for the author
+### Weakness #3 (severity: minor, raised by 1/5)
+**Claim:** Lemma 6 (Massart) is stated "Under \Cref{ass:vc}" (bundling
+`n>=d>=1`), but its first inequality needs no size constraint; only the second
+(Sauer--Shelah at `m=n>=d`) does, so the stated hypothesis is mildly stronger
+than the proof uses. (R2.)
+**Location:** sections/04-sauer-massart.tex:69-70.
+**Verdict:** INTENTIONAL.
+**Rebuttal:** Stating a lemma under the project's standing assumption is a
+benign, deliberate convention; the hypothesis is satisfied at every cite-site
+and the conclusion is correct. Splitting `ass:vc` into per-inequality
+preconditions is a restructuring the minimum-change principle forbids and the
+panel did not require. No fix.
 
-1. Do the choices for $\delta$ restriction (allowing $\delta \to 1$ in the headline) reflect the intended audience of the bound? If yes, the current `rem:headline-form` convention suffices.
+### Weakness #4 (severity: minor, raised by 1/5)
+**Claim:** The headline theorem advertises arbitrary input space / every
+distribution, but relies on the image-admissible-Suslin measurability convention
+stated only in Preliminaries, not surfaced in the theorem hypotheses. (R2.)
+**Location:** sections/01-preliminaries.tex:13-17.
+**Verdict:** INTENTIONAL.
+**Rebuttal:** The reviewer concedes it is "properly disclosed (so not a silent
+assumption)". It is the standard empirical-process measurability convention,
+declared once globally. Importing it into the theorem hypotheses would be a
+statement-level edit (forbidden without user approval) and is not warranted. No
+fix.
 
-### Verdict
-**accept-with-minor-revisions**
+### Weakness #5 (severity: minor, raised by 1/5)
+**Claim:** The result carries an extra `\sqrt{\log(n/d)}` factor, not the
+minimax-optimal `\sqrt{d/n}`. (R3.)
+**Location:** sections/05-main-theorem.tex:86.
+**Verdict:** INTENTIONAL.
+**Rebuttal:** Loose-by-design and explicitly disclosed in `rem:rate`: the
+optimal rate needs Dudley chaining, outside the advertised
+symmetrization/Sauer--Shelah/Massart pipeline. Matches the claimed contribution.
+No fix.
 
-Both remaining weaknesses are minor and INTENTIONAL design choices: Weakness 1 reflects the user's headline form as stated; Weakness 2 is a brief proof that reads correctly upon careful inspection. No further action required.
+### Weakness #6 (severity: minor, raised by 1/5)
+**Claim:** Two parallel notations (risk `R/\Rhat` vs operator `D\ell/\Dhat\ell`)
+force the reader to keep the `def:loss-class` dictionary live across sections.
+(R4.)
+**Location:** sections/01-preliminaries.tex:37.
+**Verdict:** INTENTIONAL.
+**Rebuttal:** The operator notation is what makes the symmetrization section
+clean; the one-line dictionary is deliberate and consistent. Collapsing one
+notation would restructure §3 — disallowed by minimum-change. No fix.
 
----
+### Weakness #7 (severity: minor, raised by 1/5)
+**Claim:** Step (d) takes a convoluted route (inflates `\log 2` into
+`d\log(en/d)`, `2\sqrt2\to4`, lands `C_0=\sqrt{17}`) where direct Cauchy--Schwarz
+gives the cleaner `C_0=3`. (R4.)
+**Location:** sections/05-main-theorem.tex:62.
+**Verdict:** INTENTIONAL.
+**Rebuttal:** The universal constant is explicitly non-optimized
+(`todo` user-decision at :25; `rem:rate`); its value is immaterial to the rate.
+The inflation gives a single clean `d\log(en/d)` complexity term in the headline.
+Rewriting to `C_0=3` is a taste-only change the gate does not require. No fix.
 
-## Author verification
+### Weakness #8 (severity: style, raised by 1/5)
+**Claim:** Macro `\sgn` is bound to `\sigma`, priming the reader for the signum
+function rather than a sign vector. (R4.)
+**Location:** macros.tex:80.
+**Verdict:** INTENTIONAL/PHANTOM.
+**Rebuttal:** `\sgn` for Rademacher signs is a defined, consistent shorthand
+rendering as `\sigma`; renaming a macro is forbidden by minimum-change and the
+reading is conventional. No fix.
 
-### Weakness #1
-**Verdict:** INTENTIONAL — the headline form is what the user specified; the convention remark is the cleanest resolution.
+## Verdict counts
+- REAL-blocking: 0
+- REAL-nonblocking: 2 (both fixed)
+- PHANTOM: 0 (W8 borderline INTENTIONAL/PHANTOM)
+- INTENTIONAL: 6
 
-### Weakness #2
-**Verdict:** PHANTOM — the relation $|\HH| = |\HH_1| + |\HH_2|$ is correct.
+## Fixes applied this iteration
+1. `sections/03-symmetrization.tex:39` — `\overset{(d)}{=}` → `\overset{(d)}{\le}`.
+2. `.proof-research/confidence-trace.md` Steps 18/20/21/22 — refreshed to
+   `\Rad_n(\Lbar)`, `2(d\log(en/d)+\log 2)/n`, and `C_0=\sqrt{17}`.
 
-### Decisions
-No fixes applied. Loop converges with `accept-with-minor-revisions`.
-
----
-
-## Convergence check
-- Iteration 1 weaknesses: 5 (4 actionable + 1 phantom)
-- Iteration 2 weaknesses: 2 (both INTENTIONAL/PHANTOM)
-- Overlap: ~0% (no overlap; iteration 1 weaknesses 1, 3, 4 all fully addressed; weakness 2 partially addressed via `rem:headline-form`; the residual is the same convention issue but classified as INTENTIONAL).
-- No structural complaints, so loop terminates at "no fixes applied" termination.
-
-**Termination reason:** no-fixes-applied (all iteration-2 weaknesses are INTENTIONAL or PHANTOM, none requires action).
-
-**Final verdict:** accept-with-minor-revisions.
+No theorem/lemma headline statement was changed. Post-fix lint (incl. R19) and
+LaTeX compile gates re-run clean.

@@ -1,22 +1,27 @@
 \documentclass[11pt]{article}
 
-\usepackage[margin=1in]{geometry}
-\input{macros.tex}
+\usepackage[letterpaper,margin=1in]{geometry}
+\linespread{1.0}
+\usepackage{url}
 
-\title{The Ellenberg--Gijswijt Cap-Set Upper Bound via Slice Rank}
+\input{macros}
+
+\title{The Ellenberg--Gijswijt cap-set bound via slice rank}
+\author{}
 \date{}
 
 \begin{document}
+
 \maketitle
 
 \input{sections/01-preliminaries}
-\input{sections/02-slice-rank-lower-bound}
-\input{sections/03-cap-set-diagonal}
-\input{sections/04-slice-rank-upper-bound}
-\input{sections/05-main-theorem}
-\input{sections/99-auxiliary}
+\input{sections/02-slice-rank}
+\input{sections/03-upper-bound}
+\input{sections/04-lower-bound}
+\input{sections/05-monomial-count}
+\input{sections/06-main-theorem}
 
-\bibliographystyle{alpha}
+\bibliographystyle{plain}
 \bibliography{refs}
 
 \end{document}

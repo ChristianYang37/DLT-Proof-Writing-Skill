@@ -1,26 +1,83 @@
 {
   "eval_id": 7,
   "eval_name": "frankl-union-closed-gilmer",
-  "version": "v1.1-out-of-DLT-probe",
-  "scope": "out-of-DLT generalization probe (extremal combinatorics via entropy)",
-  "graded_at": "2026-05-14T17:30:00+08:00",
-  "grader": "main-agent (hand-grade per agents/grader.md)",
+  "graded_at": "2026-06-09T13:00:00Z",
   "assertions": [
-    {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script", "passed": true, "evidence": "compile_ok: True, undef_refs/cites/errs all 0", "notes": ""},
-    {"text": "scripts/lint.py reports 0 errors (including 0 R5 violations)", "type": "script", "passed": true, "evidence": "0 errors, 0 warnings; manual R5 verification: 5 section files, every theorem/lemma followed by \\begin{proof} in same file. thm:main in 05-main-theorem.tex uses BOTH forms (citation in optional bracket [{\\cite[Theorem 2]{gilmer2022}}] AND immediate proof following)", "notes": "doubly-compliant R5"},
-    {"text": "proof uses Gilmer's entropy method", "type": "qualitative", "passed": true, "evidence": "runner-log: 'thm:entropy-gap reveals bits one at a time via data-processing + chain rule'; 'thm:main argues by contradiction'; section names: 02-elementary-entropy, 03-lemma-1, 04-theorem-entropy", "notes": "entropy method throughout"},
-    {"text": "the key step uses union-closure to bound H(X ∪ Y) ≤ H(X) explicitly", "type": "qualitative", "passed": true, "evidence": "Gilmer's central observation — union-closure forces X ∪ Y ∈ F so H(X ∪ Y) ≤ log|F| = H(X). thm:entropy-gap is the conditional-entropy formalization of this", "notes": "load-bearing step explicit"},
-    {"text": "entropy decomposition over the universe is shown — element-wise contributions in terms of p_i derived", "type": "qualitative", "passed": true, "evidence": "lem:gap is the key conditional-entropy gap; partition S = C_0 ⊔ C_1 at threshold p_c = 0.1; Markov gives Pr[C_0] ≥ 0.9; sum both-low and mixed blocks", "notes": "decomposition explicit, not asserted"},
-    {"text": "a specific universal constant c > 0 is proven (any ≥ 0.01 acceptable)", "type": "qualitative", "passed": true, "evidence": "thm:main states c = 0.01 explicitly; verified through the chain lem:hbin-low (factor 1.4) + lem:hbin-mixed + partition argument", "notes": "concrete constant, not asymptotic"},
-    {"text": "binary entropy h(p) used and the single-variable inequality proven (or cited correctly)", "type": "qualitative", "passed": true, "evidence": "lem:hbin-low: hbin(p+p'-pp') ≥ 1.4 · (hbin(p)+hbin(p'))/2 for p,p' ≤ 0.1; lem:hbin-mixed: hbin(p+p'-pp') ≥ (1-p)hbin(p') — both proved in 02-elementary-entropy.tex", "notes": "inequalities proven, not handwaved; one 🟡 in C.5 is the monotonicity of an auxiliary function (numerically verified, matches Gilmer's own treatment)"},
-    {"text": "no fabricated citations — every \\cite resolves in refs.bib", "type": "script", "passed": true, "evidence": "3 cite keys: gilmer2022, cover2006elements, frankl1995extremal — all in refs.bib; .proof-research/cite-gilmer2022.md + cover-thomas.md digests verify them", "notes": "citation digest discipline followed"},
-    {"text": "Phase C.5 confidence sweep ran", "type": "script", "passed": true, "evidence": ".proof-research/confidence-trace.md; 30 steps; final 🟢 29 / 🟡 1 / 🔴 0", "notes": "the single 🟡 is monotonicity of g(s)=hbin(0.9s)/hbin(0.5s) on (0,0.2] — numerically verified to 4+ decimal places, l'Hopital boundary argument given, derivative deferred (matches Gilmer's published treatment)"},
-    {"text": "Phase D review loop ran", "type": "script", "passed": true, "evidence": "review-iteration-1.md (4 weaknesses, 2 REAL-nonblocking fixed + 2 INTENTIONAL rebutted), review-iteration-2.md (2 weaknesses, both INTENTIONAL, accept-as-is)", "notes": "2 iter to accept-as-is"}
+    {
+      "text": "scripts/latexmk-wrapper.py reports compile_ok=true",
+      "type": "script",
+      "passed": true,
+      "evidence": "latexmk-wrapper.py main.tex --outdir .output => {\"compile_ok\": true, \"errors\": [], \"undef_refs\": [], \"undef_cites\": [], \"overfull_violations\": []}",
+      "notes": "Compiles cleanly; no undefined refs/cites, no overfull violations above threshold."
+    },
+    {
+      "text": "scripts/lint.py reports 0 errors (including 0 R5 violations — every theorem/lemma immediately followed by its proof in the same file)",
+      "type": "script",
+      "passed": true,
+      "evidence": "lint.py main.tex sections/*.tex --bib refs.bib => {\"n_errors\": 0, \"n_warnings\": 0, \"violations\": []}; rules_run includes R5.",
+      "notes": "0 errors; R5 in rules_run. Two annotated `% lint: ignore` (R19,R15) but final n_errors=0 regardless."
+    },
+    {
+      "text": "proof uses Gilmer's entropy method, not direct combinatorial or probabilistic arguments unrelated to entropy",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "06-main-theorem.tex:14 \"$\\Ent(A \\cup B) \\;\\ge\\; 1.26\\,\\Ent(A)$\"; 07-frankl-corollary.tex:34-44 max-entropy + union-closure contradiction. Entire decomposition (chain rule, data-processing, binary entropy).",
+      "notes": "Faithful reconstruction of Gilmer's information-theoretic argument (Thms 1-2, Lemmas 1-5)."
+    },
+    {
+      "text": "the key step uses union-closure to bound H(X \\cup Y) \\le H(X) explicitly (this is the load-bearing step)",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "07-frankl-corollary.tex:34-41 \"union-closure forces $A \\cup B \\in \\F$ ... \\Ent(A \\cup B) \\overset{(a)}{\\le} \\log|\\F| \\overset{(b)}{=} \\Ent(A)\" via max-entropy (fac:max-entropy).",
+      "notes": "Load-bearing step explicit and correctly justified via maximum-entropy on the F-support."
+    },
+    {
+      "text": "entropy decomposition over the universe is shown — element-wise contributions in terms of p_i := Pr[i ∈ X] are derived, not just asserted",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "06-main-theorem.tex:25-53 per-coordinate Eq.(per-coord) $\\Ent((A\\cup B)_i\\mid(A\\cup B)_{<i})\\ge1.26\\,\\Ent(A_i\\mid A_{<i})$ assembled by chain rule; 07-frankl-corollary.tex:27 $p_i\\coloneqq\\Pr[i\\in A]=|\\{A\\in\\F:i\\in A\\}|/|\\F|$.",
+      "notes": "Conditional per-coordinate decomposition fully derived (chain rule + coarsening + key lemma); p_i defined explicitly."
+    },
+    {
+      "text": "a specific universal constant c > 0 is proven (any value ≥ 0.01 is acceptable; later improvements to ≈0.38 by Cambie, Yu, et al. need not be reproduced)",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "07-frankl-corollary.tex:13-17 thm:gilmer-frankl \"at least a $c = 0.01$ fraction ... $\\ge 0.01\\,|\\F|$\", proven by contradiction.",
+      "notes": "Explicit c=0.01 proven; rem:constant correctly notes sharp 0.38 is follow-up, not reproduced."
+    },
+    {
+      "text": "the binary entropy function h(p) (or its analog) is used in the single-variable inequality, and the inequality is proven (or cited from a textbook with an exact theorem/lemma number, not handwaved)",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "03-single-variable-bounds.tex:16-52 lem:concavity-half $\\hb(p+p'-pp')\\ge1.4\\cdot\\frac{\\hb(p)+\\hb(p')}{2}$ and :54-75 lem:concavity-mix $\\hb(p+p'-pp')\\ge(1-p)\\hb(p')$, each with full proof via concavity.",
+      "notes": "Both single-var lemmas proven from concavity; g-min=1.45 step is prose 'direct calculation' but verified true (review W#2)."
+    },
+    {
+      "text": "no fabricated citations — every \\cite resolves in refs.bib (Gilmer 2022 should be cited correctly with arXiv id)",
+      "type": "script",
+      "passed": true,
+      "evidence": "Only \\cite{gilmer2022unionclosed}, \\cite{coverthomas2006}; both in refs.bib. gilmer2022unionclosed has eprint=2211.09055, archivePrefix=arXiv. lint R12/R13 clean.",
+      "notes": "Gilmer 2022 cited with correct arXiv id 2211.09055; no fabricated/unresolved cites."
+    },
+    {
+      "text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists",
+      "type": "script",
+      "passed": true,
+      "evidence": ".proof-research/confidence-trace.md present (13723 bytes); 31 steps, each with location, initial/current 🔴/🟡/🟢 tag, and verification method.",
+      "notes": "Full confidence trace: 25 🟢 / 6 🟡 / 0 🔴 with per-step methods."
+    },
+    {
+      "text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md exists",
+      "type": "script",
+      "passed": true,
+      "evidence": ".proof-research/review-iteration-1.md present; five reviewers R1-R5 with 0-10 scores (9,9,8,8,7), mean 8.20, 6 merged+verified weaknesses with verdicts.",
+      "notes": "Full five-reviewer panel; mean 8.20 > 8 strict gate; no blocking/critical weakness."
+    }
   ],
   "overall": {
     "passed_count": 10,
     "failed_count": 0,
     "not_verifiable_count": 0,
-    "summary": "Outstanding — out-of-DLT generalization probe succeeded. 5 section files, full R5 compliance. Gilmer's entropy argument reproduced cleanly: hbin inequalities (lem:hbin-low factor 1.4 + lem:hbin-mixed) feed into lem:gap which feeds thm:entropy-gap (the load-bearing union-closure inequality) which contradicts when all p_i < 0.1, yielding c = 0.01. Phase C.5 honestly flagged the one numerical-monotonicity step Gilmer himself defers; Phase D converged in 2 iterations. Citation digest for arxiv:2211.09055 (Gilmer 2022) verified before use — no fabricated bib entries. The skill applied its full workflow discipline to a paper-by-Gilmer-himself-recent result, with all the discipline (digests, confidence tags, peer review, citation honesty) working as designed."
+    "summary": "Strong, faithful reconstruction of Gilmer's entropy proof of the union-closed constant bound. All 10 assertions pass: compiles cleanly, lint 0 errors (R5 pairing satisfied), both citations resolve with correct arXiv id, and the C.5/Phase-D artifacts are complete (31-step trace, genuine five-reviewer panel, mean 8.20). The math is correct and well-decomposed: data-processing coarsening, two proven binary-entropy concavity lemmas, the region-split key lemma, chain-rule lift, and the union-closure/max-entropy contradiction yielding c=0.01. Honest about scope (sharp 0.38 cited not reproduced) and uses Gilmer's true Lemmas 2-3 over the prompt's heuristic placeholder, with a remark linking them. Minor blemishes, none assertion-relevant: the g-minimization is prose 'direct calculation' (verified correct), and two visible [TODO: user-decision] markers remain in the PDF body. Would survive a FOCS/combinatorics appendix review modulo the one-line g'(u)<0 note and TODO cleanup."
   }
 }

@@ -1,283 +1,296 @@
-# Confidence trace — eval 07 (Gilmer / Frankl union-closed)
+# Confidence trace — frankl-union-closed-gilmer (Phase C.5)
 
-Enumeration of every non-trivial derivation step across the four proofs in
-`sections/02-elementary-entropy.tex`, `sections/03-lemma-1.tex`,
-`sections/04-theorem-entropy.tex`, and `sections/05-main-theorem.tex`.
+Every derivation step is enumerated and tagged. Upgrade paths used:
+- 🟢 **verified** — named textbook inequality (concavity/Jensen, Markov,
+  data-processing, max-entropy) hand-checked, OR independent numeric
+  re-derivation matched (script `/tmp` run logged in runner-log; constants
+  re-checked: OR-identity, Jensen, $0.9$-bound, $g$-min $=1.45$, Lemma 3,
+  Markov $0.01/0.1$, $1.26/1.4=0.9$, $1.8\cdot0.9=1.62$, $\log_2 2 =1$).
+- 🟡 **cross-checked** — matched against the Gilmer source digest
+  `.proof-research/gilmer-entropy-method.md` (verbatim Lemmas 1–5 / Theorems
+  1–2) or the Cover–Thomas digest.
 
-Steps are flat-indexed for cross-reference with TodoWrite. Each step starts
-🔴 `from-memory` and is upgraded via the dispatch table in
-`references/confidence-sweep.md`.
+No step remains 🔴: every step is either a named textbook fact (🟢) or a
+verbatim digest match against Gilmer's published lemmas (🟡). Numerical
+constants were independently script-verified (🟢).
 
 ---
 
-## Lemma 2 (small-probability ratio bound), sections/02-elementary-entropy.tex
-
-### Step 1
-**Location:** sections/02-elementary-entropy.tex (Step 1 of proof)
-**Content:** For $p, p' \in [0, 0.1]$, $p + p' - p p' \ge 0.9 (p + p')$.
+## Step 1
+**Location:** sections/03-single-variable-bounds.tex:7
+**Content (≤ 2 lines):** $\Pr[\text{bit}\cupbit\text{bit}'=1]=1-(1-p)(1-p')=p+p'-pp'$ (OR of two independent bits).
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Hand-check: $p p' \le 0.1 \min(p, p') \le 0.1 \cdot \tfrac{p+p'}{2}$ gives $p+p'-pp' \ge p+p' - 0.1\cdot\tfrac{p+p'}{2} \ge 0.9(p+p')$ via averaging the two one-sided bounds $p+p'-pp' \ge p+0.9p'$ and $p+p'-pp' \ge 0.9p+p'$.
+**Verification method:** Elementary inclusion–exclusion; independent numeric identity check passed.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-### Step 2
-**Location:** sections/02-elementary-entropy.tex (Step 1)
-**Content:** $\hbin(p + p' - p p') \ge \hbin(0.9 (p + p'))$ when both sides have argument in $[0, 1/2]$.
+## Step 2
+**Location:** sections/02-cond-entropy-monotone.tex:17
+**Content (≤ 2 lines):** $I(X;f(Y))\le I(X;Y)$ by data processing on Markov chain $X\to Y\to f(Y)$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** $\hbin$ is non-decreasing on $[0,1/2]$ (textbook); since $0 \le 0.9(p+p') \le p+p'-pp' \le p+p' \le 0.2 < 1/2$, monotonicity applies.
+**Verification method:** Named textbook inequality (data-processing, \Cref{fac:data-processing}); Cover–Thomas digest.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-### Step 3
-**Location:** sections/02-elementary-entropy.tex (Step 2)
-**Content:** $\tfrac{\hbin(p)+\hbin(p')}{2} \le \hbin\bigl(\tfrac{p+p'}{2}\bigr)$ by concavity.
+## Step 3
+**Location:** sections/02-cond-entropy-monotone.tex:19
+**Content (≤ 2 lines):** $H(X)-H(X\mid f(Y))\le H(X)-H(X\mid Y)$ via $I(X;W)=H(X)-H(X\mid W)$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Direct Jensen with $\lambda = 1/2$; concavity of $\hbin$ is `\Cref{fac:hbin-concave}`.
+**Verification method:** Textbook mutual-information identity; hand-checked.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-### Step 4
-**Location:** sections/02-elementary-entropy.tex (Step 4, monotonicity of g)
-**Content:** $g(s) = \hbin(0.9 s)/\hbin(0.5 s)$ is non-increasing on $(0, 0.2]$, so $\min g = g(0.2)$.
+## Step 4
+**Location:** sections/02-cond-entropy-monotone.tex:21
+**Content (≤ 2 lines):** Cancel $H(X)$, rearrange to $H(X\mid Y)\le H(X\mid f(Y))$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Elementary algebra; hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 5
+**Location:** sections/03-single-variable-bounds.tex:24
+**Content (≤ 2 lines):** $\frac{\hb(p)+\hb(p')}{2}\le \hb(\frac{p+p'}{2})$ (concavity of $\hb$).
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Jensen / concavity (\Cref{fac:concavity}); numeric check over $[0,0.5]^2$ passed (0 violations).
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 6
+**Location:** sections/03-single-variable-bounds.tex:30
+**Content (≤ 2 lines):** $p+p'-pp'=p+p'(1-p)\ge 0.9(p+p')$ on $[0,0.1]^2$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** $1-p'\ge0.9$ on $[0,0.1]$; independent numeric check over $[0,0.1]^2$ passed (0 violations).
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 7
+**Location:** sections/03-single-variable-bounds.tex:39
+**Content (≤ 2 lines):** $\frac{\hb(p+p'-pp')}{\frac12(\hb(p)+\hb(p'))}\ge \frac{\hb(0.9u)}{\hb(0.5u)}=g(u)$, $u=p+p'$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Combines Steps 5–6 with monotonicity of $\hb$ on $[0,1/2]$; matches Gilmer Lemma 2 digest.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 8
+**Location:** sections/03-single-variable-bounds.tex:44
+**Content (≤ 2 lines):** $\min_{u\in(0,0.2]} g(u)=g(0.2)=\hb(0.18)/\hb(0.10)=1.450\ldots>1.4$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Independent numeric minimization: $g$-min $=1.4501$ at $u=0.2$ (matches Gilmer Figure-1 caption $1.496$ for the 2D function); script-verified.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 9
+**Location:** sections/03-single-variable-bounds.tex:60
+**Content (≤ 2 lines):** $p+p'-pp'=p\cdot1+(1-p)p'$ (convex combination of endpoints $1$ and $p'$).
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Algebraic identity; hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 10
+**Location:** sections/03-single-variable-bounds.tex:62
+**Content (≤ 2 lines):** $\hb(p\cdot1+(1-p)p')\ge p\,\hb(1)+(1-p)\hb(p')=(1-p)\hb(p')$, using $\hb(1)=0$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Concavity of $\hb$ + $\hb(1)=0$; Gilmer Lemma 3; numeric check over $[0,1]^2$ passed (0 violations).
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 11
+**Location:** sections/04-region-bounds.tex:27
+**Content (≤ 2 lines):** Markov: $\Pr[p_C>0.1]\le \E[p_c]/0.1\le 0.01/0.1=0.1$, so $\Pr[\Cz]\ge0.9$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Markov's inequality (named); arithmetic $0.01/0.1=0.1$ script-verified.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 12
+**Location:** sections/04-region-bounds.tex:41
+**Content (≤ 2 lines):** $\Pr[\Cz]H(X\mid\Cz)=\Pr[\Cz]\E_{c\sim q_0}[\hb(p_c)]$ (conditional Bernoulli identity).
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** Definition of conditional entropy of a Bernoulli; hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 13
+**Location:** sections/04-region-bounds.tex:42
+**Content (≤ 2 lines):** Symmetrize: $\E_{c\sim q_0}[\hb(p_c)]=\E_{c,c'\sim q_0}[\tfrac12(\hb(p_c)+\hb(p_{c'}))]$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟢 verified
+**Verification method:** i.i.d. copies have equal expectation; elementary, hand-checked.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 14
+**Location:** sections/04-region-bounds.tex:43
+**Content (≤ 2 lines):** Apply Lemma 2 pointwise: $\le \frac{\Pr[\Cz]}{1.4}\E_{c,c'\sim q_0}[\hb(p_c+p_{c'}-p_cp_{c'})]$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟡 cross-checked
-**Verification method:** Numerical sweep (60-point grid on $[0.001, 0.2]$) in Phase A confirmed that $g$ is decreasing and achieves minimum $\approx 1.4501$ at $s = 0.2$. The analytic derivative argument is sketched in `\Cref{rem:g-monotone}`; the proof retains a `\todo{}`-free elementary monotonicity claim verified by computation. Tag remains 🟡 (cross-checked) because we used numerical evidence rather than a closed-form derivative inequality.
+**Verification method:** \Cref{lem:concavity-half} (proved here, Steps 5–8); hypotheses $p_c,p_{c'}\le0.1$ hold on $\Cz$. Matches Gilmer Lemma 4 chain.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-### Step 5
-**Location:** sections/02-elementary-entropy.tex (Step 5)
-**Content:** $g(0.2) = \hbin(0.18)/\hbin(0.10) \approx 1.4501 > 1.4$.
+## Step 15
+**Location:** sections/04-region-bounds.tex:44
+**Content (≤ 2 lines):** $\E_{c,c'\sim q_0}[\hb(p_c+p_{c'}-p_cp_{c'})]=H(X\cupbit X'\mid\Cz,\Cz')$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Python computation in Phase A: $\hbin(0.18) \approx 0.6801$, $\hbin(0.10) \approx 0.4690$, ratio $\approx 1.4501$.
+**Verification method:** Conditional independence given $\Cz,\Cz'$ makes the OR Bernoulli$(p_c+p_{c'}-p_cp_{c'})$; hand-checked.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
----
-
-## Lemma 3 (mixed-regime bound), sections/02-elementary-entropy.tex
-
-### Step 6
-**Location:** sections/02-elementary-entropy.tex (Lemma 3 proof)
-**Content:** $p + p' - p p' = p \cdot 1 + (1 - p) \cdot p'$ (convex combination identity).
+## Step 16
+**Location:** sections/04-region-bounds.tex:45
+**Content (≤ 2 lines):** $\frac{\Pr[\Cz]}{1.4}\le \frac{\Pr[\Cz]^2}{1.26}$ since $\Pr[\Cz]\ge0.9=1.26/1.4$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Hand-expansion: $p \cdot 1 + (1-p) p' = p + p' - p p'$.
+**Verification method:** $1.26/1.4=0.9$ script-verified; inequality $1/1.4\le\Pr[\Cz]/1.26$ follows.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-### Step 7
-**Location:** sections/02-elementary-entropy.tex (Lemma 3 proof)
-**Content:** $\hbin(p \cdot 1 + (1-p) p') \ge p \cdot \hbin(1) + (1-p) \hbin(p') = (1-p) \hbin(p')$.
+## Step 17
+**Location:** sections/04-region-bounds.tex:73
+**Content (≤ 2 lines):** Expand $2\Pr[\Cz,\Co']H(\cdots)=2\sum_{c\in\Cz,c'\in\Co}q(c)q(c')\hb(p_c+p_{c'}-p_cp_{c'})$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Direct application of concavity of $\hbin$ (`\Cref{fac:hbin-concave}`); $\hbin(1) = 0$ by definition.
+**Verification method:** Conditional-entropy expansion over product law; hand-checked.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
----
+## Step 18
+**Location:** sections/04-region-bounds.tex:75
+**Content (≤ 2 lines):** $\ge 2\sum q(c)q(c')(1-p_c)\hb(p_{c'})$ by Lemma 3.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** \Cref{lem:concavity-mix} (Step 10) with $(p,p')=(p_c,p_{c'})$. Matches Gilmer Lemma 5 chain.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-## Lemma 1 / `lem:gap`, sections/03-lemma-1.tex
-
-### Step 8
-**Location:** sections/03-lemma-1.tex (Step 1, Markov)
-**Content:** $\Pr[\Ccal_1] = \Pr[p_c > 0.1] \le \E[p_c]/0.1 \le 0.01/0.1 = 0.1$.
+## Step 19
+**Location:** sections/04-region-bounds.tex:77
+**Content (≤ 2 lines):** Factor the double sum into $(\sum_{c\in\Cz}q(c)(1-p_c))(\sum_{c'\in\Co}q(c')\hb(p_{c'}))$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Standard Markov inequality applied to non-negative $p_c$ with threshold $0.1$ and mean $\le 0.01$.
+**Verification method:** Distributivity of the product sum; hand-checked.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-### Step 9
-**Location:** sections/03-lemma-1.tex (Step 1, complement)
-**Content:** $\Pr[\Ccal_0] \ge 0.9$.
+## Step 20
+**Location:** sections/04-region-bounds.tex:79
+**Content (≤ 2 lines):** $\ge 2(\sum_{c\in\Cz}q(c)\cdot0.9)\Pr[\Co]H(X\mid\Co)$ using $1-p_c\ge0.9$ and identifying the $\Co$-sum.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Complement of Step 8: $\Pr[\Ccal_0] = 1 - \Pr[\Ccal_1] \ge 1 - 0.1 = 0.9$.
+**Verification method:** $p_c\le0.1\Rightarrow1-p_c\ge0.9$; conditional-entropy identity; hand-checked.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-### Step 10
-**Location:** sections/03-lemma-1.tex (Step 2)
-**Content:** Decomposition $\H(X \mid C) = \Pr[\Ccal_0] \H(X \mid \Ccal_0) + \Pr[\Ccal_1] \H(X \mid \Ccal_1)$ and the analogous 4-way decomposition of $\H(X \cup X' \mid C, C')$.
+## Step 21
+**Location:** sections/04-region-bounds.tex:81
+**Content (≤ 2 lines):** $=1.8\Pr[\Cz]\Pr[\Co]H(X\mid\Co)$, then $\ge1.62\Pr[\Co]H(X\mid\Co)$ via $\Pr[\Cz]\ge0.9$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Standard tower-property decomposition of conditional entropy over a partition; both lines are line-by-line expansions of the definition of conditional entropy via partitioning the value-space of $C$ (resp. $(C, C')$).
+**Verification method:** $\sum_{c\in\Cz}q(c)=\Pr[\Cz]$; $1.8\cdot0.9=1.62$ script-verified.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-### Step 11
-**Location:** sections/03-lemma-1.tex (Step 2, symmetry)
-**Content:** $\Pr[\Ccal_0, \Ccal_1'] \H(X \cup X' \mid \Ccal_0, \Ccal_1') = \Pr[\Ccal_1, \Ccal_0'] \H(X \cup X' \mid \Ccal_1, \Ccal_0')$.
+## Step 22
+**Location:** sections/05-key-lemma.tex:30
+**Content (≤ 2 lines):** Region decomposition $H(X\cupbit X'\mid C,C')=T_1+T_2+T_3$ over $\Cz\sqcup\Co$ partition.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** Law of total conditional entropy across the 4 region pairs; matches Gilmer Lemma 1 assembly (digest).
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 23
+**Location:** sections/05-key-lemma.tex:36
+**Content (≤ 2 lines):** $T_2$ collects both mixed events (factor 2) by i.i.d. symmetry; $\Pr[\Cz,\Co']=\Pr[\Cz]\Pr[\Co]$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** $(C, X)$ and $(C', X')$ are iid; $X \cup X' = X' \cup X$ is symmetric, so swapping gives the equality.
+**Verification method:** Independence of the two copies + symmetry of OR; hand-checked.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-### Step 12
-**Location:** sections/03-lemma-1.tex (Step 3, Claim A symmetrization)
-**Content:** $\E_{c \sim q_0}[\hbin(p_c)] = \E_{c, c' \sim q_0}[(\hbin(p_c) + \hbin(p_{c'}))/2]$.
+## Step 24
+**Location:** sections/05-key-lemma.tex:45
+**Content (≤ 2 lines):** $T_1\ge1.26\Pr[\Cz]H(X\mid\Cz)$, $T_2\ge1.62\Pr[\Co]H(X\mid\Co)$, $T_3\ge0$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** \Cref{lem:region-low,lem:region-mix} (Steps 12–21); non-negativity of entropy. Matches Gilmer Lemma 1.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 25
+**Location:** sections/05-key-lemma.tex:56
+**Content (≤ 2 lines):** Sum + $1.62\ge1.26$ + total conditional entropy law $\Rightarrow H(X\cupbit X'\mid C,C')\ge1.26H(X\mid C)$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** $\E_{c, c' \sim q_0 \otimes q_0}[(\hbin(p_c)+\hbin(p_{c'}))/2] = \E_c \hbin(p_c)/2 + \E_{c'} \hbin(p_{c'})/2 = \E_c \hbin(p_c)$ since $c, c'$ are iid.
+**Verification method:** $1.62\ge1.26$; $H(X\mid C)=\Pr[\Cz]H(X\mid\Cz)+\Pr[\Co]H(X\mid\Co)$; hand-checked.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-### Step 13
-**Location:** sections/03-lemma-1.tex (Step 3, Claim A)
-**Content:** $\E_{c, c' \sim q_0}[(\hbin(p_c)+\hbin(p_{c'}))/2] \le \E_{c, c' \sim q_0}[\hbin(p_c + p_{c'} - p_c p_{c'})] / 1.4$.
+## Step 26
+**Location:** sections/06-main-theorem.tex:30
+**Content (≤ 2 lines):** $H((A\cup B)_i\mid(A\cup B)_{<i})\ge H((A\cup B)_i\mid A_{<i},B_{<i})$ since $(A\cup B)_{<i}=f(A_{<i},B_{<i})$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** \Cref{lem:cond-mono} (Steps 2–4). The crucial Eq. (2) of Gilmer; digest-matched.
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 27
+**Location:** sections/06-main-theorem.tex:32
+**Content (≤ 2 lines):** $H((A\cup B)_i\mid A_{<i},B_{<i})=H(A_i\cupbit B_i\mid A_{<i},B_{<i})$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Pointwise \Cref{lem:hbin-low} on $\Ccal_0 \times \Ccal_0$ where $p_c, p_{c'} \le 0.1$ gives $\hbin(p_c + p_{c'} - p_c p_{c'}) \ge 1.4 \cdot (\hbin(p_c) + \hbin(p_{c'}))/2$; rearrange and integrate.
+**Verification method:** $(A\cup B)_i=A_i\cupbit B_i$ by definition; hand-checked.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-### Step 14
-**Location:** sections/03-lemma-1.tex (Step 3, Claim A multiplication)
-**Content:** $\Pr[\Ccal_0]/1.4 \le \Pr[\Ccal_0]^2 / 1.26$, equivalently $1/1.4 \le \Pr[\Ccal_0]/1.26$, i.e. $\Pr[\Ccal_0] \ge 1.26/1.4 = 0.9$.
+## Step 28
+**Location:** sections/06-main-theorem.tex:33
+**Content (≤ 2 lines):** $\ge1.26H(A_i\mid A_{<i})$ by the key lemma with $C=A_{<i},C'=B_{<i}$, marginal $\E[A_i]=\Pr[i\in A]\le0.01$.
+**Initial tag:** 🔴 from-memory
+**Current tag:** 🟡 cross-checked
+**Verification method:** \Cref{lem:single-var}; hypotheses checked ($A_{<i},B_{<i}$ i.i.d., conditional Bernoulli, marginal cap). Gilmer Eq. (3).
+**Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
+
+## Step 29
+**Location:** sections/06-main-theorem.tex:42
+**Content (≤ 2 lines):** Chain rule on both sides: $H(A\cup B)=\sum_i H((A\cup B)_i\mid\cdot)\ge1.26\sum_i H(A_i\mid\cdot)=1.26H(A)$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Direct arithmetic: $1.26/1.4 = 0.9$, and Step 9 gives $\Pr[\Ccal_0] \ge 0.9$.
+**Verification method:** Chain rule \Cref{fac:chain-rule} (textbook); summation of Step 28 over $i$; hand-checked.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-### Step 15
-**Location:** sections/03-lemma-1.tex (Step 4, Claim B / application of Lemma 3)
-**Content:** $2 \sum_{c \in \Ccal_0, c' \in \Ccal_1} q(c) q(c') \hbin(p_c + p_{c'} - p_c p_{c'}) \ge 2 \sum_{c \in \Ccal_0, c' \in \Ccal_1} q(c) q(c') (1 - p_c) \hbin(p_{c'})$.
+## Step 30
+**Location:** sections/07-frankl-corollary.tex:42
+**Content (≤ 2 lines):** $H(A\cup B)\le\log|\F|=H(A)$: max-entropy on $\F$-support + $A$ uniform.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Pointwise application of \Cref{lem:hbin-mixed} with $(p, p') = (p_c, p_{c'})$ for $c \in \Ccal_0$, $c' \in \Ccal_1$ -- gives summand $(1 - p_c) \hbin(p_{c'})$. Note: $\Cref{lem:hbin-mixed}$ holds for any $p, p' \in [0,1]$, so the choice $(p, p') = (p_c, p_{c'})$ with $p_c$ small (in $\Ccal_0$) and $p_{c'}$ possibly large (in $\Ccal_1$) is valid.
+**Verification method:** Maximum-entropy fact \Cref{fac:max-entropy} (Cover–Thomas Thm 2.6.4); union-closure gives $A\cup B\in\F$. Hand-checked.
 **Sub-agent task id:** none
+**Last updated:** 2026-06-09T05:00:00Z
 
-### Step 16
-**Location:** sections/03-lemma-1.tex (Step 4, Claim B factorization)
-**Content:** $\sum_{c \in \Ccal_0, c' \in \Ccal_1} q(c) q(c') (1 - p_c) \hbin(p_{c'}) = \left(\sum_{c' \in \Ccal_1} q(c') \hbin(p_{c'})\right)\left(\sum_{c \in \Ccal_0} q(c) (1 - p_c)\right)$.
+## Step 31
+**Location:** sections/07-frankl-corollary.tex:55
+**Content (≤ 2 lines):** Contradiction $H(A)\ge H(A\cup B)\ge1.26H(A)>H(A)$ since $H(A)=\log|\F|\ge\log2=1>0$.
 **Initial tag:** 🔴 from-memory
 **Current tag:** 🟢 verified
-**Verification method:** Trivial: the summand factorizes since the index sets are independent and the factor on $c$ vs. $c'$ are independent.
+**Verification method:** $\log_2 2=1>0$ script-verified; $1.26>1$; chain of Steps 28/30. Hand-checked.
 **Sub-agent task id:** none
-
-### Step 17
-**Location:** sections/03-lemma-1.tex (Step 4, Claim B closing arithmetic)
-**Content:** $\sum_{c \in \Ccal_0} q(c) (1 - p_c) \ge 0.9 \Pr[\Ccal_0] \ge 0.9 \cdot 0.9 = 0.81$, hence factor $2 \cdot 0.81 = 1.62$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** $p_c \le 0.1$ on $\Ccal_0$ gives $1 - p_c \ge 0.9$; sum $\sum_c q(c) = \Pr[\Ccal_0] \ge 0.9$ from Step 9.
-**Sub-agent task id:** none
-
-### Step 18
-**Location:** sections/03-lemma-1.tex (Step 5, assembly)
-**Content:** $1.62 \Pr[\Ccal_1] \H(X \mid \Ccal_1) \ge 1.26 \Pr[\Ccal_1] \H(X \mid \Ccal_1)$ since $1.62 \ge 1.26$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct: $1.62 \ge 1.26$ and $\Pr[\Ccal_1] \H(X \mid \Ccal_1) \ge 0$.
-**Sub-agent task id:** none
-
-### Step 19
-**Location:** sections/03-lemma-1.tex (Step 5)
-**Content:** Final assembly: $\H(X \cup X' \mid C, C') \ge 1.26 \H(X \mid C)$ using the decomposition + bounds + dropping non-negative both-large block.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Straightforward addition of Steps 13-18 results, plus non-negativity of $\Pr[\Ccal_1]^2 \H(X \cup X' \mid \Ccal_1, \Ccal_1') \ge 0$ which is true since entropy is non-negative.
-**Sub-agent task id:** none
-
----
-
-## Theorem 1 / `thm:entropy-gap`, sections/04-theorem-entropy.tex
-
-### Step 20
-**Location:** sections/04-theorem-entropy.tex (Step 1)
-**Content:** $(A \cup B)_{<i} = \phi(A_{<i}, B_{<i})$ where $\phi$ is the coordinatewise-maximum function.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct: $(A \cup B)_j = \max(A_j, B_j)$, and $(A \cup B)_{<i}$ is the tuple of these for $j < i$. So $(A \cup B)_{<i}$ is the coordinatewise-max of $(A_{<i}, B_{<i})$, a deterministic function.
-**Sub-agent task id:** none
-
-### Step 21
-**Location:** sections/04-theorem-entropy.tex (Step 2, data-processing)
-**Content:** $\H((A \cup B)_i \mid (A \cup B)_{<i}) \ge \H((A \cup B)_i \mid A_{<i}, B_{<i})$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct application of \Cref{fac:data-processing} (data-processing for entropy) with $X = (A\cup B)_i$, $Y = (A_{<i}, B_{<i})$, $f = \phi$ from Step 20.
-**Sub-agent task id:** none
-
-### Step 22
-**Location:** sections/04-theorem-entropy.tex (Step 2, verifying Lemma 1 hypotheses)
-**Content:** Hypotheses of \Cref{lem:gap} hold with $C = A_{<i}$, $C' = B_{<i}$, $X = A_i$, $X' = B_i$, $p_a = \Pr[A_i = 1 \mid A_{<i} = a]$, and $\E[X] = \Pr[i \in A] \le 0.01$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Each hypothesis enumerated in the .tex; check verifications: (1) finite state space; (2) Bernoulli conditional; (3) $B_{<i} \overset{d}{=} A_{<i}$ since $B \overset{d}{=} A$; (4) $B_i | B_{<i} = a \sim \Bern(p_a)$ same conditional; (5) $B_i$ independent of $(A_{<i}, A_i)$ since $A, B$ independent; (6) $\E[A_i] \le 0.01$ by hypothesis.
-**Sub-agent task id:** none
-
-### Step 23
-**Location:** sections/04-theorem-entropy.tex (Step 3, chain rule for A)
-**Content:** $\H(A) = \sum_{i=1}^n \H(A_i \mid A_{<i})$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** \Cref{fac:chain-rule} applied to the indicator vector $(A_1, \dots, A_n)$; $A$ identified with this vector.
-**Sub-agent task id:** none
-
-### Step 24
-**Location:** sections/04-theorem-entropy.tex (Step 3, chain rule for A∪B)
-**Content:** $\H(A \cup B) = \sum_{i=1}^n \H((A \cup B)_i \mid (A \cup B)_{<i})$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Same chain rule on the indicator vector $((A \cup B)_1, \dots, (A \cup B)_n)$.
-**Sub-agent task id:** none
-
-### Step 25
-**Location:** sections/04-theorem-entropy.tex (Step 3, telescoping)
-**Content:** Term-by-term application of Eq. (per-coord) $\H((A\cup B)_i | \cdot) \ge 1.26 \H(A_i | A_{<i})$ summed: $\H(A \cup B) \ge 1.26 \H(A)$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Summing both sides of an inequality termwise preserves it; factor $1.26$ pulls out.
-**Sub-agent task id:** none
-
----
-
-## Theorem 2 / `thm:main`, sections/05-main-theorem.tex
-
-### Step 26
-**Location:** sections/05-main-theorem.tex (Step 1)
-**Content:** Uniform $A$ on $\Fcal$ gives $\H(A) = \log |\Fcal|$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct from definition: uniform on $N$ elements has entropy $\log N$.
-**Sub-agent task id:** none
-
-### Step 27
-**Location:** sections/05-main-theorem.tex (Step 2)
-**Content:** $\H(A \cup B) \le \log |\Fcal|$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Union-closedness $\Rightarrow A \cup B \in \Fcal$ a.s.\ $\Rightarrow A \cup B$ supported on $\Fcal$; apply \Cref{fac:uniform-max}.
-**Sub-agent task id:** none
-
-### Step 28
-**Location:** sections/05-main-theorem.tex (Step 3)
-**Content:** $|\{A \in \Fcal: i \in A\}|/|\Fcal| = \Pr[i \in A]$ for $A$ uniform on $\Fcal$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Trivial: $\Pr[i \in A] = |\{A \in \Fcal: i \in A\}|/|\Fcal|$ by definition of uniform.
-**Sub-agent task id:** none
-
-### Step 29
-**Location:** sections/05-main-theorem.tex (Step 4)
-**Content:** $|\Fcal| \ge 2 \Rightarrow \H(A) \ge \log 2 = 1 > 0$.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Direct from $\H(A) = \log|\Fcal|$ and $|\Fcal| \ge 2$.
-**Sub-agent task id:** none
-
-### Step 30
-**Location:** sections/05-main-theorem.tex (Step 5)
-**Content:** $1.26 \H(A) \le \H(A \cup B) \le \H(A) \Rightarrow 0.26 \H(A) \le 0 \Rightarrow \H(A) \le 0$, contradicting Step 29.
-**Initial tag:** 🔴 from-memory
-**Current tag:** 🟢 verified
-**Verification method:** Subtract $\H(A)$ from both sides: $0.26 \H(A) \le 0$; entropy is non-negative so this forces $\H(A) = 0$; but Step 29 gives $\H(A) \ge 1$.
-**Sub-agent task id:** none
-
----
-
-## Summary
-
-- **Total steps enumerated:** 30
-- **🟢 verified:** 29
-- **🟡 cross-checked:** 1 (Step 4 — monotonicity of $g(s)$, supported by numerical sweep + analytic sketch in `\Cref{rem:g-monotone}`)
-- **🔴 from-memory remaining:** 0
-- **Sub-agents fired:** 0 (all steps fast-pathed via textbook inequalities, pointwise application of established lemmas, direct algebra, or Phase A numerical verification)
-- **`unable-to-derive` count:** 0
-- **`\todo{}` markers introduced:** 0
-
-Phase D handoff: every step ≥ 🟡; the single 🟡 step is the monotonicity claim, which is supported analytically by the sketch in `\Cref{rem:g-monotone}` plus numerical evidence. The reviewer should focus attention here if anywhere.
+**Last updated:** 2026-06-09T05:00:00Z

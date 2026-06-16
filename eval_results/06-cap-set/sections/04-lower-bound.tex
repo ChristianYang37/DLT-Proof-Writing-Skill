@@ -1,0 +1,55 @@
+\section{Lower bound on the slice rank}\label{sec:lower}
+
+We use the cap-set hypothesis to show that restricting $T$ to $A^3$ produces a
+diagonal tensor of full size, whose slice rank we computed in
+\Cref{lem:slice-rank-def:diag}.
+
+\begin{lemma}[Lower bound]\label{lem:lower}
+Under \Cref{ass:capset}, the restriction of $T(x,y,z)=\one[x+y+z=0]$ to $A^3$ is the
+diagonal tensor
+\begin{align}\label{eq:T-diag}
+T|_{A^3}(x,y,z)\;=\;\one[x=y=z]\;=\;\sum_{a\in A}\one[x=y=z=a],
+\qquad x,y,z\in A,
+\end{align}
+and consequently $\sr\!\big(T|_{A^3}\big)=|A|$.
+\end{lemma}
+
+\begin{proof}
+We establish the diagonal identity Eq.~\eqref{eq:T-diag}, then read off the slice
+rank from \Cref{lem:slice-rank-def:diag}.
+
+\smallskip\noindent
+\textbf{Step 1: $T|_{A^3}$ is diagonal.}
+Fix $x,y,z\in A$. We claim the constraint collapses to the diagonal:
+\begin{align}\label{eq:iff}
+\bigl(\,x+y+z=0,\ \ x,y,z\in A\,\bigr)\quad\Longleftrightarrow\quad x=y=z.
+\end{align}
+Here ``$\Leftarrow$'' holds as $x=y=z=a\Rightarrow x+y+z=3a=0$ (since $3=0$ in
+$\F_3$), and ``$\Rightarrow$'' is precisely \Cref{ass:capset}. Hence
+\begin{align*}
+T|_{A^3}(x,y,z)
+\;\overset{(a)}{=}\;\one[x+y+z=0]
+\;\overset{(b)}{=}\;\one[x=y=z]
+\;\overset{(c)}{=}\;\sum_{a\in A}\one[x=y=z=a],
+\end{align*}
+where (a) is the definition of $T$, (b) is Eq.~\eqref{eq:iff}, and (c) expands the
+diagonal indicator over $a\in A$. This is Eq.~\eqref{eq:T-diag}, a diagonal tensor
+with all coefficients $c_a=1\ne 0$.
+
+\smallskip\noindent
+\textbf{Step 2: slice rank of the diagonal.}
+Eq.~\eqref{eq:T-diag} meets the hypotheses of \Cref{lem:slice-rank-def:diag} with
+$X=A$, $k=3$, and $c_a=1\ne 0$ for all $a\in A$, so
+\begin{align*}
+\sr\!\big(T|_{A^3}\big)\;=\;|A|.
+\end{align*}
+This completes the proof.
+\end{proof}
+
+\begin{remark}[The no-progression property is load-bearing]\label{rem:no-3ap-load}
+Without \Cref{ass:capset} the restricted tensor $T|_{A^3}$ would in general have
+off-diagonal entries (whenever $x+y+z=0$ with $x,y,z$ not all equal), and the clean
+identity Eq.~\eqref{eq:T-diag} would fail; the slice rank could then be far below $|A|$.
+The cap-set hypothesis is precisely what collapses $T|_{A^3}$ onto its diagonal and
+forces the lower bound $\sr(T|_{A^3})\ge|A|$.
+\end{remark}

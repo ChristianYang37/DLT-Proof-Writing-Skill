@@ -41,6 +41,9 @@ These are failure modes that human authors rarely commit but that AI-written pro
 - **Confident interpolation.** Bridging two steps with a fluent English sentence that hides a missing argument: *"By a standard argument, this implies ..."*; *"It is clear that ..."*; *"A straightforward calculation gives ..."*.
   **Defense:** if you wrote any of these phrases, the next step must in fact be straightforward — otherwise expand it. "Standard" and "clear" are red flags in your own draft.
 
+- **Prose-hidden derivation.** Performing an inferential step entirely in a sentence — *"by the definition of $\nabla L$, this equals $\ldots$"*, *"expanding the square gives $\ldots$"* — instead of showing it as a display row. Distinct from confident interpolation: the step may even be *correct*, but asserting it in prose makes it unauditable and is the prime surface for silent error. The agent's well-known tendency to "derive in words" is exactly this.
+  **Defense:** state every inferential step as an `align` / `equation` row with its justification (trailer / `\tag{}` / legend); prose is for *why*, not *what*. If a step is too trivial to display, fold it into the adjacent row's reason — never leave it free-standing. Lint **R19** fires when a proof's natural-language prose outweighs its display+inline math; the Phase-D derivation-integrity reviewer hunts the rest. See [templates.md](templates.md) §Derivation patterns (display-first).
+
 - **Plausible but wrong algebraic manipulation.** Mis-applying Cauchy-Schwarz, Jensen's inequality, or matrix-norm submultiplicativity in a direction that looks right but isn't.
   **Defense:** for any non-trivial algebraic step, write out the named inequality being used in the trailer/legend; if you cannot name a single one, the step is suspect.
 

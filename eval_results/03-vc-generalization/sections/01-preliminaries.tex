@@ -1,47 +1,109 @@
-\section{Preliminaries}\label{sec:preliminaries}
+\section{Preliminaries}\label{sec:prelim}
 
 \paragraph{Notation.}
-Throughout, $\XX$ is an arbitrary measurable input space, $\DD$ is a probability distribution on $\XX \times \{0,1\}$, and $\HH \subset \{0,1\}^{\XX}$ is a fixed hypothesis class of binary classifiers. We write $S = \{(x_i, y_i)\}_{i=1}^n \in (\XX \times \{0,1\})^n$ for an i.i.d.\ sample from $\DD$. For $h \in \HH$, define the \emph{population risk} and the \emph{empirical risk}
-\begin{align*}
-\Risk(h) \;:=\; \Pr_{(x,y) \sim \DD}\bigl[ h(x) \ne y \bigr],
-\qquad
-\eRisk_n(h) \;:=\; \frac{1}{n} \sum_{i=1}^{n} \1\bigl[ h(x_i) \ne y_i \bigr].
-\end{align*}
-We use $\eps_1, \ldots, \eps_n$ for i.i.d.\ Rademacher signs ($\Pr[\eps_i = +1] = \Pr[\eps_i = -1] = 1/2$), independent of $S$. Throughout, $c, C, C_1, C_2, \ldots$ denote universal positive constants whose values may change from line to line. We use $\log$ for the natural logarithm.
+Let $\Xcal$ be an arbitrary input space and let
+$\Hcal\subset\{0,1\}^{\Xcal}$ be a hypothesis class of binary classifiers.
+Examples are drawn from $\Zcal:=\Xcal\times\{0,1\}$ according to an unknown
+distribution $\Dcal$. We write $S=\{(x_i,y_i)\}_{i=1}^{n}\sim\Dcal^{n}$ for an
+i.i.d.\ sample. For a measurable $g:\Zcal\to[0,1]$ we use $\Dcal g:=\E_{(x,y)
+\sim\Dcal}[g(x,y)]$ for its population mean and $\widehat\Dcal_n g:=\frac1n
+\sum_{i=1}^{n} g(x_i,y_i)$ for its empirical mean on $S$.
+Throughout, $c,C,C_1,C_2,\dots$ denote universal positive constants whose
+values may change from line to line and depend on no problem parameter. We adopt
+the standard measurability convention of empirical-process theory: $\Hcal$ is
+assumed \emph{image-admissible Suslin} (equivalently, pointwise-separable), so
+that suprema such as $\sup_{h\in\Hcal}\abs{\Risk(h)-\Riskhat_n(h)}$ are
+measurable functions of $S$ and the concentration and symmetrization arguments
+below apply verbatim.
 
-\paragraph{VC dimension and the growth function.}
-For a finite set $A = \{a_1, \ldots, a_m\} \subset \XX$, the \emph{projection} of $\HH$ onto $A$ is
-\begin{align*}
-\HH\big|_{A} \;:=\; \bigl\{ (h(a_1), \ldots, h(a_m)) : h \in \HH \bigr\} \;\subset\; \{0,1\}^{m}.
-\end{align*}
+\begin{definition}[Population and empirical risk]\label{def:risk}
+For $h\in\Hcal$ the population and empirical (training) risks under the $0/1$
+loss are
+\begin{align}\label{eq:risk-def}
+\Risk(h)
+:=\Pr_{(x,y)\sim\Dcal}\bigl[h(x)\neq y\bigr]
+=\E_{(x,y)\sim\Dcal}\bigl[\1\{h(x)\neq y\}\bigr],
+\qquad
+\Riskhat_n(h):=\frac1n\sum_{i=1}^{n}\1\{h(x_i)\neq y_i\}.
+\end{align}
+\end{definition}
+
+\begin{definition}[$0/1$ loss class]\label{def:loss-class}
+The loss class associated with $\Hcal$ is
+\begin{align}\label{eq:loss-class}
+\Lcal:=\bigl\{\,\ell_h:(x,y)\mapsto\1\{h(x)\neq y\}\ \big|\ h\in\Hcal\,\bigr\}
+\subset\{0,1\}^{\Zcal}.
+\end{align}
+With this notation $\Risk(h)=\Dcal\ell_h$ and $\Riskhat_n(h)=\widehat\Dcal_n
+\ell_h$, so that
+$\sup_{h\in\Hcal}\abs{\Risk(h)-\Riskhat_n(h)}
+=\sup_{\ell\in\Lcal}\abs{\Dcal\ell-\widehat\Dcal_n\ell}$.
+\end{definition}
+
+\begin{definition}[Empirical Rademacher complexity]\label{def:rademacher}
+Let $\sgn_1,\dots,\sgn_m$ be i.i.d.\ Rademacher variables, i.e.\
+$\Pr[\sgn_i=+1]=\Pr[\sgn_i=-1]=\tfrac12$, independent of the data. For a class
+$\Gcal\subset\R^{\Zcal}$ and a sample $T=(z_1,\dots,z_m)$, the empirical and
+average Rademacher complexities are
+\begin{align}\label{eq:rad-def}
+\Radhat_T(\Gcal):=\E_{\sgn}\Bigl[\sup_{g\in\Gcal}\frac1m\sum_{i=1}^{m}
+   \sgn_i\,g(z_i)\Bigr],
+\qquad
+\Rad_m(\Gcal):=\E_{T\sim\Dcal^{m}}\bigl[\Radhat_T(\Gcal)\bigr].
+\end{align}
+\end{definition}
 
 \begin{definition}[Growth function]\label{def:growth}
-The \emph{growth function} of $\HH$ at sample size $m$ is
-\begin{align*}
-\growth_{\HH}(m) \;:=\; \max_{A \subset \XX,\, |A| = m} \bigl| \HH\big|_{A} \bigr|.
-\end{align*}
+The growth function (shatter coefficient) of $\Hcal$ at size $m$ is
+\begin{align}\label{eq:growth-def}
+\Growth_{\Hcal}(m):=\max_{x_1,\dots,x_m\in\Xcal}
+   \bigl|\bigl\{(h(x_1),\dots,h(x_m)):h\in\Hcal\bigr\}\bigr|.
+\end{align}
+A set $\{x_1,\dots,x_m\}$ is \emph{shattered} by $\Hcal$ if the maximum above
+equals $2^{m}$, i.e.\ all $2^{m}$ label patterns are realized. The
+Vapnik--Chervonenkis dimension $\VC(\Hcal)$ is the largest $m$ for which some
+size-$m$ set is shattered.
 \end{definition}
 
-\begin{definition}[VC dimension]\label{def:vc}
-A set $A \subset \XX$ with $|A| = m$ is \emph{shattered} by $\HH$ if $|\HH|_A| = 2^m$. The \emph{VC dimension} of $\HH$, denoted $\VC(\HH)$, is the largest integer $d$ such that some $A \subset \XX$ with $|A| = d$ is shattered by $\HH$. If $\HH$ shatters arbitrarily large sets, then $\VC(\HH) = \infty$.
-\end{definition}
+\begin{assumption}[I.i.d.\ sampling]\label{ass:iid}
+The sample $S=\{(x_i,y_i)\}_{i=1}^{n}$ consists of $n$ independent draws from a
+single distribution $\Dcal$ on $\Zcal$.
+\end{assumption}
 
-\begin{remark}\label{rem:zero-one}
-The conclusion of the main theorem concerns the binary $0/1$ loss; for general bounded losses $\ell: \mathcal{Y}^2 \to [0,1]$ derived from a binary class, the loss class $\ell \circ \HH$ has VC dimension equal to that of $\HH$, so the same bound applies.
+\begin{assumption}[Finite VC dimension, non-degenerate regime]\label{ass:vc}
+The class $\Hcal$ has $\VC(\Hcal)=d<\infty$, and the sample size satisfies
+$n\ge d\ge 1$.
+\end{assumption}
+
+\begin{remark}\label{rem:regime}
+The hypothesis $n\ge d$ in \Cref{ass:vc} costs nothing. Since both $\Risk(h)$ and
+$\Riskhat_n(h)$ lie in $[0,1]$, the deterministic trivial bound
+$\sup_{h}\abs{\Risk(h)-\Riskhat_n(h)}\le 1$ holds for every sample and every $n$;
+in the excluded regime $n<d$ one simply invokes this trivial bound, so no claim
+about \Cref{thm:vc-bound} is needed there. The regime $n\ge d$ is exactly where
+the Sauer--Shelah estimate $\Growth_{\Hcal}(m)\le(em/d)^{d}$ is informative and
+the bound of \Cref{thm:vc-bound} is the operative one.
 \end{remark}
 
-\paragraph{Rademacher complexity.}
+\begin{fact}[The loss class has the same VC dimension]\label{fac:loss-vc}
+$\Growth_{\Lcal}(m)\le\Growth_{\Hcal}(m)$ for all $m$, and hence
+$\VC(\Lcal)\le\VC(\Hcal)=d$.
+\end{fact}
 
-\begin{definition}[Empirical and population Rademacher complexity]\label{def:rademacher}
-For any function class $\FF \subset \{0,1\}^{\XX \times \{0,1\}}$ and a sample $S = \{z_i\}_{i=1}^n$, the \emph{empirical Rademacher complexity} (in the absolute-value variant used throughout this section) is
+\begin{proof}
+Fix $z_1=(x_1,y_1),\dots,z_m=(x_m,y_m)\in\Zcal$. The map
 \begin{align*}
-\widehat{\Rad}_S(\FF) \;:=\; \E_{\eps}\!\left[ \sup_{f \in \FF} \Bigl| \frac{1}{n} \sum_{i=1}^{n} \eps_i f(z_i) \Bigr| \;\bigg|\; S \right],
+\psi:(h(x_1),\dots,h(x_m))\ \longmapsto\
+\bigl(\1\{h(x_1)\neq y_1\},\dots,\1\{h(x_m)\neq y_m\}\bigr),
 \end{align*}
-and the \emph{population Rademacher complexity} is $\Rad_n(\FF) := \E_{S}[\widehat{\Rad}_S(\FF)]$. We use the absolute-value form because it arises directly from symmetrization with the two-sided event $\sup_g |\mu - \widehat\mu_n|$; the unsigned variant differs by at most a factor of $2$.
-\end{definition}
-
-For the hypothesis class $\HH$ with $0/1$ loss, the loss class
-\begin{align*}
-\GG \;:=\; \bigl\{ g_h(x,y) := \1[h(x) \ne y] \;:\; h \in \HH \bigr\}.
-\end{align*}
-satisfies $\growth_{\GG}(m) = \growth_{\HH}(m)$ and $\VC(\GG) = \VC(\HH) = d$, since the map $h \mapsto g_h$ is a bijection and $g_h(x,y) = h(x) \oplus y$ depends on $h$ only through its $\{0,1\}$ output on $x$.
+is a coordinatewise bijection of $\{0,1\}^{m}$: on coordinate $i$ it is the
+identity when $y_i=0$ and the bit-flip $b\mapsto 1-b$ when $y_i=1$, both
+bijections of $\{0,1\}$. A bijection cannot increase the number of distinct
+images, so the label patterns of $\Lcal$ on $(z_1,\dots,z_m)$ are the image of
+those of $\Hcal$ on $(x_1,\dots,x_m)$ under this bijection, giving
+$\abs{\Lcal_{|(z_1,\dots,z_m)}}=\abs{\Hcal_{|(x_1,\dots,x_m)}}
+\le\Growth_{\Hcal}(m)$. Taking the maximum over $z_1,\dots,z_m$ yields
+$\Growth_{\Lcal}(m)\le\Growth_{\Hcal}(m)$, and a shattered set of $\Lcal$ would
+force one of $\Hcal$ of the same size, so $\VC(\Lcal)\le d$. This gives the
+assertion.
+\end{proof}

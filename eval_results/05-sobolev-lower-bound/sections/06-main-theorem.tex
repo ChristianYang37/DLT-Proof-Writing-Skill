@@ -1,0 +1,148 @@
+\section{The minimax lower bound}\label{sec:main}
+
+We now assemble \Cref{lem:vg,lem:bumps,lem:kl,lem:fano} into the minimax lower
+bound, choosing the resolution $m$ and amplitude $\omega$ to balance the
+$\Ltwo$ separation against the KL diameter.
+
+\begin{theorem}[Sobolev minimax lower bound]\label{thm:main}
+Consider fixed-design Gaussian regression (\Cref{ass:setup}) over the Sobolev
+ball $\mathcal{W}=\{f:\norm{f}_{\Sob}\le1\}$ on $[0,1]^d$ with integer
+smoothness $s\ge 1$. There is a constant $c=c(s,d,g,\sigma^2)>0$ such that, for
+all $n$ large enough,
+\begin{align}\label{eq:main}
+\inf_{\hat f}\;\sup_{f^*\in\mathcal{W}}\;
+\E_{D_n}\norm{\hat f-f^*}_{\Ltwo}^2
+\;\ge\; c\,n^{-2s/(2s+d)},
+\end{align}
+the infimum running over all estimators $\hat f=\hat f(D_n)$.
+\end{theorem}
+
+\begin{proof}
+The proof reduces estimation to an $M$-ary hypothesis test over the bump
+family of \Cref{def:bumps}, then balances the $\Ltwo$ separation against the
+information content. Fix the bump $g$ and the constants
+$c_g,C_g,G_\infty$ together with $\omega_0:=C_g^{-1/2}$ from
+\Cref{def:bumps,lem:bumps,lem:kl}, and set the amplitude to its largest
+feasible value $\omega=\omega_0$ throughout.
+
+\paragraph{Choice of resolution.}
+Define the constant and the resolution
+\begin{align}\label{eq:m-choice}
+B \;:=\; \left(\frac{64\,G_\infty\,\omega_0^2}{\sigma^2\,\log 2}\right)^{1/(2s+d)},
+\qquad
+m \;:=\; \left\lceil B\,n^{1/(2s+d)}\right\rceil,
+\end{align}
+taken along the subsequence of sample sizes for which $m\mid n^{1/d}$ (so
+\Cref{lem:kl} applies).
+By construction $m\ge B\,n^{1/(2s+d)}$, and for $n$ large enough
+$m\le 2B\,n^{1/(2s+d)}$, so
+\begin{align}\label{eq:m-twosided}
+B\,n^{1/(2s+d)} \;\le\; m \;\le\; 2B\,n^{1/(2s+d)}.
+\end{align}
+
+\paragraph{Step 1: the hypotheses are feasible and $2\Delta$-separated.}
+Let $\{\tau^{(1)},\dots,\tau^{(M)}\}$ be the Varshamov--Gilbert codewords of
+\Cref{lem:vg} with $M_0=m^d\ge 8$, and set $f_k := u_{\tau^{(k)}}$. By
+\Cref{lem:bumps} with $\omega=\omega_0$, every $f_k\in\mathcal{W}$, and for
+$k\ne k'$,
+\begin{align}\label{eq:sep-applied}
+\norm{f_k-f_{k'}}_{\Ltwo}^2
+\;\ge\; \frac{c_g}{8}\,\frac{\omega_0^2}{m^{2s}}
+\;=:\; (2\Delta)^2,
+\qquad\text{so}\qquad
+\Delta^2 \;=\; \frac{c_g\,\omega_0^2}{32}\,\frac{1}{m^{2s}}.
+\end{align}
+Moreover, by Eq.~\eqref{eq:vg} the cardinality satisfies
+\begin{align}\label{eq:logM}
+\log M \;\ge\; \frac{m^d}{8}\,\log 2.
+\end{align}
+
+\paragraph{Step 2: the KL diameter is at most $\tfrac14\log M$.}
+By \Cref{lem:kl} with $\omega=\omega_0$, and then the resolution lower bound
+$m\ge B\,n^{1/(2s+d)}$ from Eq.~\eqref{eq:m-twosided},
+\begin{align*}
+\max_{k\ne k'}\KL\!\left(P_{f_k}\,\middle\|\,P_{f_{k'}}\right)
+\;\le\; & ~ \frac{G_\infty}{2\sigma^2}\,\frac{n\,\omega_0^2}{m^{2s}} \\
+\;=\; & ~ \frac{G_\infty\,\omega_0^2}{2\sigma^2}\,\frac{n}{m^{2s+d}}\,m^{d} \\
+\;\le\; & ~ \frac{G_\infty\,\omega_0^2}{2\sigma^2}\,\frac{1}{B^{2s+d}}\,m^{d} \\
+\;=\; & ~ \frac{G_\infty\,\omega_0^2}{2\sigma^2}\cdot\frac{\sigma^2\,\log 2}{64\,G_\infty\,\omega_0^2}\,m^{d}
+\;=\; \frac{\log 2}{128}\,m^{d}
+\;\le\; \frac14\,\log M,
+\end{align*}
+where the first step is \Cref{lem:kl}, the second step multiplies and divides
+by $m^{d}$, the third step uses $m^{2s+d}\ge B^{2s+d}n$ (hence
+$n/m^{2s+d}\le B^{-(2s+d)}$) from Eq.~\eqref{eq:m-twosided}, the fourth step
+inserts the value of $B$ from Eq.~\eqref{eq:m-choice} and cancels, and the last
+step uses
+$\tfrac{\log2}{128}m^d\le\tfrac14\cdot\tfrac{m^d}{8}\log2\le\tfrac14\log M$,
+where the first inequality holds since $\tfrac{1}{128}\le\tfrac14\cdot\tfrac18=\tfrac{1}{32}$
+and the second is Eq.~\eqref{eq:logM}.
+
+\paragraph{Step 3: Fano lower-bounds the testing error.}
+Apply \Cref{lem:fano} with $P_k=P_{f_k}$ and $V$ uniform on $[M]$ (valid since
+$M\ge 2^{M_0/8}\ge 2$). Combining its mutual-information bound with Step~2,
+\begin{align*}
+\inf_{\psi}\Pr\!\left[\psi(Y)\ne V\right]
+\;\ge\; & ~ 1 - \frac{I(V;Y)+\log 2}{\log M} \\
+\;\ge\; & ~ 1 - \frac{\tfrac14\log M+\log 2}{\log M} \\
+\;\ge\; & ~ 1 - \frac14 - \frac{\log 2}{\log M}
+\;\ge\; \frac12,
+\end{align*}
+where the first step is the Fano inequality Eq.~\eqref{eq:fano}, the second step
+inserts $I(V;Y)\le\max_{k\ne k'}\KL(P_{f_k}\|P_{f_{k'}})\le\tfrac14\log M$ from
+Eq.~\eqref{eq:fano} and Step~2, the third step splits the fraction, and the last
+step uses $\log 2/\log M\le 1/4$: by Eq.~\eqref{eq:logM} and
+$m^d\to\infty$ we have $\log M\ge\tfrac{m^d}{8}\log 2\ge 4\log 2$ for $n$ large
+enough.
+
+\paragraph{Step 4: from testing error to risk.}
+Fix any estimator $\hat f$ and define the test
+$\psi(Y):=\argmin_{k\in[M]}\norm{\hat f-f_k}_{\Ltwo}$ (ties broken
+arbitrarily). If $\psi(Y)\ne V=k$, then $f_{\psi}\ne f_k$ are two distinct
+hypotheses, and by the triangle inequality and the separation
+Eq.~\eqref{eq:sep-applied},
+\begin{align*}
+2\norm{\hat f-f_k}_{\Ltwo}
+\;\ge\; & ~ \norm{\hat f-f_k}_{\Ltwo}+\norm{\hat f-f_{\psi}}_{\Ltwo} \\
+\;\ge\; & ~ \norm{f_k-f_{\psi}}_{\Ltwo}
+\;\ge\; 2\Delta,
+\end{align*}
+where the first step uses that $\psi$ minimizes the distance to $\hat f$ (so
+$\norm{\hat f-f_\psi}_{\Ltwo}\le\norm{\hat f-f_k}_{\Ltwo}$), the second step is
+the triangle inequality, and the third step is Eq.~\eqref{eq:sep-applied}. Hence
+$\norm{\hat f-f_k}_{\Ltwo}\ge\Delta$ on the event $\{\psi\ne V\}$, so
+$\norm{\hat f-f_k}_{\Ltwo}^2\ge\Delta^2\,\1\{\psi\ne V\}$. Taking expectations
+and the supremum over the family,
+\begin{align*}
+\sup_{f^*\in\mathcal{W}}\E_{D_n}\norm{\hat f-f^*}_{\Ltwo}^2
+\;\ge\; & ~ \max_{k\in[M]}\E_{P_{f_k}}\norm{\hat f-f_k}_{\Ltwo}^2 \\
+\;\ge\; & ~ \frac{1}{M}\sum_{k=1}^{M}\E_{P_{f_k}}\norm{\hat f-f_k}_{\Ltwo}^2 \\
+\;\ge\; & ~ \Delta^2\cdot\frac{1}{M}\sum_{k=1}^{M}\Pr_{P_{f_k}}\!\left[\psi(Y)\ne k\right] \\
+\;=\; & ~ \Delta^2\cdot\Pr\!\left[\psi(Y)\ne V\right]
+\;\ge\; \frac{\Delta^2}{2},
+\end{align*}
+where the first step restricts the supremum to the finite family $\{f_k\}$
+(each in $\mathcal{W}$ by Step~1), the second step bounds a maximum below by an
+average, the third step inserts $\norm{\hat f-f_k}_{\Ltwo}^2\ge\Delta^2\1\{\psi\ne k\}$,
+the fourth step recognizes the average over the uniform prior as
+$\Pr[\psi(Y)\ne V]$, and the last step uses the Fano bound of Step~3. As
+$\hat f$ was arbitrary, the same lower bound holds for $\inf_{\hat f}$.
+
+\paragraph{Step 5: the rate.}
+Inserting $\Delta^2$ from Eq.~\eqref{eq:sep-applied} and the upper bound
+$m\le 2B\,n^{1/(2s+d)}$ from Eq.~\eqref{eq:m-twosided},
+\begin{align*}
+\inf_{\hat f}\sup_{f^*\in\mathcal{W}}\E_{D_n}\norm{\hat f-f^*}_{\Ltwo}^2
+\;\ge\; & ~ \frac{\Delta^2}{2}
+\;=\; \frac{c_g\,\omega_0^2}{64}\,\frac{1}{m^{2s}} \\
+\;\ge\; & ~ \frac{c_g\,\omega_0^2}{64}\,\frac{1}{(2B)^{2s}}\,n^{-2s/(2s+d)}
+\;=\; c\,n^{-2s/(2s+d)},
+\end{align*}
+where the first step is Step~4 and Eq.~\eqref{eq:sep-applied} (so
+$\tfrac{\Delta^2}{2}=\tfrac12\cdot\tfrac{c_g\omega_0^2}{32\,m^{2s}}
+=\tfrac{c_g\omega_0^2}{64\,m^{2s}}$), the second step
+inserts $m\le 2B\,n^{1/(2s+d)}$ hence $m^{-2s}\ge(2B)^{-2s}n^{-2s/(2s+d)}$, and
+the last step collects the $(s,d,g,\sigma^2)$-dependent factors into
+$c:=\tfrac{c_g\,\omega_0^2}{64\,(2B)^{2s}}>0$. This is Eq.~\eqref{eq:main},
+completing the proof.
+\end{proof}

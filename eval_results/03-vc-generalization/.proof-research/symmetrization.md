@@ -1,39 +1,49 @@
-# Symmetrization (ghost-sample argument)
+# Ghost-sample symmetrization (Rademacher)
 
-**Source.** Boucheron-Lugosi-Massart, *Concentration Inequalities*, Ch. 11; Wainwright, *High-Dimensional Statistics*, Ch. 4; Vapnik 1998.
+**Source.** Mohri–Rostamizadeh–Talwalkar, *Foundations of Machine Learning*
+(2018, 2nd ed.), Lemma 3.4 / proof of Thm 3.3; Wainwright HDS (2019) §4.2;
+Boucheron–Lugosi–Massart (2013) §11. Project keys: `\cite{mohri2018foundations}`,
+`\cite{wainwright2019high}`.
 
-**Statement (expectation form).** Let $\mathcal{F} \subset \{f: \mathcal{X} \to [0,1]\}$. If $S = (Z_1, \ldots, Z_n)$ and $S' = (Z'_1, \ldots, Z'_n)$ are independent i.i.d. samples and $\varepsilon_1, \ldots, \varepsilon_n$ are independent Rademacher signs (also independent of $S, S'$), then
-$$
-\mathbb{E} \sup_{f \in \mathcal{F}} \bigl| \mathbb{E}_{\mathcal{D}} f - \tfrac{1}{n} \sum_{i=1}^n f(Z_i) \bigr|
-\;\le\;
-2 \, \mathbb{E} \sup_{f \in \mathcal{F}} \Bigl| \tfrac{1}{n} \sum_{i=1}^n \varepsilon_i f(Z_i) \Bigr|.
-$$
-
-**Tail form (the version we use).** For any $t > 0$,
-$$
-\Pr\!\left[ \sup_{f \in \mathcal{F}} | \mathbb{E} f - \widehat{\mathbb{E}}_n f | \ge t \right]
-\;\le\;
-2 \, \Pr\!\left[ \sup_{f \in \mathcal{F}} | \widehat{\mathbb{E}}_n f - \widehat{\mathbb{E}}'_n f | \ge t/2 \right],
-$$
-valid provided $n t^2 \ge 2$ (so $\sup |\widehat{\mathbb{E}}_n - \mathbb{E} f| \le 1/2$ holds for the relevant pair via Chebyshev). For losses in $[0,1]$, a clean statement: when $n \ge 2/t^2$,
-$$
-\Pr\!\left[ \sup_{f \in \mathcal{F}} | \mathbb{E} f - \widehat{\mathbb{E}}_n f | > t \right]
-\;\le\;
-2 \, \Pr\!\left[ \sup_{f \in \mathcal{F}} | \widehat{\mathbb{E}}_n f - \widehat{\mathbb{E}}'_n f | > t/2 \right].
-$$
+**Statement.** Let $\mathcal G$ be a class of functions $z\mapsto g(z)\in[0,1]$,
+$S=(Z_1,\dots,Z_n)$ i.i.d. $\sim P$, and $S'=(Z_1',\dots,Z_n')$ an independent
+*ghost* sample i.i.d. $\sim P$. With $\sigma_1,\dots,\sigma_n$ i.i.d. Rademacher
+($\Pr[\sigma_i=\pm1]=1/2$), independent of $S,S'$, and
+$\hat P_n g=\frac1n\sum_i g(Z_i)$, $Pg=\E_{Z}g(Z)$,
+$$\E_S\Big[\sup_{g\in\mathcal G}\big(Pg-\hat P_n g\big)\Big]
+  \le 2\,\E_{S,\sigma}\Big[\sup_{g\in\mathcal G}\tfrac1n\sum_{i=1}^n\sigma_i g(Z_i)\Big]
+  = 2\,\mathfrak R_n(\mathcal G).$$
+The factor $2$ is the symmetrization constant. The same holds for the two-sided
+quantity $\E_S\sup_g|Pg-\hat P_n g|$ with the absolute value inside the
+Rademacher average.
 
 **Hypotheses.**
-- $f$ takes values in $[0,1]$ (or bounded).
-- $S, S'$ are independent samples of size $n$ from the same distribution.
-- The supremum is over a class $\mathcal{F}$ that is countable or has a measurable suitability/separability (universal measurability suffices in practice; in proofs we assume measurability tacitly).
+- i.i.d. sample; ghost sample independent and identically distributed.
+- Rademacher signs independent of both samples.
+- $\mathcal G$ a fixed (data-independent) class.
 
-**Constants and dimension dependence.** Factor 2 in front; the $t \to t/2$ in the inner probability. The $n \ge 2/t^2$ side condition removes via Chebyshev on the ghost sample.
+**Constants / dimension dependence.** The constant is exactly $2$. Two steps:
+(i) $Pg=\E_{S'}\hat P'_n g$, so $\sup_g(Pg-\hat P_ng)\le\E_{S'}\sup_g(\hat P'_ng-
+\hat P_ng)$ by Jensen (sup of expectation $\le$ expectation of sup); (ii)
+introduce signs: $g(Z'_i)-g(Z_i)$ is symmetric, so multiplying by $\sigma_i$
+leaves the distribution unchanged, then split the sup → two Rademacher averages,
+each $\le\mathfrak R_n(\mathcal G)$, summing to $2\mathfrak R_n$.
 
-**Canonical use.** Given a class with VC-dim $d$, after symmetrization we apply Rademacher complexity bounds — the ghost-sample probabilities involve only $2n$ realized points, so the supremum effectively ranges over the projection $\mathcal{F}|_{S \cup S'}$ (a set of size $\le \Pi_{\mathcal{F}}(2n)$). This is the key reduction that brings the growth function into play.
+**Canonical use pattern.**
+```latex
+\begin{align*}
+\E_S\Big[\sup_{g}\big(Pg-\hat P_ng\big)\Big]
+&\le \E_{S,S'}\Big[\sup_g\tfrac1n\textstyle\sum_i\big(g(Z'_i)-g(Z_i)\big)\Big]\\
+&= \E_{S,S',\sigma}\Big[\sup_g\tfrac1n\textstyle\sum_i\sigma_i\big(g(Z'_i)-g(Z_i)\big)\Big]\\
+&\le 2\,\mathfrak R_n(\mathcal G).
+\end{align*}
+```
 
 **Common misuses.**
-- Forgetting the $n \ge 2/t^2$ side condition (mild but needed for the cleanest constant 2).
-- Applying to unbounded functions without checking moment conditions.
-- Forgetting that the Rademacher variables are independent of $(S, S')$.
+- Dropping the factor $2$.
+- Forgetting that the inequality is on the **expected** sup; the high-probability
+  version still needs a separate concentration step (McDiarmid) — symmetrization
+  alone does not give $\log(1/\delta)$.
+- Applying with a data-dependent $\mathcal G$ (then signs are not independent).
 
-**Project citation key.** \cite{vapnik1998} or \cite{boucheronLugosiMassart2013}; we use the textbook version.
+**Project citation key.** `\cite{mohri2018foundations}`

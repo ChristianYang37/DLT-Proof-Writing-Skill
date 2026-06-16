@@ -1,11 +1,25 @@
 \documentclass[11pt]{article}
 
-\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{aliascnt}
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage[letterpaper,margin=1in]{geometry}
+\linespread{1.0}
 \usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\usepackage[capitalize]{cleveref}
 
 \input{macros}
 
-\title{Linear Convergence of Gradient Descent on Two-Layer ReLU Networks via the Neural Tangent Kernel}
+\title{Gradient Descent Optimizes Over-parameterized Two-Layer ReLU Networks:\\
+A Neural Tangent Kernel Analysis}
 \author{}
 \date{}
 
@@ -13,13 +27,13 @@
 \maketitle
 
 \input{sections/01-preliminaries}
-\input{sections/02-main-result}
-\input{sections/03-proof-of-lemma-init-gram}
-\input{sections/04-proof-of-lemma-perturbation}
-\input{sections/05-proof-of-lemma-linear-conv}
-\input{sections/06-proof-of-theorem-main}
+\input{sections/02-lemma-init-gram-close}
+\input{sections/03-lemma-gram-stability}
+\input{sections/04-lemma-contraction}
+\input{sections/05-lemma-main-induction}
+\input{sections/06-main-theorem}
 
-\bibliographystyle{alpha}
+\bibliographystyle{plain}
 \bibliography{refs}
 
 \end{document}

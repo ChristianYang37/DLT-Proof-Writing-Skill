@@ -1,12 +1,16 @@
-% Macros for the Ellenberg-Gijswijt cap-set bound
-\usepackage{amsmath, amssymb, amsthm}
+% ---------------------------------------------------------------------------
+% macros.tex — theorem environments (aliascnt-safe) + notation
+% ---------------------------------------------------------------------------
+
+\usepackage{amsmath,amssymb,amsthm}
 \usepackage{aliascnt}
-\usepackage{url}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
 \usepackage[capitalize]{cleveref}
 \usepackage{enumitem}
-\usepackage{xcolor}
 
-% Master counter
+% --- Theorem environments: aliascnt so cleveref names key correctly ---------
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
 
@@ -40,6 +44,7 @@
 \newtheorem{remark}[remark]{Remark}
 \aliascntresetthe{remark}
 
+% --- cleveref names (now correctly keyed via aliascnt) ----------------------
 \crefname{theorem}{Theorem}{Theorems}
 \crefname{lemma}{Lemma}{Lemmas}
 \crefname{proposition}{Proposition}{Propositions}
@@ -50,29 +55,22 @@
 \crefname{remark}{Remark}{Remarks}
 \crefname{equation}{Eq.}{Eqs.}
 
-% Fields and sets
-\providecommand{\F}{}
-\renewcommand{\F}{\mathbb{F}}
-\providecommand{\R}{}
-\renewcommand{\R}{\mathbb{R}}
-\providecommand{\N}{}
-\renewcommand{\N}{\mathbb{N}}
-\providecommand{\Z}{}
-\renewcommand{\Z}{\mathbb{Z}}
-\newcommand{\1}{\mathbf{1}}
+% --- todo marker ------------------------------------------------------------
+\newcommand{\todo}[1]{\textbf{\textcolor{red}{[TODO: #1]}}}
 
-% Operators
-\DeclareMathOperator{\sr}{slice\,rank}
-\DeclareMathOperator{\rk}{rank}
-\DeclareMathOperator{\spann}{span}
-\DeclareMathOperator{\supp}{supp}
-\DeclareMathOperator{\poly}{poly}
-
-% Custom
+% --- Notation ---------------------------------------------------------------
+\newcommand{\F}{\mathbb{F}}                 % finite field
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\one}{\mathbf{1}}               % indicator
+\newcommand{\sr}{\operatorname{sr}}         % slice rank
+\newcommand{\rank}{\operatorname{rank}}
+\newcommand{\deeg}{\operatorname{deg}}
+\newcommand{\Span}{\operatorname{span}}
+\newcommand{\supp}{\operatorname{supp}}
 \newcommand{\norm}[1]{\left\| #1 \right\|}
 \newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
-\newcommand{\eps}{\varepsilon}
-\newcommand{\Fthree}{\F_3}
-
-% Vectors
-\renewcommand{\vec}[1]{\mathbf{#1}}
+\newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand{\set}[1]{\left\{ #1 \right\}}
+\DeclareMathOperator*{\argmin}{arg\,min}

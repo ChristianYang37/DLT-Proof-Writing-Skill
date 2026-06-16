@@ -1,0 +1,13 @@
+{
+  "attempts": [
+    {"n": 1, "route": "4.3", "error_sig": "doc-comment-/--/-in-tactic-block", "note": "used /-- -/ for in-tactic @lx; must be /- -/ block comments"},
+    {"n": 2, "route": "4.3", "error_sig": "rw-hx-rewrote-x_star-inside-gradient", "note": "rw [hx] looped: x_star occurs inside gradient L x_star; set g := gradient L x_star to break recursion"},
+    {"n": 3, "route": "VERIFIED", "error_sig": "none", "note": "build_ok; only expected unused-variable linter warnings for hr/hnorm/Fintype/Nontrivial (documented decisions.md D3). Proceeding to full gate."}
+  ],
+  "counters": {
+    "global_attempts": 0, "cap": 12,
+    "s4_stay_streak": 0, "cap_stay": 4,
+    "s4_to_s3_count": 0, "cap_s3": 3,
+    "s4_to_s2_count": 0, "cap_s2": 2
+  }
+}

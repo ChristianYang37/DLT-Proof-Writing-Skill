@@ -1,93 +1,118 @@
-# Review iteration 1 — VC generalization proof
+# Review loop — iteration 1 (VC generalization bound)
 
-## Reviewer output (produced in adversarial peer-review mode per review-loop.md prompt)
+Proof under review: `eval_results/03-vc-generalization` — Theorem `thm:vc-bound`
+(uniform distribution-free VC generalization bound) via McDiarmid →
+symmetrization → Sauer–Shelah → Massart → Cauchy–Schwarz assembly.
 
-### Summary
-The paper proves the classical VC generalization bound: for hypothesis class $\HH$ with VC dimension $d$, an i.i.d.\ sample of size $n \ge d$ from any distribution $\DD$ gives $\sup_h |R(h) - \hat R_n(h)| \le C \sqrt{(d \log(n/d) + \log(1/\delta))/n}$ with probability $\ge 1 - \delta$. The proof follows the textbook pipeline:
-1. **Symmetrization (Lemma 1.1)** reduces $\E_S \sup_g |\mu - \hat\mu_n|$ to $2 \E_{S, \eps} \sup_g |\tfrac{1}{n}\sum \eps_i g(z_i)|$, via ghost-sample + sign-randomization + triangle split.
-2. **Sauer-Shelah (Lemma 2.2)** bounds the growth function $\Pi_\HH(m) \le \sum_{i \le d}\binom{m}{i} \le (em/d)^d$, via the shifting operator.
-3. **Massart finite-class (Lemma 3.3)** bounds $\E_\eps \max_a |\sum \eps_i a_i| \le R\sqrt{2\log(2N)}$ via sub-Gaussian MGF + maximal inequality.
-The main theorem assembles these in expectation, then transfers to high probability via McDiarmid with bounded differences $c_i = 1/n$.
+## Reviewer scores
 
-### Strengths
-- The decomposition is exactly the textbook three-lemma + McDiarmid skeleton, which is the cleanest pedagogical organization.
-- Constants are tracked explicitly throughout: $C_1 = 4$ from Step 1, final $C = 8$ or $4\sqrt{2}$ depending on regime.
-- The trailing-justification derivation pattern is applied uniformly within each proof, with step-counts matching ordinal trailers (verified).
-- The Massart proof correctly handles the absolute-value variant by augmenting $A$ to $A \cup (-A)$, doubling the cardinality bound to $\log(2N)$.
-- The headline-form convention is honestly disclosed in `rem:headline-form` and the proof's Step 4 acknowledges the subtlety with a `\todo{}` marker.
+| Reviewer | Lens | Score | Blocking? |
+|---|---|---|---|
+| R1 | correctness: line-by-line | 5 | no |
+| R2 | correctness: assumptions/generality | 8 | no |
+| R3 | correctness: ML-significance | 9 | no |
+| R4 | math taste | 8 | no |
+| R5 | derivation integrity | 7 | no |
+| **mean** | | **7.40** | |
 
-### Weaknesses
+Accept gate (`mean > 8` AND no unresolved REAL-blocking critical): mean 7.40 ≤ 8
+→ **ITERATE**.
 
-#### Weakness 1 (severity: major)
-**Claim:** The proof of Sauer-Shelah's property (b) — that shattering can only decrease under the shifting operator — is sketched, not given. The text says "details: if $i \notin B$, the action of $T_i$ on $\HH|_B$ is trivial ...; if $i \in B$, a case analysis ... concludes." This is a key load-bearing step in the standard proof and the case analysis is genuinely required.
-**Evidence:** sections/04-sauer-shelah.tex:28, verbatim: *"Property (b) is the content of the elementary verification: ... if $i \in B$, a case analysis on whether the pair $(h, h')$ involved in the flip belongs to the same $\HH|_B$-equivalence class concludes."*
-**Severity:** major (blocks verification of Sauer-Shelah Step 1).
+## Merged + verified weaknesses
 
-#### Weakness 2 (severity: major)
-**Claim:** The Step 4 absorption from $\log(en/d)$ to $\log(n/d)$ in the headline form has a genuine gap in the small-sample regime $d \le n < ed$, especially when $\delta$ is close to 1. The proof acknowledges this with a `\todo{}` but does not actually close it. The bound $\Phi(S) \le C \sqrt{(d \log(n/d) + \log(1/\delta))/n}$ as stated in the headline can fail in this regime if $C$ is required to be universal.
-**Evidence:** sections/06-proof-of-main.tex:80, verbatim: *"\todo{verify: in the small-sample regime $d \le n < e d$ with $\delta$ close to 1, the headline form Eq.~\eqref{eq:vc-main} cannot dominate the trivial bound $\Phi(S) \le 1$ without enlarging $C$ as a function of $\delta$."*
-**Severity:** major (the headline statement as quoted by the user is technically not what was proved; the proof in fact establishes a slightly different but morally equivalent bound).
+### Weakness #1 (severity: major, raised by 4/5)
+**Claim:** Symmetrization step (d) (`03-symmetrization.tex:39-40`) produces the
+absolute-value Rademacher average `2 E_σ sup_ℓ |1/n Σ σ_i ℓ(z_i)|` and equates it
+to `2 Rad_n(L)`, but Definition 1.3 (`def:rademacher`) defines `Rad` WITHOUT an
+absolute value, and Massart's core (`04:90`) bounds only the signed max. Since
+`E sup|X| ≥ E sup X`, the no-abs definition does not upper-bound the abs object;
+the equality as written is unlicensed (R1/R5 major; R2/R3 minor).
+**Verdict:** REAL-blocking.
+**Fix-plan / fix applied:** Routed the absolute value through the symmetrized
+class `L̄ := L ∪ (−L)` via the exact identity `sup_{ℓ∈L}|X_ℓ| = sup_{ℓ∈L̄} X_ℓ`
+(`|t| = max(t,−t)`). Lemma 3 now concludes `≤ 2 Rad_n(L̄)`; the abs is removed
+legitimately into the signless definition. Headline ("universal constant `C>0`")
+unchanged. New macro `\Lbar` added.
 
-#### Weakness 3 (severity: minor)
-**Claim:** The symmetrization lemma's Step 2 description of the sign-randomization is informal. The statement "the random tuple $(\eps_i \cdot (z'_i - z_i))_i$ (interpreted via the swap) has the same joint distribution as $(z'_i - z_i)_i$" is correct but the parenthetical "interpreted via the swap" leaves the precise meaning implicit. The argument is standard (since $(z_i, z'_i)$ are exchangeable, the joint law is invariant under permuting them, and the random sign $\eps_i$ realizes this permutation), but the reader has to fill it in.
-**Evidence:** sections/03-symmetrization.tex:28, verbatim: *"the random tuple $(\eps_i \cdot (z'_i - z_i))_i$ (interpreted via the swap) has the same joint distribution as $(z'_i - z_i)_i$."*
-**Severity:** minor (the conclusion is correct; the exposition is informal).
+### Weakness #2 (severity: major, raised by 2/5)
+**Claim:** Massart (`04:90-96`) bounds the no-abs `Rad_n(L)`; plugging in the
+abs object needs a doubling argument `|A| → |A ∪ (−A)|` (cost `log 2`) never
+shown (R1 major / R5 minor). Same defect as #1, viewed from the Massart side.
+**Verdict:** REAL-blocking (jointly with #1).
+**Fix applied:** Massart Lemma 7 now bounds `Rad_n(L̄)` over the projection
+`Ā = A ∪ (−A)` with `|Ā| ≤ 2|A| ≤ 2 Π_H(n)`, giving
+`√(2(d log(en/d)+log 2)/n)`. The `log 2` is absorbed into the universal constant
+downstream (`C` changed from `3` to `√17` inside the proof; the theorem headline
+fixes no numeric value).
 
-#### Weakness 4 (severity: minor)
-**Claim:** In Eq.~(1.5) (symmetrization conclusion), the leading constant is $2$ but the standard ghost-sample argument typically yields the constant exactly $2$ in expectation form. The proof gets this right but the comment in `rem:symm-expect-data-dep` about "$2 \, \Rad_n(\GG)$ in the convention of \Cref{def:rademacher}" uses Rademacher complexity *without absolute value* in the definition, while the symmetrization bound uses absolute-value Rademacher complexity. The two differ by at most a factor of 2 (since $|\E\sup_g X_g| \le \E \sup_g |X_g|$ but in general $\E \sup_g |X_g| \ne \E \sup_g X_g$). This is a notation-level inconsistency.
-**Evidence:** sections/01-preliminaries.tex:36-38 defines $\widehat{\Rad}_S(\FF) = \E_\eps \sup_f \tfrac{1}{n}\sum \eps_i f(z_i)$ *without* absolute value, but the proof everywhere uses $\sup_g |\tfrac{1}{n}\sum \eps_i g(z_i)|$. The remark `rem:symm-expect-data-dep` claims these are equal, which they are not in general.
-**Severity:** minor (notation inconsistency; the proof is internally correct because it uses the absolute-value form throughout, but the cross-reference to `def:rademacher` is loose).
+### Weakness #3 (severity: minor, raised by 1/5)
+**Claim:** Symmetrization step (b) (`03:46`) attributes the sup/expectation swap
+to "Jensen (convexity of the supremum)", but `sup E ≤ E sup` is monotonicity,
+not Jensen; the `|·|` half is genuinely Jensen.
+**Verdict:** REAL-nonblocking (both inequalities valid; naming imprecise).
+**Fix applied:** Split the justification — `|·|` via Jensen (convexity of `|·|`),
+the sup via the monotonicity relation `sup E ≤ E sup`.
 
-#### Weakness 5 (severity: minor)
-**Claim:** The final Step 3 chain of the main proof Eq.~(after Step 3) writes a sequence "first step is the chain after Step 2; second step applies the elementary inequality; third step expands the bracket; last step uses ...". But the third step is an equality (the "expansion") sandwiched between two inequalities. Counting ordinals: row 1 ("$\le$"), row 2 ("$\le$"), row 3 ("$=$"), row 4 ("$\le$"). The trailer ordinals match.
-**Evidence:** sections/06-proof-of-main.tex:62-70, the four-row chain has trailer matching.
-**Severity:** style (verified correct after recount; no action).
+### Weakness #4 (severity: minor, raised by 1/5)
+**Claim:** McDiarmid (`02:14`) needs `Φ(S) = sup_{h∈H} |...|` measurable, but `H`
+is an arbitrary (possibly uncountable) subset of `{0,1}^X` with no measurability
+hypothesis stated.
+**Verdict:** REAL-nonblocking (genuine omitted technical hypothesis).
+**Fix applied:** Added a standing image-admissible-Suslin / pointwise-separable
+measurability convention to the Preliminaries notation paragraph.
 
-### Questions for the author
+### Weakness #5 (severity: minor, raised by 1/5)
+**Claim:** Main-theorem step (d) (`05:53`) writes `√(log(1/δ)/(2n))` as
+`√(log(1/δ))/√n`, dropping `1/√2`, and is "presented as equality" — an
+undisplayed `√2` inflation.
+**Verdict:** PHANTOM / INTENTIONAL.
+**Rebuttal:** Line 53 is already marked `\overset{(d)}{\le}`, not `=`; the
+dropped `1/√2` is a direction-preserving conservative bound, and `C` is
+explicitly non-optimized (Remark `rem:rate`). No fix. (The `(d)` step was
+rewritten anyway as part of #1/#2, and remains a documented inequality.)
 
-1. The headline statement displays $\log(n/d)$; would the author prefer to restate the theorem with $\log(en/d)$ to avoid the small-sample subtlety, or is the convention in `rem:headline-form` the intended reading?
-2. The Sauer-Shelah proof's shifting argument is the cleanest of several available proofs. Was this chosen over the more direct induction-on-$|\HH|$ argument (Vershynin's *HDP* Ch. 8)?
-3. The McDiarmid step gives one-sided concentration; the headline is two-sided. The two-sided bound costs a factor of $2$ in $\delta$, absorbed into $C$. Is this implicit absorption acceptable?
+### Weakness #6 (severity: minor, raised by 1/5)
+**Claim:** Remark 1 (`01:74`) justifies excluding `n<d` by asserting the RHS of
+`thm:vc-bound` "exceeds 1", which is not literally true at the boundary / for `δ`
+near 1.
+**Verdict:** REAL-nonblocking (conclusion fine, stated reason imprecise).
+**Fix applied:** Rewrote the remark to invoke the deterministic trivial bound
+`sup|R−R̂| ≤ 1` (always valid since risks lie in `[0,1]`) directly in the `n<d`
+regime, making no claim about the theorem's RHS there.
 
-### Verdict
-**accept-with-minor-revisions**
+### Weakness #7 (severity: style, raised by 1/5)
+**Claim:** Macros `\poly`, `\esssup`, `\inner` defined but never used
+(`macros:61-68`).
+**Verdict:** REAL-nonblocking (style).
+**Fix applied:** Deleted the three dead macros.
 
-The proof is correct in its main pipeline. Weaknesses 1 and 2 are major in the sense that they currently block clean verification, but both can be patched without changing any headline statement. Weakness 1 needs a complete proof of property (b) of the shifting operator. Weakness 2 needs a cleaner Step 4 that either (a) restates the theorem with $\log(en/d)$, or (b) cleanly closes the small-$n$ regime via the trivial $\Phi \le 1$ bound with a universal constant absorption. Weaknesses 3-5 are minor and may be addressed inline.
+### Weakness #8 (severity: minor/style, raised by 1/5)
+**Claim:** `\Ecal` declared (`macros:77`) but unused; section 05 hand-writes raw
+`\mathcal{E}` nine times.
+**Verdict:** REAL-nonblocking (style).
+**Fix applied:** Deleted the dead `\Ecal` macro (minimum-change vs. 9 inline
+edits; raw `\mathcal{E}` is consistent within section 05).
 
----
+### Weakness #9 (severity: style, raised by 1/5)
+**Claim:** Theorem statement (`05:14-19`) is over-decorated: restates the bound
+in two algebraic forms plus an inline explanatory clause.
+**Verdict:** INTENTIONAL / would touch the headline.
+**Rebuttal:** Editing this lives inside `\begin{theorem}` and modifies the
+headline statement block; per the statement-change rule it is NOT auto-applied.
+The dual form and the `log e = 1 ⟹ +d` clause are a deliberate
+prompt-rate-matching choice. Flagged to the user, no fix.
 
-## Author verification
+## Fixes applied this iteration
+#1, #2 (joint, REAL-blocking major — abs/no-abs seam closed via `L̄`),
+#3, #4, #6 (REAL-nonblocking minor), #7, #8 (style). Rebutted: #5 (phantom),
+#9 (intentional, headline). Constant changed `3 → √17` (in-proof only; headline
+unchanged).
 
-### Weakness #1 (severity: major)
-**Claim:** Property (b) shifting-decreases-shattering is sketched, not proved.
-**Verdict:** REAL-blocking. The case analysis for $i \in B$ is genuinely the load-bearing step in the standard Sauer proof, and skipping it leaves a hole. The patch cost is moderate (a clean case-split paragraph). Per cost gate, major REAL-blocking *must fix*.
-**Fix plan:** Add a paragraph after property (b) explicitly stating: if $T_i(\HH)$ shatters $B$ with $i \in B$, then for each $\beta \in \{0,1\}^B$, some $h \in T_i(\HH)$ has $h|_B = \beta$, hence the preimage of this $h$ under $T_i$ is some $h^{\circ} \in \HH$. Then a short case-split on whether $T_i$ flipped at index $i$ shows $\HH|_B$ also achieves all of $\{0,1\}^B$. Cost: ~5–8 LaTeX lines.
+## Post-fix gates
+- `lint.py` (incl. R19): **0 errors, 0 warnings**.
+- `latexmk-wrapper.py`: **compile_ok = true**; 0 undef refs/cites/macros, 0
+  overfull violations above threshold.
+- `pdf/main.pdf` refreshed.
 
-### Weakness #2 (severity: major)
-**Claim:** Step 4 absorption $\log(en/d) \to \log(n/d)$ has a gap in $d \le n < ed$ for $\delta$ close to 1.
-**Verdict:** REAL-blocking. Current text contains a `\todo{}` acknowledging the gap; the cleanest fix is to restate the theorem with $\log(en/d)$ in the conclusion and add a one-line remark that $\log(en/d) \asymp \log(n/d)$ for $n \ge 2d$. However, this changes the headline statement (modifies the conclusion), which per `review-loop.md` Component 3 triggers **statement-change escalation**.
-**Fix plan:** Two options:
-- (A) Restate theorem with $\log(en/d)$, add convention remark — needs user approval (statement change).
-- (B) Clean Step 4 absorption by handling the small-$n$ regime with a trivial bound *plus* enlarging $C$ to absorb the $\delta \to 1$ degeneracy. Specifically: $\Phi \le 1$ always; in the regime $n \le ed$ and $\log(1/\delta) \le 1$, both sides of Eq.~\eqref{eq:vc-main} are $O(1)$, and the bound holds for $C \ge \sqrt{e}$ if we additionally enlarge it to account for the worst-case constant. This keeps the headline as stated; the absorption is into the universal constant. Cost: 5 LaTeX lines.
-
-I will adopt option (B) — staying within the user's headline statement. **No statement change.**
-
-### Weakness #3 (severity: minor, REAL-nonblocking)
-**Claim:** Symm Step 2 sign-randomization description is informal.
-**Verdict:** REAL-nonblocking. Patch cost: 2-3 lines making the exchangeability argument explicit. Below the cost threshold for minor REAL-nonblocking (3 lines), so fix.
-
-### Weakness #4 (severity: minor, REAL-nonblocking)
-**Claim:** Rademacher complexity definition uses no absolute value but proof uses absolute value.
-**Verdict:** REAL-nonblocking. Patch cost: 1 line modifying `def:rademacher` to include `|·|`. Below the cost threshold; fix.
-
-### Weakness #5 (severity: style)
-**Claim:** Step 3 chain trailer ordinal counting.
-**Verdict:** PHANTOM (reviewer flagged and self-resolved; no actual defect). Do not fix.
-
----
-
-## Decisions to apply
-- Fix Weakness 1: add case-split paragraph.
-- Fix Weakness 2 (option B): tighten Step 4 absorption.
-- Fix Weakness 3: make exchangeability explicit.
-- Fix Weakness 4: include `|·|` in `def:rademacher` or revise the remark.
+## Decision
+Iterate (fixes applied). Next panel re-runs on the patched proof.

@@ -1,0 +1,82 @@
+\section{Initialization: the empirical Gram matrix concentrates}\label{sec:init-gram}
+
+\begin{lemma}[Initial Gram close to population]\label{lem:init-gram-close}
+% lint: ignore R17 — single concentration event; the 1-δ budget is discharged in-proof by entrywise Hoeffding + a union over the n^2 entries (Steps 1-2), and aggregated into the global union bound in the proof of thm:main.
+Fix $\delta \in (0, 1)$. There is a universal constant $C > 0$ such that if
+\begin{align}\label{eq:width-init}
+m \;\ge\; \frac{C \, n^2 \log(n / \delta)}{\lzero^2},
+\end{align}
+then with probability at least $1 - \delta$ over the random initialization $W(0)$,
+\begin{align}\label{eq:gram-close-init}
+\opnorm{H(0) - \Hinf} \;\le\; \frac{\lzero}{4}
+\qquad\text{and consequently}\qquad
+\lmin\!\left( H(0) \right) \;\ge\; \tfrac{3}{4}\,\lzero.
+\end{align}
+\end{lemma}
+
+\begin{proof}
+The strategy is a four-link chain: control each entry $H_{ij}(0)$ by Hoeffding's inequality
+(\Cref{fac:hoeffding}), union over the $n^2$ entries to bound every entrywise deviation
+simultaneously, pass from the entrywise bound to operator norm via $\opnorm{\cdot} \le
+\fnorm{\cdot}$, and convert the operator-norm bound into an eigenvalue bound by Weyl's
+inequality (\Cref{fac:weyl}).
+
+\smallskip\noindent\textbf{Step 1 (entrywise Hoeffding).}
+Fix $i, j \in [n]$ and write $H_{ij}(0) = \tfrac{1}{m}\sum_{r=1}^m Z_r^{ij}$ with
+$Z_r^{ij} := x_i^{\top} x_j\,\indic{w_r(0)^{\top} x_i \ge 0}\indic{w_r(0)^{\top} x_j \ge 0}$.
+The $Z_r^{ij}$ are i.i.d.\ across $r$ (the $w_r(0)$ are i.i.d.), bounded by
+$\abs{Z_r^{ij}} \le \abs{x_i^{\top} x_j} \le 1$ (Cauchy--Schwarz with $\norm{x_i}=1$), so
+$Z_r^{ij} \in [-1, 1]$, and $\E[Z_r^{ij}] = \Hinf_{ij}$ by \Cref{def:gram}. Applying
+Hoeffding's inequality (\Cref{fac:hoeffding}) to $S = \sum_{r=1}^m Z_r^{ij}$ with
+$\beta_r - \alpha_r = 2$ and threshold $t = m\,\tau$ for $\tau := \lzero/(4n)$,
+\begin{align}\label{eq:entry-hoeffding}
+\Pr\!\left[ \abs{H_{ij}(0) - \Hinf_{ij}} \ge \tau \right]
+\;=\; & ~ \Pr\!\left[ \abs{S - \E S} \ge m\tau \right]
+\;\le\; 2\exp\!\left( - \frac{2 (m\tau)^2}{4m} \right)
+\;=\; 2\exp\!\left( - \frac{m\tau^2}{2} \right),
+\end{align}
+where the equality rescales by $1/m$, the inequality is \Cref{fac:hoeffding} with
+$\sum_r (\beta_r - \alpha_r)^2 = 4m$, and the last is arithmetic.
+
+\smallskip\noindent\textbf{Step 2 (union over entries).}
+Union-bounding Eq.~\eqref{eq:entry-hoeffding} over all $n^2$ ordered pairs $(i,j)$,
+\begin{align}\label{eq:entry-union}
+\Pr\!\left[ \max_{i,j \in [n]} \abs{H_{ij}(0) - \Hinf_{ij}} \ge \tau \right]
+\;\le\; & ~ n^2 \cdot 2\exp\!\left( - \frac{m\tau^2}{2} \right)
+\;\le\; \delta,
+\end{align}
+where the first step is the union bound over the $n^2$ events of Eq.~\eqref{eq:entry-hoeffding}
+and the second holds whenever $m \ge \tfrac{2}{\tau^2}\log(2n^2/\delta)
+= \tfrac{32\, n^2}{\lzero^2}\log(2n^2/\delta)$; since $\log(2n^2/\delta) \le 4\log(n/\delta)$
+for $n \ge 1$, this is implied by the width condition Eq.~\eqref{eq:width-init} with
+$C \ge 128$.
+
+\smallskip\noindent\textbf{Step 3 (entrywise $\ge$ Frobenius $\ge$ operator).}
+On the complementary event of Eq.~\eqref{eq:entry-union}, which has probability at least
+$1 - \delta$, every entry satisfies $\abs{H_{ij}(0) - \Hinf_{ij}} \le \tau = \lzero/(4n)$, so
+\begin{align}\label{eq:op-from-frob}
+\opnorm{H(0) - \Hinf}
+\;\le\; & ~ \fnorm{H(0) - \Hinf}
+\;=\; \Big( \sum_{i,j} \abs{H_{ij}(0) - \Hinf_{ij}}^2 \Big)^{1/2}
+\;\le\; \sqrt{n^2 \tau^2}
+\;=\; n\tau
+\;=\; \frac{\lzero}{4},
+\end{align}
+where the first step is the standard bound $\opnorm{M} \le \fnorm{M}$ for any matrix $M$ (the
+largest singular value is at most the root-sum-of-squares of all singular values), the second
+is the definition of the Frobenius norm, the third inserts the entrywise bound from
+Eq.~\eqref{eq:entry-union} into each of the $n^2$ summands, and the rest is arithmetic.
+
+\smallskip\noindent\textbf{Step 4 (Weyl).}
+Applying Weyl's inequality (\Cref{fac:weyl}) to the symmetric matrices $H(0)$ and $\Hinf$,
+together with $\lmin(\Hinf) = \lzero$ (\Cref{ass:lambda0}),
+\begin{align}\label{eq:weyl-init}
+\lmin\!\left( H(0) \right)
+\;\ge\; & ~ \lmin\!\left( \Hinf \right) - \opnorm{H(0) - \Hinf}
+\;\ge\; \lzero - \frac{\lzero}{4}
+\;=\; \frac{3}{4}\,\lzero,
+\end{align}
+where the first step is Weyl's inequality, the second substitutes \Cref{ass:lambda0} and
+Eq.~\eqref{eq:op-from-frob}, and the last is arithmetic. This proves
+Eq.~\eqref{eq:gram-close-init}, completing the proof.
+\end{proof}

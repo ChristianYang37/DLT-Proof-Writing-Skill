@@ -20,6 +20,9 @@
 .output/
 .proof-research/sweep-step-*.md
 
+# Lean build artifacts and downloaded dependencies (regeneratable via `lake`)
+.lake/
+
 # macOS
 .DS_Store
 

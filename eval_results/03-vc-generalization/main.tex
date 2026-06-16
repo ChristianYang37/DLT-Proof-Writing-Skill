@@ -1,15 +1,29 @@
 \documentclass[11pt]{article}
 
-\usepackage[margin=1in]{geometry}
+\usepackage[letterpaper,margin=1in]{geometry}
+\linespread{1.0}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{mathtools}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
 \input{macros}
 
+\title{A VC-Dimension Generalization Bound\\
+       via Symmetrization, Sauer--Shelah, and Massart}
+\author{}
+\date{}
+
 \begin{document}
+\maketitle
 
 \input{sections/01-preliminaries}
-\input{sections/02-main-result}
+\input{sections/02-mcdiarmid-deviation}
 \input{sections/03-symmetrization}
-\input{sections/04-sauer-shelah}
-\input{sections/05-massart}
-\input{sections/06-proof-of-main}
+\input{sections/04-sauer-massart}
+\input{sections/05-main-theorem}
+
+\bibliographystyle{plain}
+\bibliography{refs}
 
 \end{document}

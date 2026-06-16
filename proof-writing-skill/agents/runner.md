@@ -12,11 +12,11 @@ You are running **one** test case from this skill's eval suite. The skill (`dlt-
 
 2. **Run the FULL workflow** for the given `prompt`. **Do not skip phases** — this eval is testing the skill in its intended end-to-end use.
 
-   - **Phase A** (plan, technical reconnaissance with digests, decompose, todos).
+   - **Phase A** (plan, **Socratic intake (A.1a)**, technical reconnaissance with digests, decompose, todos). Eval mode has no interactive user to block on: run A.1a as a **self-Q&A** — write out the setting/architecture questions, adopt the **stronger/tighter** default for each, and record each in `<output_dir>/.proof-research/decisions.md` and `runner-log.md` (**NOT** as `\todo` in the `.tex` — inline `\todo` is reserved for genuine `\todo{verify:}` gaps), then proceed without waiting.
    - **Phase B** (preliminaries: macros with `aliascnt`, assumptions, definitions).
    - **Phase C** (statements and proofs with per-statement review).
    - **Phase C.5 — Confidence sweep**: produce `<output_dir>/.proof-research/confidence-trace.md` per [confidence-sweep.md](../references/confidence-sweep.md). Enumerate every derivation step, tag each 🔴 initially, then walk the list upgrading via fast-path (textbook inequalities → 🟢; digest match → 🟡) or fire-and-forget sub-agent re-derivation. Save the trace and any sub-agent reports to `.proof-research/`. **Do not skip this phase.**
-   - **Phase D — Review loop**: run the bounded peer-review loop per [review-loop.md](../references/review-loop.md). Spawn a reviewer sub-agent that produces Summary / Strengths / Weaknesses / Questions / Verdict, verify each weakness, apply minimum-change fixes if the cost gate permits, iterate until verdict is `accept-as-is` OR the 3-iteration cap OR convergence detection fires. Save each iteration's review + your verification decisions to `<output_dir>/.proof-research/review-iteration-<N>.md`. **Do not skip this phase.**
+   - **Phase D — Review loop**: run the bounded peer-review loop per [review-loop.md](../references/review-loop.md) and [reviewer-roles.md](../references/reviewer-roles.md). **First clear the desk-reject gate (gate (d))**: `lint.py … --final` exit 0 (R20: no surviving `\todo`, no `.proof-research/`/`decisions.md`/`runner-log` reference) AND the desk-reject gate reviewer returns `desk-accept` (format / anonymity / structure); fix any violation and re-run before the panel. Then each iteration spawns **five reviewers in parallel** (3 correctness lenses + math-taste + derivation-integrity), each scoring 0–10; merge/dedupe their weaknesses, verify each, apply minimum-change fixes if the cost gate permits, and iterate. **Accept when the mean score > 8 and no unresolved critical remains**, else stop at the 3-iteration cap OR convergence detection. Save each iteration's five reviews + scores + your verification decisions to `<output_dir>/.proof-research/review-iteration-<N>.md`. **Do not skip this phase.**
 
 3. **Experiment design (only if the eval prompt requests it).** If the eval prompt explicitly asks for an `experiments-plan.md`, produce it per [theory-experiment.md](../references/theory-experiment.md) — **design only, never fabricated numbers**. Save to `<output_dir>/experiments-plan.md`. If the eval does not request experiments, do not produce a plan; the proof PDF stays clean of empirical content per the conventions.
 
@@ -99,10 +99,12 @@ One paragraph: what the headline theorem says, how it's decomposed (which lemmas
 
 ## Phase D — Review loop summary
 - Iterations: <N> (max 3)
-- Final verdict: accept-as-is | accept-with-minor-revisions | major-revision-required | reject-as-flawed
-- Weaknesses per iteration: <N_1>, <N_2>, ...
+- Accepted: <yes/no> (final mean <m>/10; accept requires mean > 8 + no unresolved critical)
+- Mean score per iteration: <m_1>, <m_2>, ...
+- Final five reviewer scores: R1 <s1> / R2 <s2> / R3 <s3> / R4 <s4> / R5 <s5>
+- Merged weaknesses per iteration: <N_1>, <N_2>, ...
 - Fixes applied per iteration: <N_1>, <N_2>, ...
-- Termination reason: <accept-as-is | 3-iter cap | convergence stall | no-fixes | statement-change escalation>
+- Termination reason: <accepted (mean>8) | 3-iter cap | convergence stall | no-fixes | statement-change escalation>
 - Iteration files in .proof-research/review-iteration-1.md, ..., review-iteration-<N>.md
 
 ## Where I had to make calls
@@ -122,4 +124,4 @@ Honest list of gaps, `\todo{}` items, deferred elaborations. The grader prefers 
 
 ## Deliverable
 
-The `<output_dir>/` directory with all files plus a brief summary message (≤ 300 words) describing: theorem proved, decomposition, Phase C.5 outcome (red/yellow/green counts), Phase D outcome (iterations + verdict), and residual `\todo` items. The grader will read your files directly.
+The `<output_dir>/` directory with all files plus a brief summary message (≤ 300 words) describing: theorem proved, decomposition, Phase C.5 outcome (red/yellow/green counts), Phase D outcome (iterations + final mean score + accepted?), and residual `\todo` items. The grader will read your files directly.

@@ -1,0 +1,58 @@
+% macros.tex — symbol macros + theorem-environment setup.
+% Generated for the Lean-verified result `Decode.decode_iff_gradient_separation`
+% (and its corollary). Symbol macros are transcribed verbatim from
+% `.lean-proof/notation-map.md`; the theorem-environment block follows the
+% cleveref-safe \newaliascnt template in references/conventions.md (lint R0c).
+
+% ---------------------------------------------------------------------------
+% Symbol macros (one per row of the notation map)
+% ---------------------------------------------------------------------------
+\newcommand{\Vocab}{\mathcal{V}}                                  % finite vocabulary
+\newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}         % real inner product
+\newcommand{\norm}[1]{\left\| #1 \right\|}                         % norm
+\newcommand{\Sphere}{\mathcal{S}_r}                                % LayerNorm sphere of radius r
+\newcommand{\loss}{L}                                              % implicit loss
+\newcommand{\grad}{\nabla}                                         % gradient operator
+\newcommand{\xstar}{x^{\star}}                                     % stationary point
+\newcommand{\astar}{a^{\star}}                                     % designated (answer) token
+\newcommand{\Generated}{\mathsf{Gen}}                              % decoder predicate
+
+% ---------------------------------------------------------------------------
+% Theorem-environment setup (aliascnt → cleveref-safe shared numbering)
+% ---------------------------------------------------------------------------
+\usepackage{amsthm}
+\usepackage{aliascnt}
+\usepackage[capitalize]{cleveref}
+
+% Master counter.
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+
+% Aliased plain-style environments.
+\newaliascnt{lemma}{theorem}
+\newtheorem{lemma}[lemma]{Lemma}
+\aliascntresetthe{lemma}
+
+\newaliascnt{corollary}{theorem}
+\newtheorem{corollary}[corollary]{Corollary}
+\aliascntresetthe{corollary}
+
+% Aliased definition-style environments.
+\theoremstyle{definition}
+\newaliascnt{definition}{theorem}
+\newtheorem{definition}[definition]{Definition}
+\aliascntresetthe{definition}
+
+% Aliased remark-style environment.
+\theoremstyle{remark}
+\newaliascnt{remark}{theorem}
+\newtheorem{remark}[remark]{Remark}
+\aliascntresetthe{remark}
+
+% Cleveref names — keyed on the aliascnt counters, so they fire correctly.
+\crefname{theorem}{Theorem}{Theorems}
+\crefname{lemma}{Lemma}{Lemmas}
+\crefname{corollary}{Corollary}{Corollaries}
+\crefname{definition}{Definition}{Definitions}
+\crefname{remark}{Remark}{Remarks}
+\crefname{equation}{Eq.}{Eqs.}

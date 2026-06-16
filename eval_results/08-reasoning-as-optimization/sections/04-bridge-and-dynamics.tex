@@ -1,0 +1,201 @@
+\section{The loss-to-margin bridge, and decode-time dynamics}
+\label{sec:bridge-and-dynamics}
+
+The decode-iff of \Cref{sec:decode-iff} characterizes \emph{which} token a constrained
+stationary point selects. This section adds the analytic link to the loss \emph{value}: a
+single, machine-verified inequality (\Cref{lem:loss_below_log2_decodes}) showing that once the
+single-token cross-entropy loss drops below $\log 2$, the greedy decoder is guaranteed to emit
+$\astar$. We then use this bridge, together with a \emph{cited, classical} convergence rate, to
+read off decode-time and success-probability consequences.
+
+The section has two clearly separated parts. \textbf{Part~B1} (\Cref{lem:loss_below_log2_decodes})
+is Lean-checked: each displayed step carries a \verb|% @lx-from:| provenance comment naming the
+Lean declaration that verifies it, exactly as in \Cref{sec:decode-iff,sec:corollaries}.
+\textbf{Part~B2} is different in status, and we flag it explicitly:
+
+\begin{quote}
+\emph{The results of Part~B2 below (\Cref{prop:gd_rate}, \Cref{cor:decode_time}, and the
+remarks) are classical consequences of convex-optimization theory. They are stated here for
+context and are \textbf{cited, not machine-verified}; only the bridge of Part~B1 (and the
+results of \Cref{sec:decode-iff,sec:corollaries}) are Lean-checked.} None of the Part~B2 claims
+carries an \verb|% @lx-from:| provenance comment, and none is tagged as Lean-verified.
+\end{quote}
+
+% ===========================================================================
+% PART B1 — VERIFIED: the loss-to-margin bridge
+% ===========================================================================
+\subsection{Part B1 (Lean-verified): the bridge}
+\label{sec:bridge-verified}
+
+Recall the single-token cross-entropy loss at a hidden state $x$,
+\begin{align*}
+\loss(x) \;=\; \log\Bigl(\sum_{c} \exp\inner{W_c}{x}\Bigr) - \inner{W_{\astar}}{x},
+\end{align*}
+which is exactly $-\log p_{\astar}(x)$ for the softmax probability $p_{\astar}(x)$ of the answer
+token. Write $\logit{c} := \inner{W_c}{x}$ for the logit of a token $c \in \Vocab$ and % lint: ignore R15
+$\Zpart := \sum_{c} \exp(\logit{c})$ for the softmax partition; then $\loss(x) = \log\Zpart - \logit{\astar}$.
+
+% @lx-from: lem:bridge | kind: named
+\begin{lemma}[Loss-to-margin bridge: $\loss(x) < \log 2 \implies$ decode $\astar$]
+\label{lem:loss_below_log2_decodes}
+Let $\Vocab$ be a vocabulary with at least two tokens and let $x \in E$. If the single-token
+cross-entropy loss at $x$ is strictly below $\log 2$,
+\begin{align*}
+\loss(x) \;=\; \log\Bigl(\sum_{c} \exp\inner{W_c}{x}\Bigr) - \inner{W_{\astar}}{x} \;<\; \log 2,
+\end{align*}
+(equivalently, the softmax mass on $\astar$ exceeds $\tfrac12$), then $\astar$ is generated at
+$x$: $\Generated(\astar, x)$.
+\end{lemma}
+
+\begin{proof}
+Write $\logit{c} = \inner{W_c}{x}$ and $\Zpart = \sum_{c}\exp(\logit{c})$.
+
+% @lx-from: lem:bridge.1 | kind: arith
+First, the partition is strictly positive:
+\begin{align*}
+\Zpart \;=\; \sum_{c} \exp(\logit{c}) \;>\; 0.
+\end{align*}
+Indeed each summand $\exp(\logit{c})$ is strictly positive, and the vocabulary is nonempty (it
+has at least two tokens), so the sum of strictly positive terms over a nonempty index set is
+strictly positive.
+
+% @lx-from: lem:bridge.2 | kind: arith
+Next, the hypothesis bounds the partition by twice the answer's exponential:
+\begin{align*}
+\Zpart \;<\; 2\,\exp(\logit{\astar}).
+\end{align*}
+To see this, rewrite the hypothesis $\log\Zpart - \logit{\astar} < \log 2$ using
+$\logit{\astar} = \log\exp(\logit{\astar})$ and $\log\bigl(2\exp(\logit{\astar})\bigr) = \log 2 + \logit{\astar}$,
+which gives $\log\Zpart < \log\bigl(2\exp(\logit{\astar})\bigr)$; since both $\Zpart$ and
+$2\exp(\logit{\astar})$ are strictly positive, strict monotonicity of $\log$ yields
+$\Zpart < 2\exp(\logit{\astar})$.
+
+% @lx-from: lem:bridge.3 | kind: arith
+Splitting the partition at $\astar$, $\Zpart = \exp(\logit{\astar}) + \sum_{c \ne \astar}\exp(\logit{c})$,
+and substituting into the previous display, the answer's exponential strictly dominates the
+combined mass of all competitors:
+\begin{align*}
+\exp(\logit{\astar}) \;>\; \sum_{c \ne \astar} \exp(\logit{c}).
+\end{align*}
+
+% @lx-from: lem:bridge.4 | kind: named
+Finally, fix a competitor $b \ne \astar$. Its exponential $\exp(\logit{b})$ is one of the
+nonnegative summands of $\sum_{c \ne \astar}\exp(\logit{c})$, hence
+$\exp(\logit{b}) \le \sum_{c \ne \astar}\exp(\logit{c}) < \exp(\logit{\astar})$; strict
+monotonicity of $\exp$ gives $\logit{b} < \logit{\astar}$, that is,
+\begin{align*}
+\forall\, b \ne \astar,\qquad \inner{W_b}{x} \;<\; \inner{W_{\astar}}{x}.
+\end{align*}
+This is exactly $\Generated(\astar, x)$, which completes the proof.
+\end{proof}
+
+\begin{remark}[What the bridge does, and does not, assume]
+\label{rem:bridge-scope}
+\Cref{lem:loss_below_log2_decodes} is a statement about the loss \emph{value} at a single point
+$x$; it assumes neither stationarity nor differentiability, and the loss is never
+differentiated. It is therefore orthogonal to, and composes with, \Cref{thm:main}: the iff says
+\emph{which} token a stationary point decodes, while the bridge gives a checkable
+\emph{sufficient} condition --- a loss below $\log 2$ --- under which that token is $\astar$.
+The threshold $\log 2$ is the exact crossover at which $p_{\astar}$ overtakes the combined mass
+of all alternatives ($p_{\astar} > \tfrac12$).
+\end{remark}
+
+% ===========================================================================
+% PART B2 — CLASSICAL / CITED (NOT machine-verified)
+% ===========================================================================
+\subsection{Part B2 (classical, cited --- not machine-verified): dynamics, rate, and success}
+\label{sec:dynamics-cited}
+
+We now model reasoning as gradient descent on the cross-entropy loss and read off the
+decode-time and success consequences. \textbf{Every claim in this subsection is classical and
+cited, or labeled as such; none is machine-verified, and none carries a Lean provenance
+comment.} The verified content of this paper is confined to \Cref{sec:decode-iff,sec:corollaries}
+and \Cref{lem:loss_below_log2_decodes}.
+
+\begin{remark}[The loss is convex and smooth]
+\label{rem:convex}
+As a function of the hidden state $x$, $\loss(x) = \log\sum_{c}\exp\inner{W_c}{x} - \inner{W_{\astar}}{x}$
+is convex: it is a log-sum-exp of linear functions (a convex function) minus a linear term (an
+affine function). On any bounded region --- in particular the compact LayerNorm sphere
+$\Sphere$ --- its gradient is Lipschitz, so $\loss$ is $\smooth$-smooth for some finite constant
+$\smooth$. These two properties are exactly the hypotheses of the classical gradient-descent
+rate below. (This remark is exposition; it is not machine-verified.)
+\end{remark}
+
+We model a reasoning trajectory as gradient descent on $\loss$,
+$x_{t+1} = x_t - \stepsize\,\grad\loss(x_t)$, from an initialization $x_1$, converging toward a
+minimizer $x^{\star}$ with optimal value $\lossopt := \loss(x^{\star})$.
+
+% Cited classical result — discharged by the \cite bracket (lint R5), NO proof, NO @lx-from.
+\begin{proposition}[Gradient-descent rate for a smooth convex loss, {\cite[Theorem~3.3]{bubeck2015}}]
+\label{prop:gd_rate}
+Let $\loss$ be convex and $\smooth$-smooth (\Cref{rem:convex}). Then gradient descent with step
+size $\stepsize = 1/\smooth$ satisfies, for all $t \ge 2$,
+\begin{align*}
+\loss(x_t) - \lossopt \;\le\; \frac{2\,\smooth\,\norm{x_1 - x^{\star}}^2}{t - 1} \;=\; O\!\left(\frac{1}{t}\right),
+\end{align*}
+and the loss is non-increasing along the iterates ($\loss(x_{t+1}) \le \loss(x_t)$).
+\end{proposition}
+
+\begin{corollary}[Decode-correct in $O(1/\optgap)$ steps, and stays correct]
+\label{cor:decode_time}
+Assume the problem is \emph{solvable} in the sense that the optimal loss clears the bridge
+threshold with positive margin,
+\begin{align*}
+\optgap \;:=\; \log 2 - \lossopt \;>\; 0,
+\end{align*}
+and set $\tstar := 1 + 2\,\smooth\,\norm{x_1 - x^{\star}}^2 / \optgap = O(1/\optgap)$. Then for
+every step $t > \tstar$ the gradient-descent iterate decodes the answer token,
+$\Generated(\astar, x_t)$, and continues to do so for all larger $t$.
+\end{corollary}
+
+\begin{proof}
+By \Cref{prop:gd_rate}, for $t \ge 2$ we have
+$\loss(x_t) - \lossopt \le 2\smooth\norm{x_1 - x^{\star}}^2/(t-1)$. Hence
+$\loss(x_t) < \log 2$ as soon as $2\smooth\norm{x_1 - x^{\star}}^2/(t-1) < \log 2 - \lossopt = \optgap$,
+that is, as soon as $t - 1 > 2\smooth\norm{x_1 - x^{\star}}^2/\optgap$, i.e. $t > \tstar$. For
+any such $t$, \Cref{lem:loss_below_log2_decodes} applies to $x_t$ and yields
+$\Generated(\astar, x_t)$. Because $\loss$ is non-increasing along the iterates
+(\Cref{prop:gd_rate}), once $\loss(x_t) < \log 2$ it remains below $\log 2$ thereafter, so the
+decode stays correct for all larger $t$. The number of steps to first decode-correctness is
+thus $\tstar = O(1/\optgap)$ --- polynomial in the inverse margin.
+\end{proof}
+
+\begin{remark}[This corollary is cited-not-verified]
+\label{rem:cor-not-verified}
+\Cref{cor:decode_time} combines the \emph{cited} rate of \Cref{prop:gd_rate} with the
+\emph{verified} bridge of \Cref{lem:loss_below_log2_decodes}. Because one of its two inputs
+(the rate) is classical and not machine-checked, the corollary as a whole is \textbf{not
+Lean-verified}; only the bridge step it invokes is. Accordingly this corollary carries no
+\verb|% @lx-from:| provenance comment and is not tagged as Lean-verified. We include the short
+proof to make the combination transparent, not to claim machine verification of it.
+\end{remark}
+
+\begin{remark}[Structural success and failure: the iff is the exact boundary]
+\label{rem:structural}
+For a \emph{fixed} problem the outcome is deterministic, $0$ or $1$: reasoning either ends at a
+point that decodes $\astar$ or it does not. Success is \emph{possible} precisely when $\astar$
+is the argmax at the optimum $x^{\star}$ --- which is exactly the verified condition of
+\Cref{thm:main} evaluated at $x^{\star}$, namely $\Generated(\astar, x^{\star})$, equivalently
+$\forall b \ne \astar,\ \mu\,\inner{W_{\astar} - W_b}{\grad\loss(x^{\star})} > 0$ at a stationary
+$x^{\star}$. \Cref{lem:loss_below_log2_decodes} gives a clean \emph{sufficient} route to that
+success ($\lossopt < \log 2$, i.e. $\optgap > 0$), while \Cref{thm:main} is the exact
+\emph{necessary-and-sufficient} condition; when separation fails at the optimum the problem
+fails structurally, and \Cref{cor:fail} names the offending competitor. (This remark is
+exposition tying the cited dynamics back to the verified geometry; it is not itself verified.)
+\end{remark}
+
+\begin{remark}[Success probability over a problem distribution]
+\label{rem:probability}
+The only honest source of randomness here is the distribution over questions $Q$ (each fixed
+$Q$ being deterministic, \Cref{rem:structural}). Writing $\optgap(Q)$ and $\tstar(Q)$ for the
+per-problem margin and decode-time, the budget-$T$ success rate is
+\begin{align*}
+\passat{T} \;=\; \Pr_Q\!\left[\, \optgap(Q) > 0 \;\wedge\; \tstar(Q) \le T \,\right]
+\;\xrightarrow[\;T \to \infty\;]{}\; \Pr_Q\!\left[\, \optgap(Q) > 0 \,\right],
+\end{align*}
+a monotone rise (in $T$) to the ceiling given by the solvable fraction
+$\Pr_Q[\optgap(Q) > 0]$. With stochastic gradients of noise level $\sigma$ the finite-$T$ curve
+$T \mapsto \passat{T}$ is smoothed into a sigmoidal $\Phi(\cdot)$-shaped profile rather than a
+hard threshold. (This remark is classical/heuristic exposition and is not machine-verified.)
+\end{remark}

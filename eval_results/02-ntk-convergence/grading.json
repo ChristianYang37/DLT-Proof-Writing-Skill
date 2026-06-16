@@ -1,27 +1,97 @@
 {
   "eval_id": 2,
   "eval_name": "ntk-convergence-two-layer",
-  "version": "v2-full-workflow",
-  "graded_at": "2026-05-14T17:00:00+08:00",
-  "grader": "main-agent (hand-grade per agents/grader.md)",
+  "graded_at": "2026-06-09T05:12:00Z",
   "assertions": [
-    {"text": "three NTK lemmas are stated by name (init-Gram close, perturbation stability, contraction)", "type": "qualitative", "passed": true, "evidence": "runner-log: 'Three structural lemmas (Gram init concentration, perturbation stability, deterministic stay-in-ball linear convergence)'", "notes": "all three named + auxiliary lemma for initial residual"},
-    {"text": "theorem statement includes m ≥ poly(n, 1/λ_0, 1/δ) width condition", "type": "qualitative", "passed": true, "evidence": "thm:main: m ≥ C_1 n^6 / (λ_0^4 δ^3), η = C_2 λ_0/n^2", "notes": "explicit polynomial exponent"},
-    {"text": "scripts/latexmk-wrapper.py reports compile_ok=true", "type": "script", "passed": true, "evidence": "compile_ok: True, undef_refs: 0, undef_cites: 0, errors: 0", "notes": ""},
-    {"text": "explicit union-bound paragraph accounts for the probability budget", "type": "qualitative", "passed": true, "evidence": "fixed-point/contradiction argument closes the probabilistic budget; runner-log: '+ one auxiliary (initial residual size); closure via inductive fixed-point/contradiction argument'", "notes": ""},
-    {"text": "uses successful-event conditioning OR explicit \"with probability 1-δ\" qualifier on every concentration-based lemma", "type": "qualitative", "passed": true, "evidence": "main theorem: 'w.p. ≥ 1 - δ'; each lemma uses w.p. or deterministic conditional form", "notes": ""},
-    {"text": "λ_0 dependency is propagated through constants (constants subscripted by λ_0 or noted as poly(1/λ_0))", "type": "qualitative", "passed": true, "evidence": "width m ∝ 1/λ_0^4; step η ∝ λ_0; contraction rate 1 - ηλ_0/2; R ∝ 1/λ_0", "notes": "every load-bearing constant shows λ_0 dependence"},
-    {"text": "every used \\Cref resolves to an existing label (no undef_refs in latexmk-wrapper output)", "type": "script", "passed": true, "evidence": "undef_refs: 0, undef_cites: 0; all citation keys (du2019gradient) resolve in refs.bib", "notes": "**v1 failure (fabricated du2019gradient) FIXED in v2** — refs.bib now contains the verified entry"},
-    {"text": "experiments-plan.md is produced in output_dir with the schema from theory-experiment.md", "type": "script", "passed": true, "evidence": "experiments-plan.md exists; runner-log lists: theoretical claim + 3 empirical hypotheses + setup + 2 baselines + 3 ablations + 4 figures + 1 table + pre-registered thresholds", "notes": "full schema followed"},
-    {"text": "experiments-plan.md has no fabricated results — the Results section is blank or absent, no invented numerical values, no fitted slopes", "type": "qualitative", "passed": true, "evidence": "runner-log: 'Results section blank'", "notes": "honest design-only artifact"},
-    {"text": "experiments-plan.md design meets ICML/NeurIPS/ICLR rigor minimum: ≥5 seeds explicitly listed, at least one baseline, at least one ablation, pre-registered success criteria stated", "type": "qualitative", "passed": true, "evidence": "10 seeds, 2 baselines (kernel regression + linear), 3 ablations (η, λ_0, d), pre-registered confirm/refute thresholds", "notes": "exceeds minimums"},
-    {"text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢", "type": "script", "passed": true, "evidence": "confidence-trace.md present; 32 steps; final state 🟢 29 / 🟡 3 / 🔴 0; two initial 🔴 with \\todo{verify} resolved to 🟢 during Phase D iter 1", "notes": "exemplary 🔴 → \\todo → fix → 🟢 path"},
-    {"text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists with the Summary/Strengths/Weaknesses/Questions/Verdict schema", "type": "script", "passed": true, "evidence": "review-iteration-1.md (5 weaknesses; W1,W2 major REAL-blocking fixed; W4,W5 minor REAL-nonblocking fixed; W3 INTENTIONAL rebutted) + review-iteration-2.md (3 minor style fixed; accept-as-is)", "notes": "2 iter to accept-as-is"}
+    {
+      "text": "three NTK lemmas are stated by name (init-Gram close, perturbation stability, contraction)",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "02-lemma-init-gram-close.tex:3 '\\begin{lemma}[Initial Gram close to population]\\label{lem:init-gram-close}'; 03-lemma-gram-stability.tex:3 '[Gram stability under weight perturbation]\\label{lem:gram-stability}'; 04-lemma-contraction.tex:3 '[One-step contraction and weight movement]\\label{lem:contraction}'.",
+      "notes": "All three named NTK lemmas present, plus a lem:main induction lemma welding them."
+    },
+    {
+      "text": "theorem statement includes m ≥ poly(n, 1/λ_0, 1/δ) width condition",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "06-main-theorem.tex:14 'm \\;\\ge\\; C\\, \\frac{n^6}{\\lzero^4\\, \\delta^3}'; rem:informal:4 'm \\gtrsim \\poly(n, 1/\\lzero, 1/\\delta)'.",
+      "notes": "Explicit polynomial width in the formal theorem; \\poly form in the informal teaser."
+    },
+    {
+      "text": "scripts/latexmk-wrapper.py reports compile_ok=true",
+      "type": "script",
+      "passed": true,
+      "evidence": "latexmk-wrapper.py main.tex --outdir .output -> {\"compile_ok\": true, \"undef_refs\": [], \"undef_cites\": [], \"mult_labels\": [], \"errors\": [], \"warnings_count\": 0}.",
+      "notes": "Clean compile; no undefined refs/cites/errors."
+    },
+    {
+      "text": "explicit union-bound paragraph accounts for the probability budget",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "06-main-theorem.tex:34 '\\textbf{Union bound (probability budget).}' ... :54-58 '\\Pr[\\mathcal{E}_1 \\cap \\mathcal{E}_2 \\cap \\mathcal{E}_3 \\cap \\mathcal{E}_4] \\ge 1 - ... \\ge 1 - 4 \\cdot \\frac{\\delta}{4} = 1 - \\delta'.",
+      "notes": "Four initialization events each at δ/4, explicit union-bound display Eq.~(union) -> 1-δ."
+    },
+    {
+      "text": "uses successful-event conditioning OR explicit \"with probability 1-δ\" qualifier on every concentration-based lemma",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "02:9 / 03:10 / 05-...:185 (init-residual) each 'with probability at least $1 - \\delta$'; 05-lemma-main-induction.tex:39-42 'we work on the intersection of the four high-probability events ... on which all statements below are deterministic'; 06:63 'Deterministic conclusion on E1∩E2∩E3∩E4'.",
+      "notes": "Every concentration lemma carries 1-δ; the induction conditions on the successful event."
+    },
+    {
+      "text": "λ_0 dependency is propagated through constants (constants subscripted by λ_0 or noted as poly(1/λ_0))",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "01-preliminaries.tex:7-10 'constants that depend on a problem parameter carry it as a subscript (e.g.\\ $C_{\\lzero}$)'; width m\\ge Cn^6/(\\lzero^4\\delta^3), radius R=c\\delta\\lzero/n^2, step \\eta=\\kappa\\lzero/n^2, rate 1-\\eta\\lzero/2; rem:decisions:85 'All constants are polynomial in $1/\\lzero$'.",
+      "notes": "λ_0 tracked at the symbol level throughout; universal-constant convention stated once."
+    },
+    {
+      "text": "every used \\Cref resolves to an existing label (no undef_refs in latexmk-wrapper output)",
+      "type": "script",
+      "passed": true,
+      "evidence": "latexmk-wrapper.py JSON 'undef_refs': []; lint.py main.tex sections/*.tex --bib refs.bib -> {\"n_errors\": 0} (R5/R0a/R0b/R12 all clean).",
+      "notes": "All cross-references resolve; all \\input targets exist on disk."
+    },
+    {
+      "text": "experiments-plan.md is produced in output_dir with the schema from theory-experiment.md (Theoretical claim, Empirical hypothesis, Setup, Metrics with verifies-which-theorem mapping, Baselines, Ablations, Plots, Pre-registered success criteria, Reproducibility)",
+      "type": "script",
+      "passed": true,
+      "evidence": "grep '^##' experiments-plan.md -> Theoretical claim, Empirical hypothesis, Setup, Metrics, Baselines, Ablations, Plots and tables, Pre-registered success criteria, Reproducibility statement; Metrics table has a 'Verifies' column mapping each metric to \\Cref{thm:main}/lem:contraction/lem:main/lem:gram-stability/lem:init-gram-close.",
+      "notes": "Full schema present with explicit verifies-which-theorem mapping per metric and per figure."
+    },
+    {
+      "text": "experiments-plan.md has no fabricated results — the Results section is blank or absent, no invented numerical values, no fitted slopes",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "experiments-plan.md:151-154 '## Results ... **Leave this section blank.** ... Do NOT populate with imagined numbers, predicted-as-actual values, or placeholder rows.'; all numerics are config sweeps/pre-registered thresholds, not measurements.",
+      "notes": "Results intentionally blank; R²≥0.98 / ±15% are pre-registered criteria, not fabricated outcomes."
+    },
+    {
+      "text": "experiments-plan.md design meets ICML/NeurIPS/ICLR rigor minimum: ≥5 seeds explicitly listed, at least one baseline, at least one ablation, pre-registered success criteria stated",
+      "type": "qualitative",
+      "passed": true,
+      "evidence": "Seeds: '[1, 2, 3, 4, 5]' (l.63, headline extended to [1..10]); Baselines B1 (NTK kernel regression) + B2 (frozen-features) (l.85-93); Ablations A1-A4 width/step/n/d (l.95-107); 'Pre-registered success criteria' with fixed Confirms/Refutes thresholds (l.126-138).",
+      "notes": "Exceeds minimum: 5 seeds, 2 baselines, 4 ablations, criteria fixed before running."
+    },
+    {
+      "text": "Phase C.5 confidence sweep ran: .proof-research/confidence-trace.md exists with each derivation step tagged 🔴/🟡/🟢 and a per-step verification method",
+      "type": "script",
+      "passed": true,
+      "evidence": ".proof-research/confidence-trace.md exists (19820 bytes); 70 🔴/🟡/🟢 occurrences; each step carries '**Verification method:**' (e.g. l.24 Hoeffding hand-check, l.42 op≤Frobenius≤... ); summary l.10 'post Phase-D iter 2: no residual 🔴'.",
+      "notes": "Per-step tags + verification methods present; final state has zero residual red."
+    },
+    {
+      "text": "Phase D review loop ran: at least one .proof-research/review-iteration-N.md file exists recording the five-reviewer panel — five 0–10 scores (3 correctness + math-taste + derivation-integrity) and merged, verified weaknesses",
+      "type": "script",
+      "passed": true,
+      "evidence": "review-iteration-1/2/3.md all exist; iter-3 Scores table 'R1 line-by-line 8 | R2 assumptions 8 | R3 ML-significance 8 (3 correctness) | R4 math-taste 8 | R5 derivation-integrity 9 | mean 8.20'; '## Merged + deduped weaknesses' with REAL-nonblocking/PHANTOM/INTENTIONAL verdicts verified against file:line.",
+      "notes": "Full five-reviewer panel, correct lens composition; final mean 8.20>8 with five scored reviews — not a gaming signal."
+    }
   ],
   "overall": {
     "passed_count": 12,
     "failed_count": 0,
     "not_verifiable_count": 0,
-    "summary": "Full v2 workflow ran cleanly. **Both v1 failures fixed**: (1) cite key du2019gradient now in refs.bib (no fabrication), (2) no truncation. Phase C.5: 32 steps, 29🟢/3🟡/0🔴 — two initial 🔴 with \\todo{verify} markers were resolved to 🟢 during Phase D iter 1 fix rewrites (textbook example of the C.5 → D handoff). Phase D: 2 iter → accept-as-is. Experiments-plan has ICML-grade rigor: 10 seeds, 2 baselines, 3 ablations, pre-registered ŝlope thresholds, Results section blank. Would pass NeurIPS/ICML review."
+    "summary": "All 12 assertions pass on the re-run (v1.2) artifacts. Strengths: a faithful DZPS three-lemma NTK skeleton (init-Gram concentration via Hoeffding+union+Frobenius≥operator+Weyl, anti-concentration stability, I-ηH contraction) welded by a clean strong-induction fixed-point lemma, with an explicit four-event union budget to 1-δ and λ_0 tracked at the symbol level; the experiments plan is rigorous (5 seeds, 2 baselines, 4 ablations, pre-registered criteria, blank Results). Compiles cleanly and lint reports 0 errors. Weakness: one honestly-flagged \\todo{verify} at 05-lemma-main-induction.tex:122 on the activation-flip remainder aggregation constant (1/8), carried from DZPS memory — the flip event itself is fully re-derived and anchored at the Gaussian init. Review-survival: would survive a NeurIPS/ICML appendix review modulo resolving that single disclosed finite-width book-keeping constant."
   }
 }

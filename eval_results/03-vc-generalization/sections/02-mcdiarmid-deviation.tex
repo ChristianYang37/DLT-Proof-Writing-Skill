@@ -1,0 +1,66 @@
+\section{Concentration of the uniform deviation}\label{sec:mcdiarmid}
+
+We first reduce the high-probability control of the uniform deviation
+$\Phi(S):=\sup_{h\in\Hcal}\abs{\Risk(h)-\Riskhat_n(h)}$ to control of its mean,
+paying only an additive $\sqrt{\log(1/\delta)/(2n)}$. The tool is McDiarmid's
+bounded-differences inequality (\Cref{thm:vc-bound} uses this as its
+concentration step).
+
+\begin{lemma}[Bounded-differences concentration of the deviation]
+\label{lem:mcdiarmid-dev}
+% lint: ignore R17 — the 1-\delta budget here is a SINGLE McDiarmid tail event
+% (no union over multiple events); its failure budget is discharged explicitly
+% by the union-bound paragraph of the main theorem (sections/05, event E).
+Under \Cref{ass:iid}, let $\Phi(S):=\sup_{h\in\Hcal}\abs{\Risk(h)
+-\Riskhat_n(h)}$. Then for every $\delta\in(0,1)$, with probability at least
+$1-\delta$ over $S$,
+\begin{align}\label{eq:mcdiarmid-conc}
+\Phi(S)\ \le\ \E_{S}\bigl[\Phi(S)\bigr]
+   +\sqrt{\frac{\log(1/\delta)}{2n}}.
+\end{align}
+\end{lemma}
+
+\begin{proof}
+We verify that $\Phi$ has the bounded-differences property with constants
+$c_i=1/n$ and then invoke McDiarmid's inequality.
+
+Fix a coordinate $i\in[n]$ and two samples $S=(z_1,\dots,z_i,\dots,z_n)$ and
+$S'=(z_1,\dots,z_i',\dots,z_n)$ differing only in the $i$-th example, where
+$z_j=(x_j,y_j)$. For every fixed $h\in\Hcal$ the population risk $\Risk(h)$ does
+not depend on $S$, and the empirical risk changes by at most $1/n$:
+\begin{align}\label{eq:risk-bdiff}
+\abs{\Riskhat_n(h)\big|_{S}-\Riskhat_n(h)\big|_{S'}}
+=\frac1n\,\abs{\1\{h(x_i)\neq y_i\}-\1\{h(x_i')\neq y_i'\}}
+\le\frac1n,
+\end{align}
+since each indicator lies in $\{0,1\}$. Writing $a(h):=\abs{\Risk(h)
+-\Riskhat_n(h)|_{S}}$ and $b(h):=\abs{\Risk(h)-\Riskhat_n(h)|_{S'}}$, the
+reverse triangle inequality and Eq.~\eqref{eq:risk-bdiff} give
+$\abs{a(h)-b(h)}\le 1/n$ for every $h$, and the elementary inequality
+$\abs{\sup_h a(h)-\sup_h b(h)}\le\sup_h\abs{a(h)-b(h)}$ yields
+\begin{align}\label{eq:phi-bdiff}
+\abs{\Phi(S)-\Phi(S')}
+=\Bigl|\sup_{h}a(h)-\sup_{h}b(h)\Bigr|
+\le\sup_{h}\abs{a(h)-b(h)}
+\le\frac1n.
+\end{align}
+Thus $\Phi$ satisfies the bounded-differences property with $c_i=1/n$ for all
+$i$, so $\sum_{i=1}^{n}c_i^{2}=n\cdot n^{-2}=1/n$.
+
+By \Cref{ass:iid} the examples $z_1,\dots,z_n$ are independent, so McDiarmid's
+inequality (\cite{boucheron2013concentration}, Theorem~6.2;
+\cite{wainwright2019high}, Corollary~2.21) applies to its upper tail:
+\begin{align}\label{eq:mcdiarmid-tail}
+\Pr_{S}\Bigl[\Phi(S)-\E_S\Phi(S)\ge t\Bigr]
+\ \le\ \exp\!\Bigl(-\frac{2t^{2}}{\sum_{i}c_i^{2}}\Bigr)
+=\exp\!\bigl(-2nt^{2}\bigr),
+\qquad t>0.
+\end{align}
+Setting the right-hand side of Eq.~\eqref{eq:mcdiarmid-tail} equal to $\delta$ gives
+$t=\sqrt{\log(1/\delta)/(2n)}$; equivalently, with probability at least
+$1-\delta$ the complementary event holds, namely
+\begin{align*}
+\Phi(S)\ \le\ \E_S\Phi(S)+\sqrt{\frac{\log(1/\delta)}{2n}}.
+\end{align*}
+This is Eq.~\eqref{eq:mcdiarmid-conc}, as desired.
+\end{proof}

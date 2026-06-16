@@ -1,0 +1,74 @@
+\section{Main theorem: linear convergence to zero training loss}\label{sec:main}
+
+\begin{remark}[Informal statement]\label{rem:informal}
+Under \Cref{ass:lambda0}, suppose the width is $m \gtrsim \poly(n, 1/\lzero, 1/\delta)$ and the
+step size is $\eta = O(\lzero / n^2)$. Then with high probability over the random
+initialization, gradient descent on the squared loss Eq.~\eqref{eq:loss} converges linearly to
+zero training loss: $\norm{y - u(k)}^2 \le (1 - \tfrac{\eta\lzero}{2})^k \norm{y - u(0)}^2
+\to 0$. The formal version with constants pinned is \Cref{thm:main}.
+\end{remark}
+
+\begin{theorem}[Linear convergence of gradient descent]\label{thm:main}
+Let \Cref{ass:lambda0} hold and fix $\delta \in (0, 1)$. Suppose
+\begin{align}\label{eq:thm-conditions}
+m \;\ge\; C\, \frac{n^6}{\lzero^4\, \delta^3},
+\qquad
+\eta \;=\; \kappa\, \frac{\lzero}{n^2}
+\quad (\kappa \le \tfrac12),
+\end{align}
+for a sufficiently large universal constant $C > 0$. Then with probability at least
+$1 - \delta$ over the random initialization $\{(w_r(0), a_r)\}_{r=1}^m$, gradient descent
+Eq.~\eqref{eq:gd} satisfies, for every iteration $k \ge 0$,
+\begin{align}\label{eq:thm-conv}
+\norm{ y - u(k) }^2 \;\le\; \left( 1 - \frac{\eta\,\lzero}{2} \right)^{k} \norm{ y - u(0) }^2 .
+\end{align}
+In particular $\norm{y - u(k)}^2 \to 0$ as $k \to \infty$, so the training loss decays to zero
+at the linear rate $1 - \tfrac{\eta\lzero}{2} = 1 - \tfrac{\kappa\lzero^2}{2n^2}$, and reaching
+$\norm{y - u(k)}^2 \le \varepsilon$ takes
+$k = O\!\left( \tfrac{n^2}{\lzero^2} \log\tfrac{n}{\delta\varepsilon} \right)$ steps.
+\end{theorem}
+
+\begin{proof}[Proof of \Cref{thm:main}]
+The proof is an assembly of the four lemmas via a union bound over their failure events.
+
+\smallskip\noindent\textbf{Union bound (probability budget).}
+Define the four initialization events, each invoked with failure parameter $\delta/4$:
+\begin{align}\label{eq:events}
+\mathcal{E}_1 &:= \left\{ \opnorm{H(0) - \Hinf} \le \tfrac{\lzero}{4} \right\}
+\quad (\text{\Cref{lem:init-gram-close}}), \notag \\
+\mathcal{E}_2 &:= \left\{ \opnorm{H(W) - H(0)} \le \tfrac{\lzero}{4}
+\text{ whenever } \norm{w_r - w_r(0)} \le R \ \forall r \right\}
+\quad (\text{\Cref{lem:gram-stability}}), \\
+\mathcal{E}_3 &:= \left\{ \norm{y - u(0)} \le \sqrt{8n/\delta} \right\}
+\quad (\text{\Cref{lem:init-residual} at level } \delta/4), \notag \\
+\mathcal{E}_4 &:= \left\{ \abs{\{(r,i) : \abs{w_r(0)^\top x_i} \le 2R\}}
+\le \tfrac{8 n m R}{\delta} \right\}
+\quad (\text{Eq.~\eqref{eq:flip-event-budget} at level } \delta/4). \notag
+\end{align}
+By \Cref{lem:init-gram-close,lem:gram-stability,lem:init-residual} and the Markov bound
+Eq.~\eqref{eq:flip-event-budget}, each applied with failure probability $\delta/4$ (the width
+Eq.~\eqref{eq:thm-conditions} dominates each lemma's requirement with $\delta$ replaced by
+$\delta/4$, which only changes the universal constant $C$), together with a union bound over
+the four failure events,
+\begin{align}\label{eq:union}
+\Pr\!\left[ \mathcal{E}_1 \cap \mathcal{E}_2 \cap \mathcal{E}_3 \cap \mathcal{E}_4 \right]
+\;\ge\; & ~ 1 - \Pr[\mathcal{E}_1^c] - \Pr[\mathcal{E}_2^c] - \Pr[\mathcal{E}_3^c]
+- \Pr[\mathcal{E}_4^c]
+\;\ge\; 1 - 4 \cdot \frac{\delta}{4}
+\;=\; 1 - \delta,
+\end{align}
+where the first step is the union bound (equivalently $\Pr[\cap_i \mathcal{E}_i]
+= 1 - \Pr[\cup_i \mathcal{E}_i^c]$) and the second inserts the per-lemma failure probabilities.
+
+\smallskip\noindent\textbf{Deterministic conclusion on $\mathcal{E}_1 \cap \mathcal{E}_2 \cap \mathcal{E}_3 \cap \mathcal{E}_4$.}
+On this event all hypotheses of \Cref{lem:main} are met: its three bulleted conditions are
+exactly the step-size choice, the events $\mathcal{E}_1 \cap \mathcal{E}_2 \cap \mathcal{E}_4$,
+and (feeding the stay-in-ball width computation) the initial-residual event $\mathcal{E}_3$.
+Therefore
+\Cref{lem:main} yields Eq.~\eqref{eq:main-conv} for every $k \ge 0$, which is exactly
+Eq.~\eqref{eq:thm-conv}. Since $0 < 1 - \tfrac{\eta\lzero}{2} < 1$, the right-hand side tends to
+$0$, giving $\norm{y - u(k)}^2 \to 0$. Finally, solving
+$(1 - \tfrac{\eta\lzero}{2})^k \cdot (8n/\delta) \le \varepsilon$ and using $-\log(1 - x) \ge x$
+gives $k = O(\tfrac{1}{\eta\lzero}\log(\tfrac{n}{\delta\varepsilon}))
+= O(\tfrac{n^2}{\lzero^2}\log(\tfrac{n}{\delta\varepsilon}))$. This completes the proof.
+\end{proof}

@@ -1,16 +1,10 @@
-% =====================================================================
-%  Macros and theorem-environment preamble.
-%  Uses aliascnt so that \Cref renders lemma/assumption/definition labels
-%  with their correct type names rather than collapsing to "Theorem X.Y".
-% =====================================================================
+% ======================================================================
+% macros.tex — NTK two-layer convergence proof
+% Theorem environments use aliascnt so cleveref keys on the env name,
+% not the shared `theorem` counter (see conventions.md §Theorem-env preamble).
+% ======================================================================
 
-% --- Theorem environments (aliascnt for cleveref-safe naming) ---------
-\usepackage{amsmath, amssymb, amsthm}
-\usepackage{mathtools}     % provides \coloneqq used by \defeq
-\usepackage{aliascnt}
-\usepackage[capitalize]{cleveref}
-\usepackage{enumitem}
-
+% ----- Theorem environments (aliascnt-safe) -----
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}[section]
 
@@ -44,6 +38,7 @@
 \newtheorem{remark}[remark]{Remark}
 \aliascntresetthe{remark}
 
+% ----- Cleveref names (correctly keyed now) -----
 \crefname{theorem}{Theorem}{Theorems}
 \crefname{lemma}{Lemma}{Lemmas}
 \crefname{proposition}{Proposition}{Propositions}
@@ -54,36 +49,28 @@
 \crefname{remark}{Remark}{Remarks}
 \crefname{equation}{Eq.}{Eqs.}
 
-% --- Asymptotics and rates --------------------------------------------
+% ----- Asymptotics / operators -----
 \DeclareMathOperator{\poly}{poly}
-\DeclareMathOperator{\polylog}{polylog}
-\newcommand{\Otil}{\widetilde{O}}
 
-% --- Common math shortcuts --------------------------------------------
-\newcommand{\R}{\mathbb{R}}
+% ----- Probability / expectation -----
 \newcommand{\E}{\mathbb{E}}
 \renewcommand{\Pr}{\mathbb{P}}
-\newcommand{\one}{\mathbf{1}}
-\newcommand{\I}{\mathbf{I}}
-\newcommand{\eps}{\varepsilon}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathcal{N}}
+\newcommand{\Unif}{\mathrm{Unif}}
+\newcommand{\indic}[1]{\mathbf{1}\!\left\{#1\right\}}
 
-% --- Bold vectors / matrices ------------------------------------------
-\newcommand{\wb}{\mathbf{w}}
-\newcommand{\xb}{\mathbf{x}}
-\newcommand{\yb}{\mathbf{y}}
-\newcommand{\ub}{\mathbf{u}}
-\newcommand{\ab}{\mathbf{a}}
-\newcommand{\Wb}{\mathbf{W}}
-\newcommand{\Hb}{\mathbf{H}}
-
-% --- Norms and inner product ------------------------------------------
+% ----- Norms / inner products -----
 \newcommand{\norm}[1]{\left\| #1 \right\|}
+\newcommand{\abs}[1]{\left| #1 \right|}
 \newcommand{\inner}[2]{\left\langle #1, #2 \right\rangle}
-\newcommand{\opnorm}[1]{\left\| #1 \right\|_{\mathrm{op}}}
+\newcommand{\opnorm}[1]{\left\| #1 \right\|_{2}}
+\newcommand{\fnorm}[1]{\left\| #1 \right\|_{F}}
 
-% --- Definitional equality --------------------------------------------
-\newcommand{\defeq}{\coloneqq}
+% ----- Problem-specific symbols -----
+\newcommand{\Hinf}{H^{\infty}}          % population NTK Gram matrix
+\newcommand{\lmin}{\lambda_{\min}}
+\newcommand{\lzero}{\lambda_{0}}        % := lambda_min(H^infty)
 
-% --- Todo marker ------------------------------------------------------
+% ----- Honesty-protocol marker (renders in red margin; resolves to nothing if unused) -----
 \newcommand{\todo}[1]{\textcolor{red}{\textbf{[TODO: #1]}}}
-\usepackage{xcolor}

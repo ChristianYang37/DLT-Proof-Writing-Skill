@@ -1,0 +1,111 @@
+\section{Growth function and finite-class Rademacher bound}\label{sec:sauer-massart}
+
+This section supplies the two combinatorial/analytic ingredients: the
+Sauer--Shelah bound on the growth function and Massart's finite-class bound on
+the Rademacher complexity.
+
+\begin{lemma}[Sauer--Shelah]\label{lem:sauer-shelah}
+If $\VC(\Hcal)=d$, then for every $m\ge1$,
+\begin{align}\label{eq:sauer}
+\Growth_{\Hcal}(m)\ \le\ \sum_{i=0}^{d}\binom{m}{i},
+\end{align}
+and consequently, for $m\ge d\ge1$,
+\begin{align}\label{eq:sauer-poly}
+\Growth_{\Hcal}(m)\ \le\ \Bigl(\frac{em}{d}\Bigr)^{d}.
+\end{align}
+\end{lemma}
+
+% Sauer--Shelah is a combinatorial set-counting argument (downward shifting /
+% Pajor induction); the inferential content is the counting of shattered subsets,
+% which is intrinsically prose-bound rather than a display derivation chain.
+% lint: ignore R19 — combinatorial shifting/counting proof, see comment above
+\begin{proof}
+Fix any $m$ points $C=\{x_1,\dots,x_m\}\subseteq\Xcal$ and write
+$\Hcal_{|C}\subseteq\{0,1\}^{C}$ for the set of label patterns realized on $C$.
+We prove the stronger \emph{Pajor} claim
+\begin{align}\label{eq:pajor}
+\abs{\Hcal_{|C}}\ \le\ \bigl|\{B\subseteq C:\ \Hcal\text{ shatters }B\}\bigr|,
+\end{align}
+where the empty set is counted as shattered. Since $\VC(\Hcal)=d$, no $B$ with
+$\abs{B}>d$ is shattered, so the right-hand side of Eq.~\eqref{eq:pajor} is at most
+$\sum_{i=0}^{d}\binom{m}{i}$; Eq.~\eqref{eq:sauer} follows by maximizing the
+left-hand side over $C$.
+
+We prove Eq.~\eqref{eq:pajor} by induction on $m=\abs{C}$. For $m=0$ both sides equal
+$1$. For the inductive step fix $x\in C$ and set $C'=C\setminus\{x\}$. Apply the
+\emph{shifting} operator $T_x$ to $\Hcal_{|C}$: for each pattern $p$ with
+$p(x)=1$, replace $p$ by the pattern $p'$ agreeing with $p$ off $x$ and with
+$p'(x)=0$ whenever $p'\notin\Hcal_{|C}$ (otherwise leave $p$ unchanged). The
+operator $T_x$ is injective, so it preserves cardinality:
+$\abs{T_x(\Hcal_{|C})}=\abs{\Hcal_{|C}}$. Partition the shifted family by its
+restriction to $C'$: a pattern $q\in(T_x\Hcal)_{|C'}$ is counted once if exactly
+one of $q0,q1$ lies in $T_x\Hcal$, and counted with multiplicity two if both do.
+The first group has size $\abs{(T_x\Hcal)_{|C'}}$, and by the induction
+hypothesis applied to the family $(T_x\Hcal)_{|C'}$ on the $m-1$ points $C'$ it
+is bounded by the number of subsets of $C'$ shattered by $T_x\Hcal$, each of
+which is shattered by $\Hcal$. For the second group, if both $q0$ and $q1$ lie
+in $T_x\Hcal$ then $T_x\Hcal$---and hence $\Hcal$---shatters the set $B\cup\{x\}$
+for every $B\subseteq C'$ shattered by the ``both'' family on $C'$; counting
+these contributes exactly the subsets of $C$ that contain $x$ and are shattered.
+Adding the two groups, every shattered subset of $C$ is counted once, which is
+Eq.~\eqref{eq:pajor}.
+
+For Eq.~\eqref{eq:sauer-poly}, since $m\ge d$ we have $(d/m)^{i}\ge(d/m)^{d}$ for
+$i\le d$, so multiplying $\sum_{i=0}^{d}\binom{m}{i}$ by
+$(d/m)^{d}\le(d/m)^{i}$ and extending the sum to all $i\ge0$ gives
+\begin{align}\label{eq:binom-poly}
+\Bigl(\frac{d}{m}\Bigr)^{d}\sum_{i=0}^{d}\binom{m}{i}
+\ \le\ \sum_{i=0}^{d}\binom{m}{i}\Bigl(\frac{d}{m}\Bigr)^{i}
+\ \le\ \sum_{i=0}^{m}\binom{m}{i}\Bigl(\frac{d}{m}\Bigr)^{i}
+=\Bigl(1+\frac{d}{m}\Bigr)^{m}
+\le e^{d},
+\end{align}
+using the binomial theorem and $1+t\le e^{t}$. Rearranging
+Eq.~\eqref{eq:binom-poly} yields $\sum_{i=0}^{d}\binom{m}{i}\le(em/d)^{d}$, which is
+Eq.~\eqref{eq:sauer-poly}. This completes the proof.
+\end{proof}
+
+\begin{lemma}[Massart finite-class Rademacher bound]\label{lem:massart-rademacher}
+Under \Cref{ass:vc}, the average Rademacher complexity of the symmetrized loss
+class $\Lbar=\Lcal\cup(-\Lcal)$ satisfies
+\begin{align}\label{eq:massart-bound}
+\Rad_n(\Lbar)\ \le\ \sqrt{\frac{2\log\bigl(2\Growth_{\Hcal}(n)\bigr)}{n}}
+\ \le\ \sqrt{\frac{2\bigl(d\log(en/d)+\log 2\bigr)}{n}}.
+\end{align}
+\end{lemma}
+
+\begin{proof}
+Fix a sample $S=(z_1,\dots,z_n)$ and consider the projection
+$A:=\bigl\{(\ell(z_1),\dots,\ell(z_n)):\ell\in\Lcal\bigr\}\subseteq\{0,1\}^{n}$.
+The projection of $\Lbar$ on $S$ is then $\bar A:=A\cup(-A)$, with
+\begin{align}\label{eq:proj-card}
+\abs{\bar A}\le 2\abs{A}=2\abs{\Lcal_{|S}}\le 2\Growth_{\Lcal}(n)
+\le 2\Growth_{\Hcal}(n),
+\end{align}
+by \Cref{fac:loss-vc} and \Cref{def:growth}. Every $a\in A$ lies in
+$\{0,1\}^{n}$, so every $\bar a\in\bar A$ satisfies $\norm{\bar a}_2\le\sqrt{n}$.
+Massart's lemma (\cite{mohri2018foundations}, Theorem~3.7;
+\cite{shalev2014understanding}, Lemma~26.8): for a finite $B\subseteq\R^{n}$ with
+radius $r=\max_{b\in B}\norm{b}_2$ and i.i.d.\ Rademacher $\sgn$,
+\begin{align}\label{eq:massart-core}
+\E_{\sgn}\Bigl[\max_{b\in B}\sum_{i=1}^{n}\sgn_i b_i\Bigr]
+\ \le\ r\sqrt{2\log\abs{B}}.
+\end{align}
+The empirical Rademacher complexity of $\Lbar$ on $S$ therefore satisfies
+\begin{align}\label{eq:rad-massart}
+\Radhat_S(\Lbar)
+=\frac1n\,\E_{\sgn}\Bigl[\max_{\bar a\in\bar A}\sum_{i=1}^{n}\sgn_i \bar a_i\Bigr]
+\ \overset{(a)}{\le}\ \frac{r\sqrt{2\log\abs{\bar A}}}{n}
+\ \overset{(b)}{\le}\ \frac{\sqrt{n}\,\sqrt{2\log\bigl(2\Growth_{\Hcal}(n)\bigr)}}{n}
+=\sqrt{\frac{2\log\bigl(2\Growth_{\Hcal}(n)\bigr)}{n}},
+\end{align}
+where step $(a)$ is Eq.~\eqref{eq:massart-core} applied to $B=\bar A$ and step
+$(b)$ uses $r\le\sqrt{n}$ and Eq.~\eqref{eq:proj-card}. The bound in
+Eq.~\eqref{eq:rad-massart} holds for every sample $S$, so taking the expectation
+$\E_S$ (\Cref{def:rademacher}) preserves it:
+$\Rad_n(\Lbar)\le\sqrt{2\log(2\Growth_{\Hcal}(n))/n}$. Finally
+\Cref{lem:sauer-shelah} with $m=n\ge d$ gives
+$\log\Growth_{\Hcal}(n)\le d\log(en/d)$, so
+$\log(2\Growth_{\Hcal}(n))\le d\log(en/d)+\log 2$, yielding the second inequality
+in Eq.~\eqref{eq:massart-bound}. This gives the assertion.
+\end{proof}

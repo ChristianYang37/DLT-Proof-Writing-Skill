@@ -1,72 +1,81 @@
-\section{Preliminaries}\label{sec:preliminaries}
+\section{Setup and preliminaries}\label{sec:prelim}
 
 \paragraph{Notation.}
-We write $[N] := \{1,\ldots,N\}$. Universal positive constants are denoted by $c, C, c_0, C_1, \ldots$, possibly depending on $s$, $d$, $\sigma$, and a fixed bump function $\psi$ to be defined below; their values may change from line to line. The dependence on $s, d, \sigma, \psi$ is suppressed in $\lesssim$, $\gtrsim$, and $\asymp$.
+We write $[N] := \{1,\dots,N\}$. For a function $u$ on $[0,1]^d$,
+$\norm{u}_{\Ltwo}^2 := \int_{[0,1]^d} u(x)^2\,dx$ denotes its squared $\Ltwo$
+norm, and for an integer $s\ge 1$ its squared Sobolev norm is
+\begin{align}\label{eq:sobolev-norm}
+\norm{u}_{\Sob}^2 \;:=\; \sum_{|\alpha|\le s} \norm{\partial^{\alpha}u}_{\Ltwo}^2,
+\end{align}
+the sum running over multi-indices $\alpha\in\N^d$ of order $|\alpha|\le s$,
+with $\partial^{\alpha}$ the corresponding weak derivative. The Sobolev class
+of interest is the unit ball
+$\mathcal{W} := \{ f\in \Sob([0,1]^d) : \norm{f}_{\Sob}\le 1\}$.
+For $\tau,\tau'\in\{0,1\}^{M_0}$, $\rhoH(\tau,\tau') := \sum_{j}\1\{\tau_j\ne\tau'_j\}$
+is the Hamming distance and $\Nzero{\tau} := \sum_j \1\{\tau_j\ne 0\}$ the
+Hamming weight. Throughout, $c, C, c_1, C_1, \dots$ denote universal positive
+constants in the sense that they may depend only on the fixed quantities
+$(s,d,g,\sigma^2)$ and on no other problem parameter (in particular not on the
+sample size $n$ or the resolution $m$); their values may change from line to
+line.
 
-For a multi-index $\alpha = (\alpha_1,\ldots,\alpha_d) \in \N_{\geq 0}^d$, let $|\alpha| = \sum_i \alpha_i$ and $\partial^\alpha = \partial_{x_1}^{\alpha_1} \cdots \partial_{x_d}^{\alpha_d}$. For $s \in \N_{\geq 1}$, the Sobolev seminorm and norm on $[0,1]^d$ are
-\begin{align*}
-\norm{f}_{W^s_2}^2 \;:=\; \sum_{|\alpha| \leq s} \int_{[0,1]^d} \bigl(\partial^\alpha f(x)\bigr)^2 \, dx.
-\end{align*}
-We write $\Ltwonorm{f}^2 := \int_{[0,1]^d} f(x)^2 \, dx$ and $\Linfnorm{f} := \sup_{x \in [0,1]^d} |f(x)|$.
-
-The \emph{empirical design norm} on a fixed sample $(x_1,\ldots,x_n) \in ([0,1]^d)^n$ is
-\begin{align*}
-\empnorm{h}^2 \;:=\; \frac{1}{n} \sum_{i=1}^{n} h(x_i)^2.
-\end{align*}
-
-\begin{definition}[Sobolev unit ball]\label{def:sobolev-ball}
-The unit ball of the Sobolev space $W^s_2([0,1]^d)$ is
-\begin{align*}
-\Sobball \;:=\; \bigl\{ f : [0,1]^d \to \R \;:\; f \in W^s_2([0,1]^d),\; \Wnorm{f} \leq 1 \bigr\}.
-\end{align*}
-\end{definition}
-
-\begin{assumption}[Fixed design and Gaussian noise]\label{ass:design-noise}
-The smoothness index $s \in \N_{\geq 1}$ and dimension $d \in \N_{\geq 1}$ are fixed. The sample size satisfies $n \geq n_0(s,d)$, where $n_0$ is a constant defined in the proof. The design $(x_1,\ldots,x_n) \in ([0,1]^d)^n$ is fixed and balanced in the sense of \Cref{def:balanced-design} below. For each $f \in \Sobball$, observations $Y_i = f(x_i) + \eps_i$ are drawn with $\eps_1,\ldots,\eps_n \overset{\mathrm{i.i.d.}}{\sim} N(0, \sigma^2)$ and $\sigma > 0$ known.
+\begin{assumption}[Fixed-design Gaussian regression]\label{ass:setup}
+We observe $D_n = \{(x_i,y_i)\}_{i=1}^n$ where the design points
+$x_1,\dots,x_n$ are the fixed regular grid
+$\{(\tfrac{i_1-1/2}{n^{1/d}},\dots,\tfrac{i_d-1/2}{n^{1/d}}) : i_\ell\in[n^{1/d}]\}$
+in $[0,1]^d$ (so $n^{1/d}\in\N$), and
+\begin{align}\label{eq:model}
+y_i \;=\; f^*(x_i) + \xi_i, \qquad \xi_i \stackrel{\mathrm{iid}}{\sim} \mathcal{N}(0,\sigma^2),
+\quad i\in[n],
+\end{align}
+for a known variance $\sigma^2>0$ and an unknown regression function
+$f^*\in\mathcal{W}$. We write $P_{f}$ for the law of $D_n$ under regression
+function $f$.
 \end{assumption}
 
-\begin{remark}\label{rem:design-noise}
-\Cref{ass:design-noise} is the standard fixed-design Gaussian regression setup. The balanced-design condition is mild and is satisfied by the regular grid $x_i = ((i_1 - 1/2)/n^{1/d}, \ldots)$ on $[0,1]^d$ whenever $n$ is a $d$-th power; it ensures that each grid cell used in the bump construction contains a controllable number of design points. The Gaussian-noise assumption yields the closed-form KL divergence used in \Cref{fac:gaussian-kl}.
+\begin{remark}\label{rem:setup}
+The grid regularity is used only through \Cref{lem:kl}, where it lets us
+compare the empirical sum $\frac1n\sum_i u(x_i)^2$ to $\norm{u}_{\Ltwo}^2$ for
+the localized perturbations built in \Cref{def:bumps}; any design whose cells
+each contain a comparable number of points would serve equally well. The
+Gaussian-noise and known-$\sigma^2$ choices are what make the
+pairwise Kullback--Leibler divergence in \Cref{lem:kl} a closed-form
+mean-shift expression.
 \end{remark}
 
-\begin{definition}[Grid and balanced design]\label{def:balanced-design}
-For an integer $m \geq 1$, partition $[0,1]^d$ into $m^d$ disjoint half-open cells
-\begin{align*}
-R_k \;:=\; \prod_{\ell=1}^{d} \Bigl[\tfrac{k_\ell - 1}{m}, \tfrac{k_\ell}{m}\Bigr),
-\qquad k = (k_1,\ldots,k_d) \in [m]^d,
-\end{align*}
-of equal volume $m^{-d}$ (boundary points assigned to the cell with smaller index). The design $(x_1,\ldots,x_n)$ is \emph{balanced at scale $m$} if every cell $R_k$ contains at most $C_{\mathsf{bal}} \cdot n / m^d$ design points, for a universal constant $C_{\mathsf{bal}} \geq 1$.
-\end{definition}
-
-\begin{remark}\label{rem:balanced-design}
-The regular grid $x_i$ described in \Cref{rem:design-noise} is balanced at every scale $m$ that divides $n^{1/d}$; one may take $C_{\mathsf{bal}} = 1$ in that case. We state \Cref{def:balanced-design} more generally so that the lower bound also covers approximately uniform designs.
-\end{remark}
-
-\begin{definition}[Risk and minimax risk]\label{def:risk}
-The $\Ltwo$-risk of an estimator $\fhat = \fhat(\Dn)$ at $\fstar \in \Sobball$ is
-\begin{align*}
-R(\fhat, \fstar) \;:=\; \E_{\Dn} \bigl[\, \Ltwonorm{\fhat - \fstar}^2 \,\bigr],
-\end{align*}
-where the expectation is taken over the noise $(\eps_1,\ldots,\eps_n)$. The minimax risk over $\Sobball$ is
-\begin{align*}
-\mathfrak{M}_n \;:=\; \inf_{\fhat} \sup_{\fstar \in \Sobball} R(\fhat, \fstar),
-\end{align*}
-with the infimum over all measurable estimators $\fhat: (\R^n) \to \Ltwo([0,1]^d)$.
-\end{definition}
-
-\begin{fact}[Restatement of Varshamov--Gilbert,~\cite{tsybakov2009introduction}]\label{fac:vg}
-For every integer $K \geq 8$, there exists a subset $\{\omega^{(0)}, \omega^{(1)}, \ldots, \omega^{(M)}\} \subset \{0,1\}^K$ with $\omega^{(0)} = (0,\ldots,0)$ such that
-\begin{align*}
-M \;\geq\; 2^{K/8} \qquad\text{and}\qquad
-\rH(\omega^{(j)}, \omega^{(k)}) \;\geq\; K/8 \quad \forall\; 0 \leq j < k \leq M,
-\end{align*}
-where $\rH$ denotes Hamming distance.
+\begin{fact}[Gaussian fixed-design KL]\label{fac:gauss-kl}
+Under \Cref{ass:setup}, for any two regression functions $f,h$,
+\begin{align}\label{eq:gauss-kl}
+\KL\!\left(P_{f}\,\middle\|\,P_{h}\right)
+\;=\; \frac{1}{2\sigma^2}\sum_{i=1}^{n}\bigl(f(x_i)-h(x_i)\bigr)^2.
+\end{align}
 \end{fact}
-
-\begin{fact}[KL for Gaussian fixed-design regression]\label{fac:gaussian-kl}
-Under \Cref{ass:design-noise}, for two regression functions $f, g$, the laws $P_f, P_g$ of the observation vector $(Y_1,\ldots,Y_n)$ satisfy
+\begin{proof}
+Under $P_f$ the observations are independent with $y_i\sim\mathcal{N}(f(x_i),\sigma^2)$,
+and likewise under $P_h$; the designs coincide. Hence
 \begin{align*}
-\KL(P_f \,\|\, P_g) \;=\; \frac{1}{2\sigma^2} \sum_{i=1}^{n} \bigl(f(x_i) - g(x_i)\bigr)^2
-\;=\; \frac{n}{2\sigma^2} \empnorm{f - g}^2.
+\KL\!\left(P_{f}\,\middle\|\,P_{h}\right)
+\;=\; & ~ \sum_{i=1}^{n}\KL\!\left(\mathcal{N}(f(x_i),\sigma^2)\,\middle\|\,\mathcal{N}(h(x_i),\sigma^2)\right) \\
+\;=\; & ~ \sum_{i=1}^{n}\frac{\bigl(f(x_i)-h(x_i)\bigr)^2}{2\sigma^2},
 \end{align*}
-\end{fact}
+where the first equality is the tensorization of $\KL$ over the independent
+coordinates and the second is the closed form for the $\KL$ between two
+univariate Gaussians of common variance $\sigma^2$. This gives the assertion.
+\end{proof}
+
+\begin{definition}[Localized bump family]\label{def:bumps}
+Fix once and for all a function $g\in C^\infty_c\bigl((0,1)^d\bigr)$ with
+$g\not\equiv 0$, and set
+$c_g := \norm{g}_{\Ltwo}^2 > 0$ and
+$C_g := \sum_{|\alpha|\le s}\norm{\partial^{\alpha}g}_{\Ltwo}^2$.
+For an integer resolution $m\ge 2$, partition $[0,1]^d$ into the $M_0 := m^d$
+subcubes of side $1/m$, and let $x^{(j)}\in[0,1]^d$, $j\in[M_0]$, be the
+"lower corners" so that $x\mapsto m\,(x-x^{(j)})$ maps the $j$-th subcube onto
+$(0,1)^d$. For an amplitude $\omega>0$ and a codeword $\tau\in\{0,1\}^{M_0}$,
+define
+\begin{align}\label{eq:bump}
+u_{\tau}(x) \;:=\; \sum_{j=1}^{M_0} \tau_j\,\frac{\omega}{m^{s}}\,
+g\!\left(m\,(x-x^{(j)})\right), \qquad x\in[0,1]^d.
+\end{align}
+The summands have pairwise disjoint supports (one per subcube).
+\end{definition}

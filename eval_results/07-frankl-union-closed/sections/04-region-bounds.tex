@@ -1,0 +1,92 @@
+\section{Region bounds}
+\label{sec:region}
+
+We now set up the conditional model of the key lemma and prove the two region
+bounds that drive it. Let $C$ be a random variable on a finite set $S$, and for
+each $c \in S$ fix $p_c \in [0,1]$. Sample $X \in \{0,1\}$ by first drawing
+$c \sim C$ and then setting $\Pr[X = 1 \given C = c] = p_c$; let $(C', X')$ be an
+independent copy of $(C, X)$. Write $q(c) = \Pr[C = c]$. We assume throughout
+this section the marginal cap
+\begin{align}
+\E[X] \;=\; \E_{c}[p_c] \;\le\; 0.01. \label{eq:marginal-cap}
+\end{align}
+Partition $S$ by the threshold $0.1$:
+\begin{align*}
+\Cz \;\coloneqq\; \{\, c \in S : p_c \le 0.1 \,\}, \qquad
+\Co \;\coloneqq\; S \setminus \Cz.
+\end{align*}
+We abbreviate the events $\{C \in \Cz\}$, $\{C \in \Co\}$ by $\Cz$, $\Co$ when no
+confusion arises. Markov's inequality applied to Eq.~\eqref{eq:marginal-cap}
+gives the region-probability bound
+\begin{align}
+\Pr[\Co] \;=\; \Pr[p_C > 0.1] \;\le\; \frac{\E_c[p_c]}{0.1} \;\le\; \frac{0.01}{0.1} \;=\; 0.1,
+\qquad\text{so}\qquad \Pr[\Cz] \;\ge\; 0.9. \label{eq:markov-region}
+\end{align}
+
+\begin{lemma}[Both-small region]
+\label{lem:region-low}
+Under Eq.~\eqref{eq:marginal-cap},
+\begin{align*}
+\Pr[\Cz]^2\, \Ent\bigl(X \cupbit X' \given \Cz, \Cz'\bigr)
+\;\ge\; 1.26\,\Pr[\Cz]\, \Ent(X \given C \in \Cz).
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+Let $q_0$ denote the law of $C$ conditioned on $\Cz$, i.e.\ $q_0(c) = q(c)/\Pr[\Cz]$
+for $c \in \Cz$. Conditioned on $C \in \Cz$ the bit $X$ is $\mathrm{Bernoulli}(p_c)$,
+so $\Ent(X \given C \in \Cz) = \E_{c \sim q_0}[\hb(p_c)]$. We compute
+\begin{align*}
+\Pr[\Cz]\,\Ent(X \given C \in \Cz)
+&\;\overset{(a)}{=}\; \Pr[\Cz]\,\E_{c \sim q_0}\bigl[\hb(p_c)\bigr] \\
+&\;\overset{(b)}{=}\; \Pr[\Cz]\,\E_{c, c' \sim q_0}\!\left[\frac{\hb(p_c) + \hb(p_{c'})}{2}\right] \\
+&\;\overset{(c)}{\le}\; \frac{\Pr[\Cz]}{1.4}\,\E_{c, c' \sim q_0}\bigl[\hb(p_c + p_{c'} - p_c p_{c'})\bigr] \\
+&\;\overset{(d)}{=}\; \frac{\Pr[\Cz]}{1.4}\,\Ent\bigl(X \cupbit X' \given \Cz, \Cz'\bigr) \\
+&\;\overset{(e)}{\le}\; \frac{\Pr[\Cz]^2}{1.26}\,\Ent\bigl(X \cupbit X' \given \Cz, \Cz'\bigr),
+\end{align*}
+where step $(a)$ is the conditional Bernoulli identity, step $(b)$ symmetrizes by
+introducing an independent copy $c' \sim q_0$ (the inner expectation is unchanged
+since $\E_{c'\sim q_0}[\hb(p_{c'})] = \E_{c\sim q_0}[\hb(p_c)]$), step $(c)$
+applies \Cref{lem:concavity-half} pointwise (valid since $p_c, p_{c'} \le 0.1$ on
+$\Cz$) and takes the expectation, step $(d)$ identifies
+$\E_{c, c' \sim q_0}[\hb(p_c + p_{c'} - p_c p_{c'})] = \Ent(X \cupbit X' \given \Cz, \Cz')$
+because conditioned on $\Cz, \Cz'$ the bits $X, X'$ are independent
+$\mathrm{Bernoulli}(p_c), \mathrm{Bernoulli}(p_{c'})$ drawn from $q_0$, so their
+OR is $\mathrm{Bernoulli}(p_c + p_{c'} - p_c p_{c'})$, and step $(e)$ replaces one
+factor $1/1.4$ by $\Pr[\Cz]/1.26$, valid since $\Pr[\Cz] \ge 0.9 = 1.26/1.4$ by
+Eq.~\eqref{eq:markov-region} gives $1/1.4 \le \Pr[\Cz]/1.26$. Multiplying through
+by $1.26$ yields the assertion.
+\end{proof}
+
+\begin{lemma}[Mixed region]
+\label{lem:region-mix}
+Under Eq.~\eqref{eq:marginal-cap},
+\begin{align*}
+2\,\Pr[\Cz, \Co']\, \Ent\bigl(X \cupbit X' \given \Cz, \Co'\bigr)
+\;\ge\; 1.62\,\Pr[\Co]\, \Ent(X \given C \in \Co).
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+Conditioned on $\{C = c, C' = c'\}$ the OR-bit $X \cupbit X'$ is
+$\mathrm{Bernoulli}(p_c + p_{c'} - p_c p_{c'})$, so its entropy is
+$\hb(p_c + p_{c'} - p_c p_{c'})$. We expand the left-hand side over the product
+law and bound term by term:
+\begin{align*}
+2\,\Pr[\Cz, \Co']\, \Ent\bigl(X \cupbit X' \given \Cz, \Co'\bigr)
+\;=\; & ~ 2 \sum_{c \in \Cz}\sum_{c' \in \Co} q(c)\,q(c')\,\hb(p_c + p_{c'} - p_c p_{c'}) \\
+\;\ge\; & ~ 2 \sum_{c \in \Cz}\sum_{c' \in \Co} q(c)\,q(c')\,(1 - p_c)\,\hb(p_{c'}) \\
+\;=\; & ~ 2 \left(\sum_{c \in \Cz} q(c)\,(1 - p_c)\right)\!\left(\sum_{c' \in \Co} q(c')\,\hb(p_{c'})\right) \\
+\;\ge\; & ~ 2 \left(\sum_{c \in \Cz} q(c)\cdot 0.9\right) \Pr[\Co]\,\Ent(X \given C \in \Co) \\
+\;=\; & ~ 1.8\,\Pr[\Cz]\,\Pr[\Co]\,\Ent(X \given C \in \Co) \\
+\;\ge\; & ~ 1.62\,\Pr[\Co]\,\Ent(X \given C \in \Co),
+\end{align*}
+where the first step is the conditional-entropy expansion just noted, the second
+step applies \Cref{lem:concavity-mix} with $(p, p') = (p_c, p_{c'})$ inside each
+summand, the third step factors the double sum, the fourth step uses
+$1 - p_c \ge 0.9$ for $c \in \Cz$ (since $p_c \le 0.1$) and recognizes
+$\sum_{c' \in \Co} q(c')\,\hb(p_{c'}) = \Pr[\Co]\,\Ent(X \given C \in \Co)$, the
+fifth step evaluates $\sum_{c \in \Cz} q(c) = \Pr[\Cz]$, and the last step uses
+$\Pr[\Cz] \ge 0.9$ from Eq.~\eqref{eq:markov-region} so that $1.8\,\Pr[\Cz] \ge 1.8 \cdot 0.9 = 1.62$.
+This gives the assertion.
+\end{proof}

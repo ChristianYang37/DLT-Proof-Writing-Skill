@@ -1,79 +1,130 @@
-# Review iteration 1
+# Review iteration 1 — Sobolev minimax lower bound
 
-## Reviewer review (peer-review-style)
+Proof under review: `\Cref{thm:main}` (Sobolev minimax lower bound) and supporting
+lemmas, `eval_results/05-sobolev-lower-bound/`.
 
-## Summary
+## Reviewer scores
 
-The paper proves the standard minimax lower bound $\mathfrak M_n \gtrsim n^{-2s/(2s+d)}$ for fixed-design Gaussian nonparametric regression over the Sobolev unit ball $W^s_2([0,1]^d)$. The proof follows the canonical Varshamov--Gilbert + bump-construction + Fano recipe. It is decomposed into four named lemmas: (i) norms of the bump family (\Cref{lem:bump-norms}), (ii) closed-form Gaussian KL (\Cref{fac:gaussian-kl}, restated), (iii) KL bound for the bump family (\Cref{lem:kl-bound}), (iv) Tsybakov's Fano-type bound (\Cref{lem:fano-tsybakov}, restated) leading to a probability lower bound (\Cref{lem:prob-lb}). The headline theorem is assembled in \Cref{sec:proof-of-thm} via Markov's inequality and a balance choice of $m$.
+| Reviewer | Lens | Score | Blocking? |
+|---|---|---|---|
+| R1 | Correctness: line-by-line rigor | 9 | no |
+| R2 | Correctness: assumptions / generality | 7 | no |
+| R3 | Correctness: ML-significance | 7 | no |
+| R4 | Math taste | 8 | no |
+| R5 | Derivation integrity | 9 | no |
+| **mean** | | **8.00** | |
 
-The decomposition is clean and follows the textbook treatment of Tsybakov 2009. Constants are tracked through the constant $c_{\msf{lb}}$ and the threshold $\alpha_\star$.
+**Accept decision:** mean = 8.00 is NOT strictly `> 8`, so the accept gate is
+not cleared → **ITERATE**. No unresolved REAL-blocking critical exists.
 
-## Strengths
+## Merged + verified weaknesses
 
-- Clean four-lemma decomposition that mirrors the canonical recipe and is easy to audit.
-- Each cited result (VG, Gaussian KL, Fano-type bound) is restated as a \fact or \lemma block with a citation digest, rather than invoked from memory.
-- The bump-construction lemma carefully accounts for both the Sobolev seminorm and the $L^2$ norm via disjoint supports.
-- Explicit numerical computation of the Fano prefactor ($\geq 0.22$) rather than burying it in $\Omega(1)$.
+### Weakness #1 (severity: major, raised by 5/5)
+**Claim:** Headline says "for all $n$ large enough" but the construction only
+holds along the subsequence where $m\mid n^{1/d}$; $m:=\lceil B n^{1/(2s+d)}\rceil$
+is defined by $n$ yet simultaneously constrained to divide $n^{1/d}$ — circular,
+non-emptiness never argued; closure only asserted in a `\todo`.
+(`sections/06-main-theorem.tex:38`, headline `:11`.)
+**Verdict:** REAL-nonblocking — STATEMENT-CHANGE / already disclosed.
+**Rebuttal / fix-plan:** The defect is real but the only honest fix (restrict the
+headline to the regular-grid subsequence, or add a nearest-grid interpolation
+paragraph) changes the **theorem headline** "for all $n$ large enough". Per
+review-loop Component 3 statement-changing escalation, headline changes are NOT
+applied automatically. The author already flagged this explicitly as a
+user-decision (`\todo` Q3, lines 40–42) — it is disclosed, not hidden, and the
+bound is non-vacuous along an infinite subsequence. Surfaced to user; no
+auto-fix.
 
-## Weaknesses
+### Weakness #2 (severity: minor, raised by 3/5)
+**Claim:** The parenthetical "$M\ge M_0\ge 8$" is literally false: VG only gives
+$M\ge 2^{M_0/8}$, which is $< M_0$ for $M_0\in\{8,\dots,63\}$. Non-load-bearing
+(only $M\ge 2$ and $\log M\ge\tfrac{m^d}{8}\log2$ are used).
+(`sections/06-main-theorem.tex:89`.)
+**Verdict:** REAL-nonblocking.
+**Rebuttal / fix-plan:** Correct and cheap. Replaced with the true, sufficient
+fact `$M\ge 2^{M_0/8}\ge 2$` (which is exactly what Step 3's Fano application
+needs). FIXED.
 
-### Weakness #1 (severity: critical)
-**Claim:** In Step 2 of the proof of \Cref{thm:main}, the proof states that the choice $m := \lfloor (\alpha_\star \sigma^2 n)^{1/(2s+d)} \rfloor$ satisfies hypothesis Eq.~\eqref{eq:m-condition} of \Cref{lem:prob-lb}. This is wrong: hypothesis Eq.~\eqref{eq:m-condition} reads $n/(\sigma^2 m^{2s+d}) \leq \alpha_\star$, equivalently $m^{2s+d} \geq n/(\alpha_\star \sigma^2)$, i.e., $m \geq (n/(\alpha_\star \sigma^2))^{1/(2s+d)}$. The chosen $m$ goes in the **opposite direction** — $m$ is upper-bounded by $(\alpha_\star \sigma^2 n)^{1/(2s+d)}$, not lower-bounded by the required threshold.
-**Evidence:** sections/06-proof-of-thm.tex lines 29--32:
-> $m := \lfloor (\alpha_\star \sigma^2 n)^{1/(2s+d)} \rfloor$ ... "by construction $m \leq (\alpha_\star \sigma^2 n)^{1/(2s+d)}$, hence $m^{2s+d} \leq \alpha_\star \sigma^2 n$, which is exactly $n / (\sigma^2 m^{2s+d}) \leq \alpha_\star$ after rearrangement."
+### Weakness #3 (severity: style, raised by 1/5)
+**Claim:** Reference digest `local-fano.md` derives the sufficient condition with
+$\alpha\le 1/16$, but the theorem's Step 2 uses $\alpha=1/4$; a cross-checking
+reader could be briefly misled. (`sections/06-main-theorem.tex:66`.)
+**Verdict:** INTENTIONAL / PHANTOM (re proof source).
+**Rebuttal / fix-plan:** The proof's $\alpha=1/4$ path is independently sound
+(R1 verified $1-\tfrac14-\tfrac{\log2}{\log M}\ge\tfrac12$ given $\log M\ge4\log2$).
+The digest's $1/16$ is one valid slack choice, not a constraint on the proof; the
+$.md$ is internal scaffolding, not part of the deliverable. No source defect → no
+fix.
 
-But $m^{2s+d} \leq \alpha_\star \sigma^2 n$ gives $\alpha_\star \geq m^{2s+d}/(\sigma^2 n)$, i.e., $n/(\sigma^2 m^{2s+d}) \geq 1/\alpha_\star$, not $\leq \alpha_\star$. The "rearrangement" reverses the inequality direction.
-**Severity:** critical
+### Weakness #4 (severity: minor, raised by 1/5)
+**Claim:** `lem:kl` is stated with the exact-count hypothesis "each cell contains
+exactly $n/M_0$ design points", but the proof only uses an upper bound; mildly
+inconsistent with `rem:setup`'s "comparable number of points would serve equally
+well". (`sections/04-kl-bound.tex:8`.)
+**Verdict:** REAL-nonblocking — entangled with Weakness #1.
+**Rebuttal / fix-plan:** The "exactly $n/M_0$" count is precisely what the
+$m\mid n^{1/d}$ hypothesis (the subject of user-decision Q3, Weakness #1)
+delivers, so the stated hypothesis is the honest consequence of the current
+construction, not an overclaim. `rem:setup` already states a comparable-count
+design would serve equally — the generality relaxation belongs to the same Q3
+user-decision. Folding it in now would pre-empt that decision; deferred to
+Weakness #1's escalation. No standalone fix.
 
-### Weakness #2 (severity: critical, follow-on from #1)
-**Claim:** Correspondingly, the final constant $c_{\msf{lb}}$ in Step 3 has $\sigma$-dependence $(\alpha_\star \sigma^2)^{-2s/(2s+d)}$, which gives $\sigma^{-4s/(2s+d)}$ — meaning $\sigma \to 0$ would make the lower bound diverge, contradicting the expected scaling. With the correct $m$ choice ($m \asymp (n/(\alpha_\star\sigma^2))^{1/(2s+d)}$), the constant becomes $c_{\msf{lb}} \asymp (\alpha_\star \sigma^2)^{+2s/(2s+d)}$, giving $\sigma^{+4s/(2s+d)}$, which is the standard $\sigma \to 0 \Rightarrow$ risk $\to 0$ behavior.
-**Evidence:** sections/06-proof-of-thm.tex lines 60--62 ($c_{\msf{lb}} := c_\rho^2 c_{\msf{prob}} (\alpha_\star\sigma^2)^{-2s/(2s+d)}$) and sections/06-proof-of-thm.tex \Cref{rem:constants} (which claims the $\sigma$-dependence is $\sigma^{4s/(2s+d)}$ but derives it from a $(\sigma^2)^{-2s/(2s+d)}$ in the formula — the remark itself is inconsistent with the formula above).
-**Severity:** critical
+### Weakness #5 (severity: minor/style, raised by 2/5)
+**Claim:** Symbol `g` does double duty — generic second regression function in
+`fac:gauss-kl` vs the fixed bump profile in `def:bumps` (and in the constant
+`c(s,d,g,\sigma^2)`). (`sections/01-preliminaries.tex:48`.)
+**Verdict:** REAL-nonblocking.
+**Rebuttal / fix-plan:** Real readability snag (the fixed bump `g` is the
+load-bearing object everywhere else). Renamed the generic second argument in
+`fac:gauss-kl` from `g` to `h` throughout the Fact and its proof; `g` is now
+reserved for the bump. FIXED.
 
-### Weakness #3 (severity: minor)
-**Claim:** \Cref{lem:prob-lb} introduces $\alpha_\star := \log 2 / (128 C_{\msf{KL}})$ in its statement Eq.~\eqref{eq:m-condition}, but the proof then says it "redefines $\alpha_\star := \log 2 / (256 C_{\msf{KL}})$" to get $\alpha = 1/16 < 1/8$. The lemma statement should match the actual value used.
-**Evidence:** sections/05-fano-application.tex Eq.~\eqref{eq:m-condition} (states 128) vs. proof body (redefines to 256). The discrepancy is harmless mathematically but confusing.
-**Severity:** minor
+### Weakness #6 (severity: style, raised by 1/5)
+**Claim:** Four declared macros never used (`\poly`, `\R`, `\abs`, `\inner`) —
+dead notation in the preamble. (`macros.tex:49`.)
+**Verdict:** REAL-nonblocking.
+**Rebuttal / fix-plan:** Confirmed unused via grep across all `.tex`. Removed the
+four declarations. FIXED.
 
-### Weakness #4 (severity: minor)
-**Claim:** The proof of \Cref{lem:kl-bound} Step 2 has a redundant computation — the bound $\sum_i f_\omega(x_i)^2 \leq (c_\psi/m^s)^2 \|\psi\|_\infty^2 \cdot n$ is derived and then "tightened" by the same factor only via the balance assumption. Without balance, the same bound is recovered; the redundancy adds words without adding content. Suggest deleting the first bound or stating it more economically.
-**Evidence:** sections/04-kl-bound.tex Step 2, lines 33--36.
-**Severity:** minor
+### Weakness #7 (severity: style, raised by 1/5)
+**Claim:** `\argmin` is a single-use macro (Step 4 test definition), so the
+declaration is marginal economy. (`sections/06-main-theorem.tex:106`.)
+**Verdict:** INTENTIONAL.
+**Rebuttal / fix-plan:** `\argmin` is a `\DeclareMathOperator*` providing correct
+operator spacing and limit placement that raw `\arg\min` would not; a dedicated
+declaration for a math operator is standard and not dead notation even at one
+use. No fix.
 
-## Questions for the author
+### Weakness #8 (severity: minor, raised by 1/5)
+**Claim:** `lem:fano` (eq:fano) folds `$I(V;Y)\le\max_{k\ne k'}\KL$` directly into
+the quoted Tsybakov result, whereas Corollary 2.6 supplies the **averaged**
+$\tfrac1{M^2}\sum\KL$ bound; the averaged→max convexity step is the author's, not
+the citation's. (`sections/05-fano.tex:16`.)
+**Verdict:** REAL-nonblocking.
+**Rebuttal / fix-plan:** Accurate attribution matters. Restated the cited
+display `eq:fano` with the **averaged** form $\tfrac1{M^2}\sum_{k,k'}\KL$ (exactly
+Cor 2.6), and moved the max-KL bound to an explicit "in particular ... by bounding
+the average by the maximum" clause attributed to convexity, not to the citation.
+`rem:fano` already carried this chain; Step 3's downstream use is unaffected.
+FIXED.
 
-- Has the author verified the floor/ceiling careful constant tracking? The factor of 2 from $\lfloor \cdot \rfloor \geq x/2$ is mentioned in Step 3 but does not appear to enter the final constant.
-- Should \Cref{lem:fano-tsybakov} be restated as a Fact or external Lemma rather than a Lemma (per the project conventions for restated external results)?
+## Fixes applied this iteration
 
-## Verdict
-major-revision-required
+- #2 `sections/06-main-theorem.tex:88–89` — `M\ge M_0\ge 8` → `M\ge 2^{M_0/8}\ge 2`.
+- #5 `sections/01-preliminaries.tex:47–60` — generic regression fn `g`→`h` in `fac:gauss-kl`.
+- #6 `macros.tex` — removed unused `\poly`, `\R`, `\abs`, `\inner`.
+- #8 `sections/05-fano.tex:8–19` — cited display now averaged-KL; max-KL as a labeled "in particular" convexity consequence.
 
----
+## Not fixed (surfaced to user)
 
-## Verification of weaknesses (Component 2)
+- #1 (major, REAL-nonblocking, STATEMENT-CHANGE): subsequence vs "for all $n$"
+  headline gap. Requires headline change → user decision (Q3 already flagged).
+- #4 (minor): `lem:kl` exact-count — entangled with #1's Q3; deferred.
+- #3 (style), #7 (style): INTENTIONAL — rebutted above.
 
-### Weakness #1 (severity: critical)
-**Claim:** The choice of $m$ satisfies the wrong direction of the hypothesis.
-**Verdict:** REAL-blocking
-**Rebuttal / fix-plan:** Real bug. Correct fix: replace floor with ceiling and flip the formula. The right choice is $m := \lceil (n / (\alpha_\star \sigma^2))^{1/(2s+d)} \rceil$. With $\lceil x \rceil \geq x$ this gives $m^{2s+d} \geq n/(\alpha_\star\sigma^2)$, i.e., the required $n/(\sigma^2 m^{2s+d}) \leq \alpha_\star$.
+## Post-fix gates
 
-### Weakness #2 (severity: critical, follow-on from #1)
-**Claim:** Constant has wrong sign on $\sigma^2$ exponent.
-**Verdict:** REAL-blocking
-**Rebuttal / fix-plan:** Direct consequence of #1. After fixing $m \asymp (n/(\alpha_\star\sigma^2))^{1/(2s+d)}$, $m^{-2s}$ scales as $(\alpha_\star\sigma^2)^{2s/(2s+d)} n^{-2s/(2s+d)}$. The exponent on $(\alpha_\star\sigma^2)$ flips from $-$ to $+$. The remark's $\sigma^{4s/(2s+d)}$ statement was actually correct in spirit but the formula above contradicted it; both will agree after fix.
-
-### Weakness #3 (severity: minor)
-**Claim:** $\alpha_\star$ value inconsistent between statement and proof.
-**Verdict:** REAL-nonblocking
-**Rebuttal / fix-plan:** Fix the lemma statement to use the final value $\log 2 / (256 C_{\msf{KL}})$ throughout.
-
-### Weakness #4 (severity: minor)
-**Claim:** Redundant computation in KL bound proof.
-**Verdict:** REAL-nonblocking
-**Rebuttal / fix-plan:** Cost cap for minor + REAL-nonblocking is 3 lines. Removing the redundant bound is 3 lines. Apply.
-
-## Fixes to apply
-
-1. **Section 06**: rewrite Step 2 with the correct $m$ choice. Update the constant chain in Step 3. Update \Cref{rem:constants}.
-2. **Section 05**: change the stated $\alpha_\star$ in Eq.~\eqref{eq:m-condition} to $\log 2 / (256 C_{\msf{KL}})$, and remove the "redefine" paragraph in the proof.
-3. **Section 04**: delete the redundant bound in Step 2.
+- `lint.py` (incl R19): **0 errors, 0 warnings.**
+- `latexmk-wrapper.py`: **compile_ok = true**; no undef refs/cites/macros; no errors.
+- `pdf/main.pdf` refreshed from `.output/main.pdf`.

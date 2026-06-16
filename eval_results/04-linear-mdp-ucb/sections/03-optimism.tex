@@ -1,0 +1,125 @@
+\section{Bellman recursion and optimism}\label{sec:optimism}
+
+On the successful event $\Ev$ of \Cref{lem:concentration} we now show two
+things: the LSVI estimate of the Bellman backup is accurate up to the bonus
+(\Cref{lem:recursion}), and consequently the optimistic value functions
+upper-bound the optimal ones (\Cref{lem:optimism}). Both are deterministic
+statements on $\Ev$.
+
+\begin{lemma}[One-step Bellman recursion]\label{lem:recursion}
+Suppose \Cref{ass:linear-mdp} holds, $\lambda=1$, and $\beta=C_\beta dH
+\sqrt{\iota}$ as in \Cref{lem:concentration}. On the event $\Ev$, for every
+policy $\pi$ and every $(x,a,h,k)\in\St\times\Ac\times[H]\times[K]$,
+\begin{align}\label{eq:recursion}
+\inner{\featmap(x,a)}{w_h^k} - Q_h^\pi(x,a)
+\;=\; \Pop_h\big(V_{h+1}^k - V_{h+1}^\pi\big)(x,a) + \Delta_h^k(x,a),
+\qquad
+\big|\Delta_h^k(x,a)\big| \;\le\; \beta\,\Mnorm{\featmap(x,a)}{(\Gram_h^k)^{-1}}.
+\end{align}
+\end{lemma}
+
+\begin{proof}
+By \Cref{fac:value-linear}, $Q_h^\pi=\inner{\featmap}{w_h^\pi}$ with
+$w_h^\pi=\theta_h+\int V_{h+1}^\pi d\mu_h$, so $\T_h V_{h+1}^\pi=\inner{\featmap}
+{w_h^\pi}$ and in particular $\inner{\featmap_h^\tau}{w_h^\pi}=r_h(x_h^\tau,
+a_h^\tau)+(\Pop_h V_{h+1}^\pi)(x_h^\tau,a_h^\tau)$. Substituting the definition
+Eq.~\eqref{eq:weight-def} of $w_h^k$ and adding and subtracting $\lambda w_h^\pi$
+inside the regularized normal equations,
+\begin{align}
+w_h^k - w_h^\pi
+&\;=\; (\Gram_h^k)^{-1}\sum_{\tau=1}^{k-1}\featmap_h^\tau\big[ r_h(x_h^\tau,a_h^\tau)+V_{h+1}^k(x_{h+1}^\tau)\big] - w_h^\pi \notag \\
+&\;=\; (\Gram_h^k)^{-1}\Big\{ -\lambda w_h^\pi + \sum_{\tau=1}^{k-1}\featmap_h^\tau\big[ V_{h+1}^k(x_{h+1}^\tau) - (\Pop_h V_{h+1}^\pi)(x_h^\tau,a_h^\tau)\big]\Big\} \notag \\
+&\;=\; \underbrace{-\lambda(\Gram_h^k)^{-1}w_h^\pi}_{q_1}
++ \underbrace{(\Gram_h^k)^{-1}\sum_{\tau=1}^{k-1}\featmap_h^\tau\big[ V_{h+1}^k(x_{h+1}^\tau) - (\Pop_h V_{h+1}^k)(x_h^\tau,a_h^\tau)\big]}_{q_2} \notag \\
+&\qquad + \underbrace{(\Gram_h^k)^{-1}\sum_{\tau=1}^{k-1}\featmap_h^\tau\big[ (\Pop_h V_{h+1}^k - \Pop_h V_{h+1}^\pi)(x_h^\tau,a_h^\tau)\big]}_{q_3}, \label{eq:wsplit}
+\end{align}
+where the first step is Eq.~\eqref{eq:weight-def}, the second uses
+$\Gram_h^k=\sum_\tau\featmap_h^\tau(\featmap_h^\tau)^\top+\lambda I$ to rewrite
+$w_h^\pi=(\Gram_h^k)^{-1}\Gram_h^k w_h^\pi$ and the normal-equation identity
+$\inner{\featmap_h^\tau}{w_h^\pi}=r_h^\tau+(\Pop_h V_{h+1}^\pi)(x_h^\tau,a_h^\tau)$,
+and the third adds and subtracts $(\Pop_h V_{h+1}^k)(x_h^\tau,a_h^\tau)$ inside
+the sum. Taking the inner product of Eq.~\eqref{eq:wsplit} with
+$\featmap(x,a)$ gives
+\begin{align}\label{eq:phi-w-split}
+\inner{\featmap(x,a)}{w_h^k - w_h^\pi}
+\;=\; \inner{\featmap(x,a)}{q_1} + \inner{\featmap(x,a)}{q_2} + \inner{\featmap(x,a)}{q_3}.
+\end{align}
+We identify the three terms. For $q_3$, since $\Pop_h g(x,a)=\inner{\featmap
+(x,a)}{\int g\,d\mu_h}$ by \Cref{ass:linear-mdp},
+\begin{align*}
+\inner{\featmap(x,a)}{q_3}
+&\;=\; \Inner{\featmap(x,a)}{(\Gram_h^k)^{-1}\sum_{\tau=1}^{k-1}\featmap_h^\tau (\featmap_h^\tau)^\top \!\int (V_{h+1}^k - V_{h+1}^\pi)\,d\mu_h} \\
+&\;=\; \Pop_h(V_{h+1}^k - V_{h+1}^\pi)(x,a) - \lambda\Inner{\featmap(x,a)}{(\Gram_h^k)^{-1}\!\int (V_{h+1}^k - V_{h+1}^\pi)\,d\mu_h},
+\end{align*}
+where the first step writes $(\Pop_h V_{h+1}^k-\Pop_h V_{h+1}^\pi)(x_h^\tau,
+a_h^\tau)=(\featmap_h^\tau)^\top\!\int(V_{h+1}^k-V_{h+1}^\pi)d\mu_h$, and the
+second uses $(\Gram_h^k)^{-1}\sum_\tau\featmap_h^\tau(\featmap_h^\tau)^\top=
+I-\lambda(\Gram_h^k)^{-1}$. Collecting the leading term of $\inner{\featmap}{q_3}$
+into Eq.~\eqref{eq:phi-w-split} and defining
+\begin{align*}
+\Delta_h^k(x,a) \;:=\; \inner{\featmap(x,a)}{q_1} + \inner{\featmap(x,a)}{q_2}
+- \lambda\Inner{\featmap(x,a)}{(\Gram_h^k)^{-1}\!\int (V_{h+1}^k - V_{h+1}^\pi)\,d\mu_h},
+\end{align*}
+we obtain the claimed identity Eq.~\eqref{eq:recursion}, since
+$\inner{\featmap(x,a)}{w_h^k}-Q_h^\pi(x,a)=\inner{\featmap(x,a)}{w_h^k-w_h^\pi}$.
+It remains to bound $|\Delta_h^k(x,a)|$. Each of the three contributions is of
+the form $\inner{\featmap(x,a)}{(\Gram_h^k)^{-1}u}$, which by Cauchy--Schwarz in
+the $(\Gram_h^k)^{-1}$ inner product is at most $\Mnorm{\featmap(x,a)}
+{(\Gram_h^k)^{-1}}\cdot\Mnorm{u}{(\Gram_h^k)^{-1}}$:
+\begin{align*}
+\big|\Delta_h^k(x,a)\big|
+&\;\le\; \Mnorm{\featmap(x,a)}{(\Gram_h^k)^{-1}} \Big( \lambda\Mnorm{w_h^\pi}{(\Gram_h^k)^{-1}} + \Big\|\textstyle\sum_\tau \featmap_h^\tau \varepsilon_h^\tau(V_{h+1}^k)\Big\|_{(\Gram_h^k)^{-1}} + \lambda\Mnorm{\int (V_{h+1}^k-V_{h+1}^\pi)d\mu_h}{(\Gram_h^k)^{-1}} \Big) \\
+&\;\le\; \Mnorm{\featmap(x,a)}{(\Gram_h^k)^{-1}} \Big( \sqrt\lambda\,\norm{w_h^\pi} + C\,dH\sqrt{\iota} + \sqrt\lambda\,\Norm{\int (V_{h+1}^k-V_{h+1}^\pi)d\mu_h} \Big) \\
+&\;\le\; \Mnorm{\featmap(x,a)}{(\Gram_h^k)^{-1}} \Big( 2H\sqrt{d} + C\,dH\sqrt{\iota} + 2H\sqrt{d} \Big)
+\;\le\; \beta\,\Mnorm{\featmap(x,a)}{(\Gram_h^k)^{-1}},
+\end{align*}
+where the first step is the triangle inequality and Cauchy--Schwarz on each
+term, the second uses $\Mnorm{u}{(\Gram_h^k)^{-1}}\le\norm{u}/\sqrt{\lambda_{\min}
+(\Gram_h^k)}\le\norm{u}/\sqrt\lambda$ and the definition Eq.~\eqref{eq:event-def}
+of $\Ev$ (here the second term is exactly the quantity bounded by $C\,dH
+\sqrt{\iota}$ on $\Ev$), the third uses $\norm{w_h^\pi}\le2H\sqrt d$
+(\Cref{fac:value-linear}) and $\norm{\int(V_{h+1}^k-V_{h+1}^\pi)d\mu_h}\le
+H\norm{\mu_h(\St)}\le H\sqrt d\le 2H\sqrt d$, and the last absorbs the
+$\lambda=1$ terms into the dominant $C\,dH\sqrt{\iota}$ and sets
+$C_\beta\ge C+4$ so that $\beta=C_\beta dH\sqrt{\iota}\ge(C\,dH+4H\sqrt d)
+\sqrt{\iota}$. This completes the proof.
+\end{proof}
+
+\begin{lemma}[Optimism]\label{lem:optimism}
+Under the hypotheses of \Cref{lem:recursion}, on the event $\Ev$ we have
+$Q_h^k(x,a)\ge Q_h^\star(x,a)$ for all $(x,a,h,k)\in\St\times\Ac\times[H]\times
+[K]$, and hence $V_h^k(x)\ge V_h^\star(x)$ for all $(x,h,k)$.
+\end{lemma}
+
+\begin{proof}
+Fix $k$ and induct on $h$ downward from $h=H+1$ to $h=1$, taking $\pi=\pi^\star$
+in \Cref{lem:recursion}. The inductive hypothesis at step $h+1$ is
+$V_{h+1}^k(x)\ge V_{h+1}^\star(x)$ for all $x$.
+
+\noindent\textbf{Base case $h=H+1$.} By convention $V_{H+1}^k\equiv 0\equiv
+V_{H+1}^\star$, so the hypothesis holds with equality.
+
+\noindent\textbf{Inductive step.} Assume $V_{h+1}^k\ge V_{h+1}^\star$
+pointwise. By \Cref{lem:recursion} with $\pi=\pi^\star$ and the monotonicity of
+$\Pop_h$,
+\begin{align*}
+\inner{\featmap(x,a)}{w_h^k} - Q_h^\star(x,a)
+&\;=\; \Pop_h\big(V_{h+1}^k - V_{h+1}^\star\big)(x,a) + \Delta_h^k(x,a) \\
+&\;\ge\; 0 - \beta\,\Mnorm{\featmap(x,a)}{(\Gram_h^k)^{-1}}
+\;=\; -\beta\,\Mnorm{\featmap(x,a)}{(\Gram_h^k)^{-1}},
+\end{align*}
+where the first step is Eq.~\eqref{eq:recursion}, and the second uses
+$\Pop_h(V_{h+1}^k-V_{h+1}^\star)\ge0$ (from the inductive hypothesis and
+$\Pop_h$ preserving nonnegativity) together with $\Delta_h^k(x,a)\ge-\beta
+\Mnorm{\featmap(x,a)}{(\Gram_h^k)^{-1}}$. Rearranging,
+$Q_h^\star(x,a)\le\inner{\featmap(x,a)}{w_h^k}+\beta\Mnorm{\featmap(x,a)}
+{(\Gram_h^k)^{-1}}$. Since also $Q_h^\star(x,a)\le H$, we conclude
+\begin{align*}
+Q_h^\star(x,a)
+\;\le\; \min\Big\{ \inner{\featmap(x,a)}{w_h^k} + \beta\,\Mnorm{\featmap(x,a)}{(\Gram_h^k)^{-1}},\; H \Big\}
+\;=\; Q_h^k(x,a),
+\end{align*}
+by the definition Eq.~\eqref{eq:Q-def} of $Q_h^k$. Taking the maximum over $a$
+gives $V_h^k(x)=\max_a Q_h^k(x,a)\ge\max_a Q_h^\star(x,a)=V_h^\star(x)$, which
+advances the induction to step $h$. This completes the proof.
+\end{proof}

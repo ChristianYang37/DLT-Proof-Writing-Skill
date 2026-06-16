@@ -1,0 +1,150 @@
+\section{Decoding as gradient separation}
+\label{sec:decode-iff}
+
+This section proves that, at a constrained stationary point on the LayerNorm sphere, the
+single-token decoder selects the designated token if and only if a signed alignment
+condition holds against every competitor. We first record an elementary sign equivalence,
+then the main biconditional, then the descent-direction corollary for the
+constrained-minimum case. Each displayed step carries a provenance comment
+\verb|% @lx-from:| identifying the exact Lean declaration that verifies it.
+
+% ===========================================================================
+% Lemma: sign equivalence
+% ===========================================================================
+\begin{lemma}[Sign equivalence]
+\label{lem:sign_equiv}
+Let $\mu \in \mathbb{R}$ with $\mu \ne 0$, and let $c \in \mathbb{R}$ be arbitrary. Then % lint: ignore R15
+\begin{align*}
+\mu^{-1} c > 0 \;\iff\; \mu c > 0.
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+% @lx-from: lem:sign_equiv | kind: arith
+The two quantities differ by the strictly positive factor $\mu^{2}$: since $\mu \ne 0$ we
+have $\mu^{2} > 0$, and
+\begin{align*}
+(\mu^{-1} c)\,\mu^{2} = \mu c.
+\end{align*}
+Multiplying a real number by the positive constant $\mu^{2}$ preserves its sign, so
+$\mu^{-1} c$ and $\mu c$ are simultaneously positive, which is the claimed equivalence. This
+completes the proof.
+\end{proof}
+
+% ===========================================================================
+% Main theorem: decode iff gradient separation
+% ===========================================================================
+% @lx-from: thm:main | kind: named
+\begin{theorem}[Decoding $\iff$ gradient separation]
+\label{thm:main}
+Let $\xstar \in \Sphere$ (so $\norm{\xstar} = r$ with $r > 0$) be constrained-stationary for
+the loss with multiplier $\mu$, in the sense of \Cref{def:stationarity}:
+\begin{align*}
+\grad \loss(\xstar) = \mu\,\xstar,
+\end{align*}
+and suppose the multiplier is nonzero, $\mu \ne 0$. Then the designated token $\astar$ is
+generated at $\xstar$ if and only if, for every competitor $b \ne \astar$, the signed
+alignment of the gap row with the gradient is strictly positive:
+\begin{align*}
+\Generated(\astar, \xstar)
+\;\iff\;
+\forall\, b \ne \astar,\quad \mu\,\inner{W_{\astar} - W_{b}}{\grad \loss(\xstar)} > 0.
+\end{align*}
+\end{theorem}
+
+\begin{proof}
+The argument reduces the biconditional to a single competitor and is then quantified over
+$b \ne \astar$. Throughout, write $\grad\loss(\xstar)$ for the (fixed) gradient vector; the
+loss is never differentiated.
+
+% @lx-from: thm:main.1 | kind: arith
+First, since $\mu \ne 0$, the stationarity equation $\grad\loss(\xstar) = \mu\,\xstar$
+rearranges to express $\xstar$ through the gradient:
+\begin{align*}
+\xstar = \mu^{-1}\,\grad \loss(\xstar).
+\end{align*}
+
+% @lx-from: thm:main.2 | kind: arith
+Next, fix a competitor $b \ne \astar$. We claim the per-competitor cone inequality is
+equivalent to the signed alignment:
+\begin{align*}
+\inner{W_{\astar}}{\xstar} > \inner{W_{b}}{\xstar}
+\;\iff\;
+\mu\,\inner{W_{\astar} - W_{b}}{\grad \loss(\xstar)} > 0.
+\end{align*}
+Indeed, by bilinearity the cone inequality $\inner{W_{\astar}}{\xstar} > \inner{W_{b}}{\xstar}$
+is equivalent to $\inner{W_{\astar} - W_{b}}{\xstar} > 0$; substituting
+$\xstar = \mu^{-1}\,\grad\loss(\xstar)$ and pulling the scalar out of the inner product gives
+$\inner{W_{\astar} - W_{b}}{\xstar} = \mu^{-1}\,\inner{W_{\astar} - W_{b}}{\grad\loss(\xstar)}$,
+so the inequality reads $\mu^{-1}\,\inner{W_{\astar} - W_{b}}{\grad\loss(\xstar)} > 0$.
+Applying the sign equivalence of \Cref{lem:sign_equiv} with
+$c = \inner{W_{\astar} - W_{b}}{\grad\loss(\xstar)}$ converts this to % lint: ignore R15
+$\mu\,\inner{W_{\astar} - W_{b}}{\grad\loss(\xstar)} > 0$, as claimed.
+
+% @lx-from: thm:main.3 | kind: named
+Finally, unfolding the decoder predicate of \Cref{def:decoder},
+$\Generated(\astar, \xstar)$ means exactly $\inner{W_{\astar}}{\xstar} > \inner{W_{b}}{\xstar}$
+for all $b \ne \astar$. Quantifying the per-competitor equivalence just established over all
+$b \ne \astar$ yields
+\begin{align*}
+\Generated(\astar, \xstar)
+\;\iff\;
+\forall\, b \ne \astar,\quad \mu\,\inner{W_{\astar} - W_{b}}{\grad \loss(\xstar)} > 0,
+\end{align*}
+which is the assertion. This completes the proof.
+\end{proof}
+
+\begin{remark}[Only $\mu \ne 0$ and stationarity are load-bearing]
+\label{rem:generalization}
+The proof of \Cref{thm:main} uses only the stationarity equation
+$\grad\loss(\xstar) = \mu\,\xstar$ and the hypothesis $\mu \ne 0$ (which already forces
+$\xstar \ne 0$). The sphere membership $\norm{\xstar} = r$ and the positivity $r > 0$ are part
+of the fixed LayerNorm-sphere setting but are never invoked in the argument; the
+characterization therefore holds verbatim for \emph{any} point satisfying the stationarity
+equation with a nonzero multiplier, on or off the sphere. We retain $\norm{\xstar} = r$ and
+$r > 0$ in the statement to match the intended geometric setting, and record their
+non-use here as an honest generalization, not a defect.
+\end{remark}
+
+% ===========================================================================
+% Corollary: descent-direction separation (mu < 0)
+% ===========================================================================
+% @lx-from: cor:neg | kind: named
+\begin{corollary}[Descent-direction separation, $\mu < 0$]
+\label{cor:neg}
+Retain the hypotheses of \Cref{thm:main}, but assume the multiplier is negative, $\mu < 0$
+(the constrained-minimum case). Then $\astar$ is generated at $\xstar$ if and only if the
+descent direction $-\grad\loss(\xstar)$ is strictly better aligned with the answer row than
+with every competitor row:
+\begin{align*}
+\Generated(\astar, \xstar)
+\;\iff\;
+\forall\, b \ne \astar,\quad \inner{W_{\astar} - W_{b}}{-\grad \loss(\xstar)} > 0.
+\end{align*}
+\end{corollary}
+
+\begin{proof}
+% @lx-from: cor:neg.1 | kind: named
+Since $\mu < 0$, in particular $\mu \ne 0$, so \Cref{thm:main} applies with this $\xstar$ and
+$\mu$, giving
+\begin{align*}
+\Generated(\astar, \xstar)
+\;\iff\;
+\forall\, b \ne \astar,\quad \mu\,\inner{W_{\astar} - W_{b}}{\grad \loss(\xstar)} > 0.
+\end{align*}
+
+% @lx-from: cor:neg.2 | kind: arith
+It remains to rewrite the per-competitor condition. Fix $b \ne \astar$ and write
+$v = W_{\astar} - W_{b}$. We show
+\begin{align*}
+\mu\,\inner{v}{\grad \loss(\xstar)} > 0
+\;\iff\;
+\inner{v}{-\grad \loss(\xstar)} > 0.
+\end{align*}
+Because $\mu < 0$, the product $\mu\,\inner{v}{\grad\loss(\xstar)}$ is strictly positive
+exactly when $\inner{v}{\grad\loss(\xstar)} < 0$; and by linearity of the inner product in its
+second argument, $\inner{v}{-\grad\loss(\xstar)} = -\inner{v}{\grad\loss(\xstar)}$, which is
+strictly positive under precisely the same condition $\inner{v}{\grad\loss(\xstar)} < 0$.
+Quantifying this equivalence over all $b \ne \astar$ turns the conclusion of \Cref{thm:main}
+into the descent-direction form, which is the assertion. This completes the proof.
+\end{proof}
